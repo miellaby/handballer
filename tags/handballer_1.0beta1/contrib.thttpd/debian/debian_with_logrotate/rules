@@ -1,0 +1,107 @@
+#!/usr/bin/make -f
+
+SHELL=/bin/bash
+PACKAGE=handballer
+
+tmp=debian/tmp
+sysconfdir=etc
+docdir=usr/share/doc
+mandir=usr/share/man
+sbindir=usr/sbin
+bindir=usr/bin
+cgi-bin=usr/lib/cgi-bin
+
+define checkdir
+	test -f config.h
+endef
+
+clean: checkroot
+	test -f debian/control
+	rm -rf $(tmp) debian/substvars debian/files *orig* \
+	    debian/*bak*
+	$(MAKE) distclean || true
+
+checkroot:
+	test root = "`whoami`" || (echo Need root privileges; exit 1)
+
+build: config.status
+	test -e debian/control
+	$(MAKE)
+	touch build-stamp
+
+config.status:
+	./configure \
+	--libdir=/usr/lib \
+	--prefix=/usr \
+	--exec-prefix=/usr \
+	--sbindir=/usr/sbin \
+	--bindir=/usr/bin \
+	--sysconfdir=/etc \
+	--mandir=/usr/share/ \
+	--includedir=/usr/include
+
+
+binary-indep: build
+	$(checkroot)
+
+binary-arch: build checkroot
+	#
+	# Build main package.
+	#
+	chmod -R g-s debian
+	install --mode=755 -d $(tmp)/DEBIAN
+	install --mode=755 -d $(tmp)/etc/{init.d,logrotate.d,$(PACKAGE)}
+	install --mode=755 -d $(tmp)/usr/sbin
+	install --mode=755 -d $(tmp)/usr/share/{doc,man}
+	install --mode=755 -d $(tmp)/usr/share/man/man8
+	install --mode=755 -d $(tmp)/usr/share/doc/$(PACKAGE)
+	install --mode=755 -d $(tmp)/var/{log,www}
+	install --mode=755 -d $(tmp)/var/www/users
+
+	#
+	# Install documentation
+	#
+	install --mode=644 debian/README.Debian.handballer \
+		$(tmp)/$(docdir)/$(PACKAGE)/README.Debian
+	install --mode=644 debian/copyright \
+		$(tmp)/$(docdir)/$(PACKAGE)
+	install --mode=644 {README,TODO} \
+		$(tmp)/$(docdir)/$(PACKAGE)
+	install --mode=644 handballer.8 \
+		$(tmp)/$(mandir)/man8
+	install --mode=644 debian/changelog \
+		$(tmp)/$(docdir)/$(PACKAGE)/changelog.Debian
+	#
+	# Install installation scripts and other special files.
+	#
+	install --mode=644 debian/handballer.conf $(tmp)/$(sysconfdir)/$(PACKAGE)
+	install --mode=644 debian/throttle.conf \
+	    $(tmp)/$(sysconfdir)/$(PACKAGE)
+	install --mode=755 debian/handballer.rc   $(tmp)/$(sysconfdir)/init.d/$(PACKAGE)
+	install --mode=644 debian/conffiles   $(tmp)/DEBIAN
+	install --mode=755 debian/{postinst,postrm,prerm} \
+		$(tmp)/DEBIAN
+	install --mode=644 debian/handballer.logrotate \
+		$(tmp)/$(sysconfdir)/logrotate.d/handballer
+	#
+	# Install binaries
+	#
+	install --mode=755 -s handballer $(tmp)/$(sbindir)
+	#
+	# Compress man pages and other documentation.
+	#
+	gzip -9f $(tmp)/$(mandir)/man8/*
+	gzip -9f $(tmp)/$(docdir)/$(PACKAGE)/changelog*
+	#
+	# Build the binary package.
+	#
+	dpkg-shlibdeps $(tmp)/$(sbindir)/*
+	dpkg-gencontrol -ips -p$(PACKAGE) -P$(tmp)
+	dpkg --build $(tmp) ..
+
+source diff:
+	@echo >&2 'Source and diff are obsolete - use dpkg-source -b'; false
+
+binary:	binary-indep binary-arch
+
+

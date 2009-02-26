@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html><head><title>Bus Sniffer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=8859-1">
+</head><body><script>
+document.write("<event-source id='bus' src = '" + location.href.replace("/console.html", ":81/bus/**?event&channel") + "'>") ;
+</script><h2>Post a  message</h2>
+<form action="javascript:postClick()">
+ <input type="text" id="labelAndMessage">
+ <input type="submit" value="POST">
+</form>
+<h2>Last message trace</h2>
+<pre id="trace" name="trace"  style="border:2px solid black;background:#EFE;min-height:100px"></pre>
+<script>
+function trace(txt) { document.getElementById('trace').innerHTML+=txt ; }
+
+
+var postMessageFakeImage = new Image ;
+var postMessageI = 0 ;
+function busPost(label, msg) {
+  postMessageFakeImage.src =
+      location.href.replace("/console.html", ":81/bus/?post=") + label + ":"
+          + encodeURIComponent(msg) + "&stamp=" + (postMessageI++) ;
+}
+
+function postClick() {
+  labelAndMessage = document.getElementById('labelAndMessage').value
+  label = labelAndMessage.substr(0,labelAndMessage.indexOf(':')).replace(/ *$/,"");
+  msg = labelAndMessage.substr(labelAndMessage.indexOf(':') + 1).replace(/^ */,"") ;
+  busPost(label, msg) ;
+}
+          
+function onPushMessage(e) {
+   var labelAndMessage = e.data ;
+   var label = labelAndMessage.substr(0, labelAndMessage.indexOf('\n'));
+   var message = labelAndMessage.substr(labelAndMessage.indexOf('\n') + 1) ;
+   var txt = label + ": " + message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\n";
+   trace(txt) ;
+}
+
+trace("listening " + location.href.replace("/console.html", ":81/bus/**?event&channel") + " ...\n") ;
+document.getElementById("bus").addEventListener("message", onPushMessage, false) ;
+</script></body></html>

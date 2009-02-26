@@ -1,0 +1,46 @@
+#!/bin/bash
+# The following two lines enable chkconfig(1) to manipulate this script
+# chkconfig: 2345 99 01
+# description: control ihandballer daemon
+# source function library
+. /etc/rc.d/init.d/functions
+
+pidfile=/var/run/handballer.pid
+pid=`cat $pidfile 2>/dev/null`
+
+if test -n "$pid" && kill -0 $pid 2>/dev/null; then
+	dead=no
+else
+	dead=yes
+fi
+
+die(){
+	echo -n "$*"; echo_failure; echo ''
+	exit 1;
+}
+
+case "$1" in
+ start)	test "$dead" = yes || die handballer is already running
+	echo -n "Starting handballer: "
+	daemon /usr/sbin/handballer -C /etc/handballer.conf
+	touch /var/lock/subsys/handballer
+	echo_success;echo ''
+	exit 0
+	;;
+  stop)	echo -n "Gently shutting down handballer: "
+	signal=USR1
+	;;
+  kill)	echo -n "Violently killing handballer: "
+	signal=INT
+	;;
+status)	status handballer; exit $?;;
+restart) $0 stop; sleep 2; exec $0 start;;
+     *)	die "Usage: handballer {start|stop|restart|status}";;
+esac
+
+test "$dead" = no || die handballer is not running
+kill -$signal $pid
+sleep 2
+kill -0 $pid 2>/dev/null && die "handballer[$pid] will not die"
+rm -f /var/lock/subsys/handballer
+echo_success; echo ''
