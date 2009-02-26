@@ -1,0 +1,17 @@
+/var/log/handballer.log {
+    rotate 14
+    daily
+    compress
+    missingok
+    delaycompress
+    postrotate
+    	if [ -f /var/run/handballer.pid ]; then
+		if [ -x /usr/sbin/invoke-rc.d ]; then
+			invoke-rc.d handballer restart > /dev/null 2>&1
+		else
+			/etc/init.d/handballer restart > /dev/null 2>&1
+		fi
+	    rm -f /tmp/start_handballer
+	fi
+    endscript
+}
