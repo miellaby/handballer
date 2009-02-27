@@ -1,0 +1,2 @@
+killall handballer
+./handballer -l - -b 'bus/**' -D -p 7777 &
