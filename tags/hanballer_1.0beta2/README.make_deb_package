@@ -1,0 +1,5 @@
+# edit change log
+debchange -i
+# build package
+dpkg-buildpackage -rfakeroot -us -uc -b
+

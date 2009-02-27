@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html><head><title>Bus Sniffer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=8859-1">
+</head><body>
+<p>
+Here is a simple <i>HTTP Bus</i> get/post tool.
+</p>
+<h2>Post a message</h2>
+<form action="javascript:postClick()">
+ <input type="text" id="myLabel">
+ <input type="text" id="myMessage">
+ <input type="submit" value="POST">
+</form>
+<br>
+<br>
+<br>
+<h2>Messages trace</h2>
+<pre id='trace' style="border:2px solid black;background:#EFE;min-height:100px"></pre>
+
+<!-- invisible resources -->
+<div id="invisiFormDiv" style="visibility:hidden;display:none">
+ <iframe id="iframeNotif" name="iframeNotif" src="/bus/**?label&script=window.parent.onBusMessage"></iframe>
+ <iframe id="invisiFormFrame" name="invisiFormFrame"></iframe>
+ <form name="invisiForm" action="/bus/" method="post" target="invisiFormFrame" enctype="text/plain">') ;<input name="msg" value="" /></form>
+</div>
+
+<script type="text/javascript">
+
+function onBusMessage(label, body) {
+   document.getElementById("trace").innerHTML += label + ':' + body.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\n";
+}
+
+function handballerPost(label,msg) {
+  document.forms.invisiForm.action = "/bus/" + label ;
+  document.forms.invisiForm.msg.value = msg ;
+  document.forms.invisiForm.submit();
+}
+
+function postClick(){
+  label = document.getElementById('myLabel').value;
+  msg = document.getElementById('myMessage').value;
+
+  handballerPost(label,msg);
+}
+
+</script>
+
+
+</body>
+</html>

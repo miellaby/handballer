@@ -1,0 +1,4 @@
+             handballer - a simple HTTP Pub/Sub bus based on thttpd server
+                    version 1.2, based on thttpd version 2.25b of 29dec2003
+
+This slight modification of thttpd transforms this web server into a very convenient HTTP Pub/Sub bus.

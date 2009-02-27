@@ -1,0 +1,159 @@
+#!/bin/bash
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+NETSTAT=/bin/netstat
+SERVICES=/etc/services
+CONFFILE=/etc/handballer/handballer.conf
+DEFPORT=7007
+
+. /usr/share/debconf/confmodule
+
+#set -e
+
+resolve_port_problem ()
+{
+    OK=0
+
+    db_text high handballer/port_prob_dsc || true	
+    db_go
+
+    #
+    # Loop until a valid port is selected.
+    #
+
+    while [ $OK = 0 ]; do
+        db_input high handballer/port_prob || true
+        db_go
+        db_get handballer/port_prob
+
+        if [ "$RET" = "Do nothing" ]; then
+            OK=1
+        elif [ "$RET" = "Specify an alternative port" ]; then
+            db_input critical handballer/select_port || true
+            db_go
+
+            db_get handballer/select_port
+
+            PORT=$RET
+
+            check_port && OK=1
+        fi
+        
+        if [ $OK = 0 ]; then
+            db_text high handballer/input_prob_dsc || true
+            db_fset handballer/port_prob seen false
+            db_fset handballer/select_port seen false
+            db_go
+        fi
+        
+    done
+}
+
+select_port () {
+    OK=0
+
+    db_text high handballer/port_no_prob_dsc || true	
+    db_go
+
+    #
+    # Loop until a valid port is selected.
+    #
+
+    while [ $OK = 0 ]; do
+        db_input high handballer/port_prob || true
+        db_go
+        db_get handballer/port_prob
+        
+        if [ "$RET" = "Do nothing" ]; then
+            OK=1
+        elif [ "$RET" = "Specify an alternative port" ]; then
+            db_input high handballer/select_port || true
+            db_go
+            db_get handballer/select_port
+            PORT=$RET
+            check_port && OK=1
+        fi
+        
+        if [ $OK = 0 ]; then
+            db_text high handballer/input_prob_dsc || true
+            db_fset handballer/port_prob seen false
+            db_fset handballer/select_port seen false
+            db_go
+        fi
+        
+    done
+}
+
+port_to_name () {
+RESULT=`grep -w $PORT_TMP $SERVICES | grep tcp | awk '{print $1}'`
+if [ -n "$RESULT" ]; then
+    PORT_TMP=$RESULT
+fi
+
+}
+
+# Determine if handballer is set to something other then port 7007
+get_setting () {
+    db_get handballer/select_port
+    PORT=$RET
+
+    if [ -z "$PORT" ]; then
+        PORT=$DEFPORT
+    fi
+}
+
+# Determine whether the specified port is bound.
+check_port () {
+OUTPUT=`$NETSTAT -plunt | awk '{print $4}' | grep -w $PORT `
+if [ "$OUTPUT" ]; then
+    PORT_OUT=1
+    return 1
+else
+    PORT_OUT=0
+    return 0
+fi
+}
+
+
+INSTALL_STAT=`dpkg -s handballer | grep Status | awk '{print $4}'`
+test -f $CONFFILE && PORT_CONF=`grep "port=80" $CONFFILE`
+
+if [ "$INSTALL_STAT" = "installed" ]; then
+    if [ -x /etc/init.d/handballer ]; then
+        if [ -x /usr/sbin/invoke-rc.d ]; then
+            invoke-rc.d handballer stop > /dev/null 2>&1 || true
+        else
+            /etc/init.d/handballer stop > /dev/null 2>&1 || true
+        fi
+    fi
+fi
+
+# do we want to chroot
+db_input medium handballer/chroot || true
+db_go
+
+if [ "$INSTALL_STAT" = "installed" ]; then
+    # Ok, we're not installed, so someone called re-configure
+    # So, if we're not using port 80, ask the question
+    PORT=$DEFPORT
+    check_port
+
+    get_setting
+    if [ "$PORT" != "$DEFPORT" ]; then 
+        if [ "$PORT_OUT" = "1" ]; then
+            resolve_port_problem
+        else
+            select_port
+        fi
+    fi
+else
+    # We're installing, see if 7007 is in use.
+    PORT=$DEFPORT
+    check_port
+
+    if [ "$PORT_OUT" = "1" ]; then
+        resolve_port_problem
+        PROBLEM=1
+    fi
+fi
+

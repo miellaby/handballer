@@ -1,0 +1,10 @@
+#Star thttpd from "bus_demo" directory
+../handballer -p 7007 -l - -b 'bus/**' -D &
+#ouvrir la demo
+http://localhost:7007/demo.html
+#poster une valeur en ligne de commande
+wget --post-data="coucou" http://localhost:7007/bus/demo/exemple
+#ou utiliser l'outil hbcpost fourni avec la libhbc
+buspost demo/exemple coucou
+
+

@@ -1,0 +1,86 @@
+# Makefile for libhbc
+#
+# Copyright © 2007 by Garden Sylvain <sylvain.garden@gmail.com>.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+
+prefix =	@prefix@
+exec_prefix =	@exec_prefix@
+LIBDIR =	${exec_prefix}/lib
+BINDIR =	${exec_prefix}/bin
+MANDIR =	@mandir@
+
+CC =		@CC@
+CCOPT =		@V_CCOPT@
+DEFS =		@DEFS@
+INCLS =		-I..
+CFLAGS =	$(CCOPT) $(DEFS) $(INCLS)
+LDFLAGS =	@LDFLAGS@
+LIBS =		@LIBS@
+NETLIBS =	@V_NETLIBS@
+INSTALL =	@INSTALL@
+
+CLEANFILES =	*.o libhbc.so libhbcg.so hbcget hbcpost
+
+@SET_MAKE@
+
+ifdef DEBUG
+CFLAGS += -DSHOW_TRACES=1
+endif
+
+.c.o:
+	@rm -f $@
+	$(CC) $(CFLAGS) -c $*.c
+
+all:		libhbc.so libhbcg.so hbcget hbcpost
+
+libhbc.so:	libhbc.o
+	$(CC) $(LDFLAGS) -pthread libhbc.o $(LIBS) -shared -o libhbc.so
+
+libhbcg.so:	getter.o ../match.o libhbc.so
+	$(CC) $(LDFLAGS) -pthread -L. -lhbc ../match.o getter.o $(LIBS) -shared -o libhbcg.so
+
+hbcget:		hbcget.o libhbc.so
+	$(CC) $(LDFLAGS) -L. -lhbc hbcget.o $(LIBS) -o hbcget
+
+hbcpost:	hbcpost.o libhbc.so
+	$(CC) $(LDFLAGS) -L. -lhbc hbcpost.o $(LIBS) -o hbcpost
+
+libhbc.o:		_hbc.h hbc.h
+hbcget.o:		hbc.h
+hbcpost.o:		hbc.h
+getter.o:		hbc.h getter.h _getter.h ../match.h
+
+install:	all
+	rm -f $(LIBDIR)/libhbcg.so $(LIBDIR)/libhbc.so $(BINDIR)/hbcget $(BINDIR)/hbcpost
+	cp libhbc.so $(LIBDIR)/libhbc.so
+	cp libhbcg.so $(LIBDIR)/libhbcg.so
+	cp hbcget $(BINDIR)/hbcget
+	cp hbcpost $(BINDIR)/hbcpost
+
+
+clean:
+	rm -f $(CLEANFILES)
+
+distclean:
+	rm -f $(CLEANFILES) Makefile

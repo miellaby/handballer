@@ -1,0 +1,92 @@
+#! /bin/sh
+
+# /etc/init.d/handballer - handballer's init script.
+# Copied by Garden Sylvain <sylvain.garden@gmail.com>
+# from original thttpd.rc script
+# written by Yotam Rubin <yotam@makif.omer.k12.il>
+
+set -e
+
+INIT=/etc/init.d/handballer
+CONFFILE=/etc/handballer/handballer.conf
+if [ ! -f $CONFFILE ]; then
+    exit 1
+fi
+
+NETSTAT=/bin/netstat
+DAEMON=/usr/sbin/handballer
+NAME=handballer
+PIDFILE=/var/run/handballer.pid
+PROXYCONFFILE=/etc/handballer/proxy.conf
+
+test -x $DAEMON || exit 0
+
+case "$1" in
+    start)
+        echo -n "Starting web server: "
+        if [ -f $PIDFILE ]; then
+            PID=`cat $PIDFILE`
+            if ps ax | grep -q "^ *$PID "; then
+                echo "$DAEMON already running."
+            else
+                rm -f $PIDFILE
+                $DAEMON -C $CONFFILE -i $PIDFILE -proxy $PROXYCONFFILE
+                echo "$NAME. "
+            fi
+        else
+            $DAEMON -C $CONFFILE -i $PIDFILE -proxy $PROXYCONFFILE
+            echo "$NAME. "
+        fi
+        ;;
+    stop)
+        echo -n "Stopping web server: "
+        if [ -f $PIDFILE ]; then
+            PID=`cat $PIDFILE`
+            if ps ax | grep -q "^ *$PID "; then
+                kill -10 $PID
+                echo "$NAME. "
+            else
+                echo "No $DAEMON found running; none killed."
+            fi
+            sleep 2
+            if ps ax | grep -q "^ *$PID "; then
+                echo "$DAEMON hasn't stopped."
+                exit 1
+            fi
+            rm -f $PIDFILE
+        else
+            echo "No $DAEMON found running; none killed."
+        fi
+        ;;
+    force-stop)
+        echo -n "Terminating web server: "
+        if [ -f $PIDFILE ]; then
+            PID=`cat $PIDFILE`
+            if ps ax | grep -q "^ *$PID "; then
+                kill $PID
+                echo "$NAME. "
+            else
+                echo "No $DAEMON found running; none killed."
+            fi
+            if ps ax | grep -q "^ *$PID "; then
+                echo "$DAEMON hasn't terminated."
+                exit 1
+            fi
+            rm -f $PIDFILE
+        else
+            echo "No $DAEMON found running; none killed."
+        fi
+        ;;
+    restart|force-reload)
+        $INIT stop || $INIT force-stop
+        sleep 1
+        $INIT start
+        ;;
+    *)
+        echo "Usage: /etc/init.d/$NAME {start|stop|restart|force-stop|force-reload}"
+        exit 1
+        ;;
+esac
+
+exit 0
+
