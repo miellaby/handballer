@@ -1,122 +1,117 @@
 // =========================================================================
 // hbc : HandBaller HTTP Bus Client Package
+//
+// parameters:
+// - baseURL: bus base URL
+// - pattern: message subscribing pattern
+// - receiveCB: message receiving callback
+// - pollPeriod: pooling loop period if any
+// - clientId: to distinguish several bus connection within an user agent
+//
+// public methods:
+// - send(label,body): send a message
 // =========================================================================
 
-// hbc skeleton
-// =========================================================================
-var hbc = {
-   // initial parameters
-   baseURL: undefined, // bus base URL
-   pattern: undefined, // message subscribing pattern
-   receiveCB: undefined, // message receiving callback
-   
-   // optional parameters
-   pollPeriod: 200, // 200 ms interval when polling is necessary
-
-   // public methods
-   init: undefined,  // initialize the library
-   send: undefined,  // send a message on the bus
-
-   // private methods and attributes
-   sendFifo: undefined, // to-be-sent messages queue
-   isSending: undefined, // sending status
-   sendXhr: undefined, // recyclable message sending dedicated XHR
-   sendOne: undefined, // private function to send one message out of the FIFO queue
-   sendNext: undefined, // private callback once called when one message has been sent
-   openXHR: undefined, // private function to open a receiving XHR
-   receiveXHR: undefined, // bus message receiving dedicated XHR
-   lastXHRState: undefined, // to detect XHR state change
-   poll: undefined, // to poll new messages in receiving XHR if required
-   pollIdx: undefined // for polling
-} ;
+function Hbc() {
+  this.baseURL = "bus/";
+  this.pattern = "**";
+  // 200 ms interval when polling is necessary
+  this.pollPeriod = 200;
+  // default client ID
+  this.clientId = "top";
+}
 
 // bus message sending section
 // =========================================================================
 
-hbc.sendFifo = [] ;
-hbc.isSending = false ;
+// private function to send one message out of the FIFO queue
+Hnc.prototype.sendOne = function(label, body) {
+  this.isSending=true;
 
-hnc.sendOne = function(label, body) {
-  hbc.isSending=true ;
-
-  hbc.sendXhr.open("POST", hbc.prefix + label, true) ;
-
-  hbc.sendXhr.onreadystatechange = function() {
+  this.sendXhr.open("POST", this.prefix + label, true);
+  var hbc = this;
+  this.sendXhr.onreadystatechange = function() {
      if (hbc.sendXhr.readyState >= 3) {
         hbc.isSending = false;
         hbc.sendNext();
-  } } ;
+  } };
 
-  hbc.sendXhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
-  hbc.sendXhr.send(body == null ? "" : "" + body);
+  this.sendXhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+  this.sendXhr.send(body == null ? "" : "" + body);
 };
 
-hbc.sendNext = function() {
-  var next = hbc.sendFifo.shift();
+// private function called back when a message sending is done
+Hbc.prototype.sendNext = function() {
+  var next = this.sendFifo.shift();
   if (next)
-     hbc.sendOne(next[0], next[1]);
+     this.sendOne(next[0], next[1]);
 };
 
-hbc.send = function(label, body) {
-  hbc.sendFifo.push([label, body]) ;
-  if (hbc.isSending) return;
-  hbc.sendNext() ;
+// public function to send a message on the bus
+Hbc.prototype.send = function(label, body) {
+  this.sendFifo.push([label, body]);
+  if (this.isSending) return;
+  this.sendNext();
 };
 
 // bus message receiving section
 // =========================================================================
 
-hbc.lastXHRstate = -1;
-
 // pooling loop when bad XHR
 var hbc.poll = function() {
-   if (hbc.receiveXHR.readyState < 3) return;
+   if (this.receiveXHR.readyState < 3) return;
 
-   var r = hbc.receiveXHR.responseText;
+   var r = this.receiveXHR.responseText;
 
    while (true) { // received message parsing loop
-      var labelSizeEndIdx = r.indexOf("\n", hbc.pollIdx);
+      var labelSizeEndIdx = r.indexOf("\n", this.pollIdx);
       if (labelSizeEndIdx == -1) break;
-      var labelSize = parseInt("0x" + r.substring(hbc.pollIdx, labelSizeEndIdx));
+      var labelSize = parseInt("0x" + r.substring(this.pollIdx, labelSizeEndIdx));
       var bodySizeIdx = 1 + labelSizeEndIdx + labelSize;
-      if (bodySizeIdx >= r.length) break ;
+      if (bodySizeIdx >= r.length) break;
       var bodySizeEndIdx = r.indexOf("\n", bodySizeIdx);
       if (bodySizeEndIdx == -1) break;
-      var bodySize = parseInt("0x" + r.substring(bodySizeIdx, bodySizeEndIdx)) ;
+      var bodySize = parseInt("0x" + r.substring(bodySizeIdx, bodySizeEndIdx));
       var bodyIdx = 1 + bodySizeEndIdx;
       if (bodyIdx + bodySize >= r.length) break;
       var label = r.substring(1 + labelSizeEndIdx, bodySizeIdx);
       var body = r.substr(bodyIdx, bodySize);
       try {
-         hbc.receiveCB(label, body) ;
+         this.receiveCB(label, body);
       } catch (e) {
-         hbc.send("log/www-browser", e.message + " [" + e.name + "]") ;
+         this.send("log/www-browser", e.message + " [" + e.name + "]");
       }
-      hbc.pollIdx = bodyIdx + bodySize + 1;
+      this.pollIdx = bodyIdx + bodySize + 1;
    }
 
-   if (hbc.receiveXHR.readyState == 4) {
+   if (this.receiveXHR.readyState == 4) {
         // if connexion is stopped, let's relaunch it
-        hbc.receiveXHR.abort();
-        hbc.openXHR();
+        this.receiveXHR.abort();
+        this.openXHR();
    } else {
-        hbc.lastXHRstate = hbc.receiveXHR.readyState ;
+        this.lastXHRstate = this.receiveXHR.readyState;
    }
 };
 
 
-hbc.openXHR() = function() {
-  hbc.pollIdx = 0;
-  hbc.lastXHRstate = -1;
-  hbc.receiveXHR = new XMLHttpRequest();
+// private function to open a receiving XHR
+Hbc.prototype.openXHR() = function() {
 
-  if (hbc.receiveXHR.multipart !== undefined)
-    { // newest Gecko versions : multipart support
-      hbc.receiveXHR.multipart = true;
+  // to poll new messages in receiving XHR if required
+  this.pollIdx = 0; // for polled XHR response parsing
+  this.lastXHRstate = -1; // for XHR state change detection
 
-      hbc.receiveXHR.onload = function(e) {
+
+  // bus message receiving dedicated XHR
+  this.receiveXHR = new XMLHttpRequest();
+
+  if (this.receiveXHR.multipart !== undefined) {
+     // newest Gecko versions : multipart support
+     this.receiveXHR.multipart = true;
+     var hbc = this;
+     this.receiveXHR.onload = function(e) {
         var r = hbc.receiveXHR.responseText;
-        var i = r.indexOf("\n") ;
+        var i = r.indexOf("\n");
         var labelSize = parseInt("0X" + r.substring(0, i));
         var label = r.substring(i + 1, i + 1 + labelSize);
         i = i + 1 + labelSize;
@@ -124,24 +119,47 @@ hbc.openXHR() = function() {
         var messageSize = parseInt("0X" + r.substring(i, j));
         var message = r.substring(j + 1, j + 1 + messageSize);
         hbc.receiveCB(label, message);
-      };
+     };
+  }
 
-    }
+  var url =  baseURL + pattern + "&label&indexed&timestamp=" + Number(new Date()), true);
+  if (!this.receiveXHR.multipart)
+    url += "&flush&box=" + clientId;
 
-  hbc.receiveXHR.open('GET', baseURL + pattern + "&label&indexed&timestamp=" + Number(new Date()), true), true);       
-  hbc.receiveXHR.send(null);
-};
+  this.receiveXHR.open('GET', url, true);
+  this.receiveXHR.send(null);
+}
 
-hbc.init = function(baseURL, pattern, receiveCB) {
-  hbc.baseURL = baseURL;
-  hbc.pattern = pattern;
-  hbc.receiveCB = receiveCB;
+// initialize the library
+Hbc.prototype.init = function() {
+  if (this.baseURL === undefined) this.baseURL = "bus/";
+  if (this.pattern === undefined) this.pattern = "**";
 
-  hbc.sendXhr = new XMLHttpRequest() ;
-  hbc.openXHR(s);
+  if (!this.pollPeriod)
+     // 200 ms interval when polling is necessary
+     this.pollPeriod = 200;
 
-  if (hbc.receiveXHR.multipart === undefined)
+  if (!this.clientId)
+     this.clientId = "top";
+
+  if (this.pollInterval !== undefined) { // resilience to multiple init call
+    clearInterval(this.pollInterval);
+    this.pollInterval = undefined;
+  }
+
+  // recyclable message sending dedicated XHR
+  this.sendXhr = new XMLHttpRequest();
+
+  // sending status
+  this.isSending = false;
+
+  // to-be-sent messages queue
+  this.sendFifo = [];
+
+  // open the receiving XHR
+  this.openXHR(s);
+  
+  if (this.receiveXHR.multipart === undefined)
      // no multipart support ==> polling
-     setInterval(hbc.poll, hbc.pollPeriod);
-};
-
+     this.pollInterval = setInterval(this.poll, this.pollPeriod);
+}

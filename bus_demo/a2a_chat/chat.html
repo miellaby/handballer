@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>A2A CHAT</title>
+<meta http-equiv="Content-Type" content="text/html; charset=8859-1">
+</head>
+
+<body>
+<h2>A2A Chat</h2>
+<h2>You say:</h2>
+<form action="javascript:postMessage()">
+<input type="text" id="messageBody" value="Hello world!">
+<input type="submit" value="Shout!">
+</form>
+<h2>You ear:</h2>
+<button onclick="document.getElementById('trace').innerHTML='';">clear</button></h2>
+<pre id='trace' style="border:2px solid black;background:#EFE;"></pre>
+
+<script type="text/javascript" src='hbc.js'></script>
+<script type="text/javascript" src='jsonize.js'></script>
+<script type="text/javascript" src='pubsubAgent.js'></script>
+<script type="text/javascript" src='indexAgent.js'></script>
+<script type="text/javascript" src='busAgent.js'></script>
+<script type="text/javascript" src='autobus.js'></script>
+
+<script type="text/javascript">
+autobus.init();
+var me = new BusAgent(busAgentUUID("intendee"), true);
+me.set("category", ["intendee"]);
+
+</script>
+
+
+</body>
+</html>
