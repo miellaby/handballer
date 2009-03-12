@@ -17,16 +17,36 @@ BusAgent.prototype = new PubSubAgent();
 BusAgent.prototype.constructor = BusAgent;
 
 BusAgent.prototype.setted = function(variable, value) {
+  var oldValue = this[variable]; // to trace change in particular cases
+
   PubSubAgent.prototype.setted.call(this, variable, value);      
+
   value = this[variable]; // it may have change
-  if (variable == "tags") {
-     var i = 0, l = value.length;
-     while (i < l) {
-        this.autobus.tagsnomy.push(value[i++], this);
-     }
+
+  if (value != oldValue) {
+    if (variable == "name") {
+       if (oldValue) this.autobus.tagsnomy.remove(oldValue, this);
+       this.autobus.tagsnomy.add(oldValue, this);
+
+    } else if (variable == "tags") {
+       var i, l;
+       if (!oldValue) oldValue = [];
+       for (i = 0, l = oldValue.length; i < l; i++) {
+          var v = oldValue[i];
+          if (value.indexOf(v) == -1)
+             this.autobus.tagsnomy.remove(v, this);
+       }
+       for (i = 0, l = value.length; i < l; i++) {
+          var v = value[i];
+          if (oldValue.indexOf(v) == -1)
+             this.autobus.tagsnomy.push(v, this);
+       }
+    }
   }
-  if (this.here)
-    this.autobus.hbc.send("model/" + this.name + "/" + variable, jsonize(value));
+
+  var name = (variable == "name" ? oldValue : this.name);
+  if (this.here && name)
+     this.autobus.hbc.send("model/" + name + "/" + variable, jsonize(value));
 }
 
 BusAgent.prototype.set = function(variable, value) {
@@ -39,10 +59,19 @@ BusAgent.prototype.set = function(variable, value) {
 
 BusAgent.prototype.call = function(fnName) {
    if (this.here) {
-       this[fnName].apply(this, arguments);
+       this[fnName].apply(this, arguments.splice(1));
    } else {
-       this.autobus.hbc.send("control/" + this.name + "/" + fnName, jsonize(arguments));
+       this.autobus.hbc.send("control/" + this.name + "/" + fnName, jsonize(arguments.splice(1)));
    }
+}
+
+BusAgent.prototype.setTags() = function() {
+   this.set("tags", arguments);
+}
+
+BusAgent.prototype.forget() = function() {
+   this.set("tags", []);
+   this.set("name", undefined);
 }
 
 function busAgentUUID(prefix) {
