@@ -25,9 +25,11 @@
 <script type="text/javascript" src='autobus.js'></script>
 
 <script type="text/javascript">
+var autobus = new Autobus();
 autobus.init();
-var me = new BusAgent(busAgentUUID("intendee"), true);
-me.set("category", ["intendee"]);
+
+var me = new BusAgent(autobus, busAgentUUID("i"), true);
+me.setTags("intendee");
 
 </script>
 
