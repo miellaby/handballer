@@ -3,7 +3,7 @@
 // =========================================================================
 
 function Autobus(hbc) {
-   this.tags = new IndexAgent();
+   this.tagsonomy = new IndexAgent();
    this.hbc = new Hbc();
 };
 
@@ -26,7 +26,7 @@ Autobus.prototype.messageCB = function(label, body) {
         command = label.substring(slashIdx + 1);
       }
 
-      obj = this.tags.getIndex(agentName);
+      obj = this.tagsonomy.getIndex(agentName);
       if (obj && obj.here) {
         if (command == "set") {
            obj.set(parameter, eval("(" + body + ")"));
@@ -41,7 +41,7 @@ Autobus.prototype.messageCB = function(label, body) {
       var agentName = label.substring(6, slashIdx);
       var slot = label.substring(slashIdx + 1);
       
-      obj = this.tags.getIndex(agentName)[0];
+      obj = this.tagsonomy.getIndex(agentName)[0];
       if (!obj) {
          obj = new BusAgent(this, agentName, false);
       }
