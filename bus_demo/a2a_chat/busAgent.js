@@ -9,8 +9,8 @@ function BusAgent(autobus, name, here) {
   this.autobus = autobus;
   this.name = name;
   this.here = (here === undefined ? false : here);
-  this.autobus.indexAgent.push("agents", this);
-  this.autobus.indexAgent.push(name, this);
+  this.autobus.tagsonomy.push("agents", this);
+  this.autobus.tagsonomy.push(name, this);
 };
 
 BusAgent.prototype = new PubSubAgent();
@@ -20,10 +20,10 @@ BusAgent.prototype.setted = function(variable, value) {
   PubSubAgent.prototype.setted.call(this, variable, value);      
   value = this[variable]; // it may have change
   if (variable == "tags") {
-        var i = 0, l = value.length;
-        while (i < l) {
-           this.autobus.indexAgent.push(value[i++], this);
-        }
+     var i = 0, l = value.length;
+     while (i < l) {
+        this.autobus.tagsnomy.push(value[i++], this);
+     }
   }
   if (this.here)
     this.autobus.hbc.send("model/" + this.name + "/" + variable, jsonize(value));
