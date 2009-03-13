@@ -12,18 +12,18 @@ IndexAgent.prototype.push = function(name, object) {
   if (this[name] === undefined) this[name] = [];
   this[name].push(object);
 
-  if (this.cbPushList[variable] !== undefined)
-    for (var lst = this.cbPushList[variable], l = lst.length, i = l - 1; i >= 0; i--)
-      lst[i](variable, object);
+  if (this.cbPushList[name] !== undefined)
+    for (var lst = this.cbPushList[name], l = lst.length, i = l - 1; i >= 0; i--)
+      lst[i](name, object);
 }
 
 IndexAgent.prototype.remove = function(name, object) {
   if (this[name] === undefined) return;
   this[name].remove(object);
 
-  if (this.cbRemoveList[variable] !== undefined)
-    for (var lst = this.cbRemoveList[variable], l = lst.length, i = l - 1; i >= 0; i--)
-      lst[i](variable, object);
+  if (this.cbRemoveList[name] !== undefined)
+    for (var lst = this.cbRemoveList[name], l = lst.length, i = l - 1; i >= 0; i--)
+      lst[i](name, object);
 }
 
 IndexAgent.prototype.getIndex = function(name) {

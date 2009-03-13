@@ -9,6 +9,8 @@ function Autobus(hbc) {
 
 
 Autobus.prototype.messageCB = function(label, body) {
+  if (this.logCB) this.logCB(label, body);
+
   var obj = null ;
   var variable = null ;
   var command = null ;
@@ -54,5 +56,5 @@ Autobus.prototype.messageCB = function(label, body) {
 
 Autobus.prototype.init = function() {
  this.hbc.receiveCB = function(label, body) { return this.messageCB(label, body); };
- this.init(hbc);
+ this.hbc.init();
 }

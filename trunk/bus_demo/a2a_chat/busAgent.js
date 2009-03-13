@@ -25,8 +25,8 @@ BusAgent.prototype.setted = function(variable, value) {
 
   if (value != oldValue) {
     if (variable == "name") {
-       if (oldValue) this.autobus.tagsnomy.remove(oldValue, this);
-       this.autobus.tagsnomy.add(oldValue, this);
+       if (oldValue) this.autobus.tagsonomy.remove(oldValue, this);
+       this.autobus.tagsonomy.add(oldValue, this);
 
     } else if (variable == "tags") {
        var i, l;
@@ -34,12 +34,12 @@ BusAgent.prototype.setted = function(variable, value) {
        for (i = 0, l = oldValue.length; i < l; i++) {
           var v = oldValue[i];
           if (value.indexOf(v) == -1)
-             this.autobus.tagsnomy.remove(v, this);
+             this.autobus.tagsonomy.remove(v, this);
        }
        for (i = 0, l = value.length; i < l; i++) {
           var v = value[i];
           if (oldValue.indexOf(v) == -1)
-             this.autobus.tagsnomy.push(v, this);
+             this.autobus.tagsonomy.push(v, this);
        }
     }
   }
@@ -65,11 +65,11 @@ BusAgent.prototype.call = function(fnName) {
    }
 }
 
-BusAgent.prototype.setTags() = function() {
+BusAgent.prototype.setTags = function() {
    this.set("tags", arguments);
 }
 
-BusAgent.prototype.forget() = function() {
+BusAgent.prototype.forget = function() {
    this.set("tags", []);
    this.set("name", undefined);
 }
