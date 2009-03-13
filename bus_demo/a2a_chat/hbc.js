@@ -13,7 +13,8 @@
 // =========================================================================
 
 function Hbc() {
-  this.baseURL = "bus/";
+  // default settings
+  this.baseURL = "/bus/";
   this.pattern = "**";
   // 200 ms interval when polling is necessary
   this.pollPeriod = 200;
@@ -25,10 +26,10 @@ function Hbc() {
 // =========================================================================
 
 // private function to send one message out of the FIFO queue
-Hnc.prototype.sendOne = function(label, body) {
+Hbc.prototype.sendOne = function(label, body) {
   this.isSending=true;
 
-  this.sendXhr.open("POST", this.prefix + label, true);
+  this.sendXhr.open("POST", this.baseURL + label, true);
   var hbc = this;
   this.sendXhr.onreadystatechange = function() {
      if (hbc.sendXhr.readyState >= 3) {
@@ -58,7 +59,7 @@ Hbc.prototype.send = function(label, body) {
 // =========================================================================
 
 // pooling loop when bad XHR
-var hbc.poll = function() {
+Hbc.prototype.poll = function() {
    if (this.receiveXHR.readyState < 3) return;
 
    var r = this.receiveXHR.responseText;
@@ -95,7 +96,7 @@ var hbc.poll = function() {
 
 
 // private function to open a receiving XHR
-Hbc.prototype.openXHR() = function() {
+Hbc.prototype.openXHR = function() {
 
   // to poll new messages in receiving XHR if required
   this.pollIdx = 0; // for polled XHR response parsing
@@ -122,9 +123,9 @@ Hbc.prototype.openXHR() = function() {
      };
   }
 
-  var url =  baseURL + pattern + "&label&indexed&timestamp=" + Number(new Date()), true);
+  var url =  this.baseURL + this.pattern + "?label&indexed&timestamp=" + Number(new Date());
   if (!this.receiveXHR.multipart)
-    url += "&flush&box=" + clientId;
+    url += "&flush&box=" + this.clientId;
 
   this.receiveXHR.open('GET', url, true);
   this.receiveXHR.send(null);
@@ -132,16 +133,6 @@ Hbc.prototype.openXHR() = function() {
 
 // initialize the library
 Hbc.prototype.init = function() {
-  if (this.baseURL === undefined) this.baseURL = "bus/";
-  if (this.pattern === undefined) this.pattern = "**";
-
-  if (!this.pollPeriod)
-     // 200 ms interval when polling is necessary
-     this.pollPeriod = 200;
-
-  if (!this.clientId)
-     this.clientId = "top";
-
   if (this.pollInterval !== undefined) { // resilience to multiple init call
     clearInterval(this.pollInterval);
     this.pollInterval = undefined;
@@ -157,7 +148,7 @@ Hbc.prototype.init = function() {
   this.sendFifo = [];
 
   // open the receiving XHR
-  this.openXHR(s);
+  this.openXHR();
   
   if (this.receiveXHR.multipart === undefined)
      // no multipart support ==> polling

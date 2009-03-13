@@ -27,9 +27,16 @@
 <script type="text/javascript">
 var autobus = new Autobus();
 autobus.init();
+autobus.logCB = function(label, body) {
+  document.getElementById("trace").innerHTML += label + " : " + body + "\n" ;
+}
 
 var me = new BusAgent(autobus, busAgentUUID("i"), true);
 me.setTags("intendee");
+
+function postMessage() {
+  me.set("shout", document.getElementById('messageBody').value);
+}
 
 </script>
 
