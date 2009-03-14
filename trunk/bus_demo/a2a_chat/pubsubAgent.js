@@ -64,7 +64,7 @@ PubSubAgent.prototype.get = function(variable) { return this[variable]; };
 PubSubAgent.prototype.getOr = function(variable, defaultValue) { return (this[variable] == undefined ? defaultValue : this[variable]); };
 
 PubSubAgent.prototype.setted = function(variable, newValue) {
-  var currentValue = (this[variable] != undefined ? this[variable] : null); 
+  var currentValue = (this[variable] !== undefined ? this[variable] : null); 
   if (newValue != currentValue)
     this.set_and_fire(variable, newValue);
 }

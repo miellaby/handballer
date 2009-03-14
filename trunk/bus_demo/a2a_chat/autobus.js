@@ -29,7 +29,7 @@ Autobus.prototype.messageCB = function(label, body) {
       }
 
       obj = this.tagsonomy.getIndex(agentName);
-      if (obj && obj.here) {
+      if (obj && obj.location !== BusAgent.prototype.there) {
         if (command == "set") {
            obj.set(parameter, eval("(" + body + ")"));
         } else {
@@ -48,13 +48,14 @@ Autobus.prototype.messageCB = function(label, body) {
          obj = new BusAgent(this, agentName, false);
       }
  
-      if (!obj.here) {
+      if (obj.location !== BusAgent.prototype.here) {
          obj.setted(slot, eval("(" + body + ")"));
       } 
    }
 }
 
 Autobus.prototype.init = function() {
- this.hbc.receiveCB = function(label, body) { return this.messageCB(label, body); };
- this.hbc.init();
+  var a = this;
+  this.hbc.receiveCB = function(l,b) { return a.messageCB(l,b); };
+  this.hbc.init();
 }

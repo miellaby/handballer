@@ -113,19 +113,17 @@ Hbc.prototype.openXHR = function() {
      this.receiveXHR.onload = function(e) {
         var r = hbc.receiveXHR.responseText;
         var i = r.indexOf("\n");
-        var labelSize = parseInt("0X" + r.substring(0, i));
-        var label = r.substring(i + 1, i + 1 + labelSize);
-        i = i + 1 + labelSize;
-        var j = r.indexOf("\n", i);
-        var messageSize = parseInt("0X" + r.substring(i, j));
-        var message = r.substring(j + 1, j + 1 + messageSize);
+        var label = r.substring(0, i);
+        var message = r.substring(i + 1);
         hbc.receiveCB(label, message);
      };
   }
 
-  var url =  this.baseURL + this.pattern + "?label&indexed&timestamp=" + Number(new Date());
-  if (!this.receiveXHR.multipart)
-    url += "&flush&box=" + this.clientId;
+  var url =  this.baseURL + this.pattern + "?label&timestamp=" + Number(new Date());
+  if (this.receiveXHR.multipart)
+     url += "&push=XYZ";
+  else
+     url += "&indexed&flush&box=" + this.clientId;
 
   this.receiveXHR.open('GET', url, true);
   this.receiveXHR.send(null);
