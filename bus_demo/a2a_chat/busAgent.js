@@ -74,8 +74,12 @@ BusAgent.prototype.setTags = function() {
 }
 
 BusAgent.prototype.forget = function() {
+   if (this.location == BusAgent.prototype.here) {
+      this.autobus.hbc.send("collapse/" + this.name);
+   }
    this.set("tags", []);
    this.set("name", undefined);
+   this.unsubscribe();
 }
 
 function busAgentUUID(prefix) {

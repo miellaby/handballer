@@ -50,6 +50,7 @@ Hbc.prototype.sendNext = function() {
 
 // public function to send a message on the bus
 Hbc.prototype.send = function(label, body) {
+  if (this.logCB) this.logCB("sending " + label + ": " + body);
   this.sendFifo.push([label, body]);
   if (this.isSending) return;
   this.sendNext();
@@ -78,9 +79,10 @@ Hbc.prototype.poll = function() {
       var label = r.substring(1 + labelSizeEndIdx, bodySizeIdx);
       var body = r.substr(bodyIdx, bodySize);
       try {
+         if (this.logCB) this.logCB("receiving " + label + ": " + body);
          this.receiveCB(label, body);
       } catch (e) {
-         this.send("log/www-browser", e.message + " [" + e.name + "]");
+         if (this.logCB) this.logCB("error in CB: " + e.message + " [" + e.name + "]");
       }
       this.pollIdx = bodyIdx + bodySize + 1;
    }
@@ -114,8 +116,9 @@ Hbc.prototype.openXHR = function() {
         var r = hbc.receiveXHR.responseText;
         var i = r.indexOf("\n");
         var label = r.substring(0, i);
-        var message = r.substring(i + 1);
-        hbc.receiveCB(label, message);
+        var body = r.substring(i + 1);
+        if (hbc.logCB) hbc.logCB("receiving " + label + ": " + body);
+        hbc.receiveCB(label, body);
      };
   }
 

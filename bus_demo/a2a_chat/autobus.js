@@ -4,24 +4,23 @@
 
 function Autobus(hbc) {
    this.tagsonomy = new IndexAgent();
-   this.hbc = new Hbc();
+   this.hbc = (hbc ? hbc : new Hbc());
 };
 
 
 Autobus.prototype.messageCB = function(label, body) {
-  if (this.logCB) this.logCB(label, body);
-
   var obj = null ;
   var variable = null ;
   var command = null ;
   var id = null ;
+
   if (label.substring(0,8)== "control/")
     {
       var slashIdx = label.indexOf("/",8);
       var slash2Idx = label.indexOf("/", slashIdx+1);
       var agentName = label.substring(8, slashIdx);
       var command=null, parameter=null;
-      if (slash2Idx.indexOf("/")!=-1) {
+      if (slash2Idx!=-1) {
         command = label.substring(slashIdx + 1, slash2Idx);
         parameter = label.substr(1 + slash2Idx);
       } else {
@@ -45,7 +44,7 @@ Autobus.prototype.messageCB = function(label, body) {
       
       obj = this.tagsonomy.getIndex(agentName)[0];
       if (!obj) {
-         obj = new BusAgent(this, agentName, false);
+         obj = new BusAgent(this, agentName, BusAgent.prototype.there);
       }
  
       if (obj.location !== BusAgent.prototype.here) {
