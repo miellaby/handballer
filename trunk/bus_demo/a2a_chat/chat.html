@@ -9,7 +9,7 @@
 <body>
 <h2>A2A Chat</h2>
 <h2>You say:</h2>
-<form action="javascript:postMessage()">
+<form action="javascript:me.postMessage()">
 <input type="text" id="messageBody" value="Hello world!">
 <input type="submit" value="Shout!">
 </form>
@@ -25,26 +25,78 @@
 <script type="text/javascript" src='autobus.js'></script>
 
 <script type="text/javascript">
+function puts(msg) {
+  document.getElementById("trace").innerHTML += (msg + "\n") ;
+}
+
 var autobus = new Autobus();
 autobus.init();
-autobus.logCB = function(label, body) {
-  document.getElementById("trace").innerHTML += label + " : " + body + "\n" ;
+
+autobus.hbc.logCB = function(msg) {
+  puts("logCB: " + msg) ;
 }
 
 var me = new BusAgent(autobus, busAgentUUID("i"), BusAgent.prototype.here);
 me.setTags("intendee");
 
-function postMessage() {
-  me.set("shout", document.getElementById('messageBody').value);
+me.postMessage = function() {
+  var msg = new BusAgent(autobus, busAgentUUID("m"), BusAgent.prototype.here);
+  msg.setTags("message");
+  msg.set("intendee", me.name);
+  //msg.set("to", otherIntendee);
+  msg.set("content", document.getElementById('messageBody').value);
 }
 
-var hotPotato = new BusAgent(autobus, "hotPotato", BusAgent.prototype.both);
-function hotPotatoPass() {
-   hotPotato.set("count",hotPotato.getOr("potato",0)+1);
+me.pingCounter = 1;
+me.doPing = function() {
+   this.set("ping", me.pingCounter++);
 }
 
-hotPotatoPass();
-setInterval(hotPotatoPass,1000000);
+var pingsLog = {};
+
+function onIntendeePing(intendee, variable, value) {
+    pingsLog[intendee.name] = intendee;
+    puts("intendee " + intendee.name + " heard at " + new Date());
+}
+
+function onMessageContent(message, variable, value) {
+    puts("intendee " + message.intendee + " said: " + value);
+}
+
+function onNewIntendee(tagsnomy, tag, intendee) {
+   puts("new intendee " + intendee.name);
+   intendee.subscribe("ping", onIntendeePing);
+}
+
+
+function onNewMessage(tagsonomy, tag, message) {
+   puts("new message " + message.name);
+   message.subscribe("content", onMessageContent);
+}
+
+autobus.tagsonomy.setSubscribe("intendee", onNewIntendee);
+autobus.tagsonomy.setSubscribe("message", onNewMessage);
+
+var lastPingsLog = null;
+function cleanGone() {
+   if (!lastPingsLog) { // 1st call
+      lastPingsLog = pingsLog;
+      return;
+   }
+     
+   for (i in lastPingsLog) {
+     if (pingsLog[i]) continue; // intendee still here
+     // intendee gone
+     puts("intendee " + i + " is gone!");
+     lastPingsLog[i].forget();
+   }
+   lastPingsLog = pingsLog; 
+   pingsLog = {};
+}
+
+me.doPing();
+setInterval(function() { me.doPing() }, 60 * 2 * 100 - 30 * Math.random() * 100);
+setInterval(cleanGone, 60 * 2 * 100);
 
 
 </script>

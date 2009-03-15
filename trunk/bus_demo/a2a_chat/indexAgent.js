@@ -14,7 +14,7 @@ IndexAgent.prototype.push = function(name, object) {
 
   if (this.cbPushList[name] !== undefined)
     for (var lst = this.cbPushList[name], l = lst.length, i = l - 1; i >= 0; i--)
-      lst[i](name, object);
+      lst[i](this, name, object);
 }
 
 IndexAgent.prototype.remove = function(name, object) {
@@ -23,7 +23,7 @@ IndexAgent.prototype.remove = function(name, object) {
 
   if (this.cbRemoveList[name] !== undefined)
     for (var lst = this.cbRemoveList[name], l = lst.length, i = l - 1; i >= 0; i--)
-      lst[i](name, object);
+      lst[i](this, name, object);
 }
 
 IndexAgent.prototype.getIndex = function(name) {

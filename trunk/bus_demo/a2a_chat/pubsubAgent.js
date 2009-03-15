@@ -21,12 +21,8 @@ if (Array.prototype.remove === undefined) {
    }
 }
 
-var pubSubAgents = [];
-
 function PubSubAgent() {
   this.cbList = {};
-  this.cbListLong = {};
-  pubSubAgents.push(this);
 };
 
 PubSubAgent.prototype.subscribe = function (variable, cb) {
@@ -34,17 +30,27 @@ PubSubAgent.prototype.subscribe = function (variable, cb) {
     this.cbList[variable].push(cb);
   else
     this.cbList[variable] = [cb];
+
+  // this method return a convenient object for the caller to log every subscription
+  // this can be used to log and clean a set of temporary subscriptions
+  return { agent: this, variable: variable, cb: cb };
 }
 
-PubSubAgent.prototype.longSubscribe = function (variable, cb) {
-  if (this.cbListLong[variable])
-    this.cbListLong[variable].push(cb);
-  else
-    this.cbListLong[variable] = [cb];
-}
+PubSubAgent.prototype.unsubscribe = function(variable, cb) {
+  if (!variable) {
+     if (!cb) {
+        this.cbList = {};
+     } else {
+        for (variable in this.cbList)
+           this.cbList[variable].remove(cb);
+     }
+     return;
+  }
 
-PubSubAgent.prototype.longUnsubscribe = function(variable, cb) {
-  this.cbListLong[variable].remove(cb);
+  if (cb)
+     this.cbList[variable].remove(cb);
+   else
+     this.cbList[variable] = [];
 }
 
 PubSubAgent.prototype.set_and_fire = function(variable, value) {
@@ -52,11 +58,7 @@ PubSubAgent.prototype.set_and_fire = function(variable, value) {
 
   if (this.cbList[variable])
     for (var lst = this.cbList[variable], l = lst.length, i = l - 1; i >= 0; i--)
-      lst[i](variable, value);
-
-  if (this.cbListLong[variable])
-    for (var lst = this.cbListLong[variable], l = lst.length, i = l - 1; i >= 0; i--)
-      lst[i](variable, value);
+      lst[i](this, variable, value);
 }
 
 PubSubAgent.prototype.get = function(variable) { return this[variable]; };
@@ -74,12 +76,7 @@ PubSubAgent.prototype.set = PubSubAgent.prototype.setted;
 PubSubAgent.prototype.status = function() {
   var status = new Object();
   for (p in this)
-    if (p != "cbList" && p != "cbListLong")
+    if (p != "cbList")
        status[p] = this[p];
   return status;
-}
-
-function pubSubAgentUnsubscribeAll() {
-  for (var lst = pubSubAgents, l = lst.length, i = l - 1; i >= 0; i--)
-    lst[i].cbList = {};
 }
