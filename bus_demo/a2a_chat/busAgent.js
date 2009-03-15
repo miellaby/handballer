@@ -77,8 +77,8 @@ BusAgent.prototype.forget = function() {
    if (this.location == BusAgent.prototype.here) {
       this.autobus.hbc.send("collapse/" + this.name);
    }
-   this.set("tags", []);
-   this.set("name", undefined);
+   this.setted("tags", []);
+   this.setted("name", undefined);
    this.unsubscribe();
 }
 
