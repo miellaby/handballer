@@ -54,7 +54,7 @@ function showHide(o) {
 }
 
 function onBusMessage(label,body) {
-  document.getElementById("trace").innerHTML += label + " : " + body + "\n" ;
+  document.getElementById("trace").innerHTML += label + ": " + body + "\n" ;
   setTimeout(function () {document.getElementById('getResult').innerHTML = document.getElementById('iframeNotif').contentWindow.document.body.innerHTML.replace(/</g,'&lt;').replace(/>/g,'&gt;');}, 0) ;
 }
 
