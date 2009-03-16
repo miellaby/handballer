@@ -89,7 +89,10 @@ BusAgent.prototype.setTags = function() {
 }
 
 BusAgent.prototype.forget = function() {
-   this.setted("tags", []);
+   for (i = 0, l = this.tags.length; i < l; i++) {
+      this.autobus.tagsonomy.remove(this.tags[i], this);
+   }
+   this.tags=[];
    this.setted("name", undefined);
    this.unsubscribe();
 }

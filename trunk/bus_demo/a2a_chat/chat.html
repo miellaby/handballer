@@ -8,13 +8,15 @@
 
 <body>
 <h2>A2A Chat</h2>
-<h2>You say:</h2>
-<form action="javascript:me.postMessage()">
-<input type="text" id="messageBody" value="Hello world!">
+<form action="javascript:me.set('nickname',document.getElementById('meName').value)">
+<h3>You are:&nbsp;&nbsp;&nbsp;<input type="text" id="meName" value="guest">
+<input type="submit" value="Set nickname!">
+</h3></form>
+<h3><form action="javascript:me.postMessage()">
+You say:&nbsp;&nbsp;&nbsp;<input type="text" id="messageBody" value="Hello world!">
 <input type="submit" value="Shout!">
-</form>
-<h2>You ear:</h2>
-<button onclick="document.getElementById('trace').innerHTML='';">clear</button></h2>
+</h3></form>
+<h3>You ear:&nbsp;&nbsp;&nbsp;<button onclick="document.getElementById('trace').innerHTML='';">clear</button></h3>
 <pre id='trace' style="border:2px solid black;background:#EFE;"></pre>
 
 <script type="text/javascript" src='hbc.js'></script>
@@ -26,30 +28,16 @@
 
 <script type="text/javascript">
 function puts(msg) {
-  document.getElementById("trace").innerHTML += (msg + "\n") ;
+  var t = document.getElementById("trace");
+  t.innerHTML = t.innerHTML.replace(/^/, msg + "\n") ;
 }
 
 var autobus = new Autobus();
 autobus.init();
 
+if(0)
 autobus.hbc.logCB = function(msg) {
   puts("logCB: " + msg) ;
-}
-
-var me = new BusAgent(autobus, busAgentUUID("i"), BusAgent.prototype.here);
-me.setTags("intendee");
-
-me.postMessage = function() {
-  var msg = new BusAgent(autobus, busAgentUUID("m"), BusAgent.prototype.here);
-  msg.setTags("message");
-  msg.set("intendee", me.name);
-  //msg.set("to", otherIntendee);
-  msg.set("content", document.getElementById('messageBody').value);
-}
-
-me.pingCounter = 1;
-me.doPing = function() {
-   this.set("ping", me.pingCounter++);
 }
 
 var pingsLog = {};
@@ -59,6 +47,10 @@ function onIntendeePing(intendee, variable, value) {
     puts("intendee " + intendee.name + " heard at " + new Date());
 }
 
+function onIntendeeNickname(intendee, variable, value) {
+    puts("intendee " + intendee.name + " is also known as " + value);
+}
+
 function onMessageContent(message, variable, value) {
     puts("intendee " + message.intendee + " said: " + value);
 }
@@ -66,13 +58,14 @@ function onMessageContent(message, variable, value) {
 function onNewIntendee(tagsnomy, tag, intendee) {
    puts("new intendee " + intendee.name);
    intendee.subscribe("ping", onIntendeePing);
+   intendee.subscribe("nickname", onIntendeeNickname);
 }
 
 var messagesQueue = [];
 function onNewMessage(tagsonomy, tag, message) {
    puts("new message " + message.name);
    message.subscribe("content", onMessageContent);
-   messagesQueue.push(message);
+   messagesQueue.unshift(message);
    var removed = messagesQueue.splice(10,10);
    for (var lst = removed, l = lst.length, i = l - 1; i >= 0; i--) {
       puts("message " + lst[i].name + " forgotten");
@@ -82,6 +75,25 @@ function onNewMessage(tagsonomy, tag, message) {
 
 autobus.tagsonomy.setSubscribe("intendee", onNewIntendee);
 autobus.tagsonomy.setSubscribe("message", onNewMessage);
+
+var me = new BusAgent(autobus, busAgentUUID("i"), BusAgent.prototype.here);
+me.setTags("intendee");
+
+me.postMessage = function() {
+  var v = document.getElementById('messageBody');
+  var msg = new BusAgent(autobus, busAgentUUID("m"), BusAgent.prototype.here);
+  msg.setTags("message");
+  msg.set("intendee", me.name);
+  //msg.set("to", otherIntendee);
+  msg.set("content", v.value);
+  v.value = "";
+}
+
+me.pingCounter = 1;
+me.doPing = function() {
+   this.set("ping", me.pingCounter++);
+}
+
 
 var lastPingsLog = null;
 function cleanGone() {
