@@ -7,6 +7,7 @@
 // - receiveCB: message receiving callback
 // - pollPeriod: pooling loop period if any
 // - clientId: to distinguish several bus connection within an user agent
+// - token: a (somewhat unique) token
 //
 // public methods:
 // - send(label,body): send a message
@@ -20,6 +21,7 @@ function Hbc() {
   this.pollPeriod = 200;
   // default client ID
   this.clientId = "top";
+  this.token = String(Number(new Date()) % (Math.random() * 0xAFF00000)).substr(0,9);
 }
 
 // bus message sending section
@@ -108,7 +110,9 @@ Hbc.prototype.openXHR = function() {
   // bus message receiving dedicated XHR
   this.receiveXHR = new XMLHttpRequest();
 
-  if (this.receiveXHR.multipart !== undefined) {
+  var multipartSupport = (this.receiveXHR.multipart !== undefined);
+  multipartSupport = false;
+  if (multipartSupport) {
      // newest Gecko versions : multipart support
      this.receiveXHR.multipart = true;
      var hbc = this;
@@ -126,7 +130,7 @@ Hbc.prototype.openXHR = function() {
   if (this.receiveXHR.multipart)
      url += "&push=XYZ";
   else
-     url += "&indexed&flush&box=" + this.clientId;
+     url += "&indexed&flush&box=" + this.token + this.clientId;
 
   this.receiveXHR.open('GET', url, true);
   this.receiveXHR.send(null);
@@ -151,7 +155,9 @@ Hbc.prototype.init = function() {
   // open the receiving XHR
   this.openXHR();
   
-  if (this.receiveXHR.multipart === undefined)
+  if (!this.receiveXHR.multipart) {
+     var self = this;
      // no multipart support ==> polling
-     this.pollInterval = setInterval(this.poll, this.pollPeriod);
+     this.pollInterval = setInterval(function(){self.poll()}, this.pollPeriod);
+  }
 }
