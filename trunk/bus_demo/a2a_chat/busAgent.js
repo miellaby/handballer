@@ -6,6 +6,7 @@
 // =========================================================================
 
 function BusAgent(autobus, name, here) {
+  (name.length > 0);
   PubSubAgent.call(this);
   this.autobus = autobus;
   this.name = name;
@@ -20,6 +21,14 @@ BusAgent.prototype.here = 1;
 BusAgent.prototype.there = 2;
 BusAgent.prototype.both = 3;
 
+BusAgent.prototype.here = function() {
+   return this.location !== BusAgent.prototype.there;
+}
+
+BusAgent.prototype.there = function() {
+   return this.location !== BusAgent.prototype.here;
+}
+
 BusAgent.prototype.setted = function(variable, value) {
   var oldValue = this[variable]; // to trace change in particular cases
 
@@ -31,7 +40,13 @@ BusAgent.prototype.setted = function(variable, value) {
 
   if (variable == "name") {
        if (oldValue) this.autobus.tagsonomy.remove(oldValue, this);
-       this.autobus.tagsonomy.add(oldValue, this);
+       
+       if (value)
+         this.autobus.tagsonomy.push(value, this);
+       else if (this.here() && oldValue) {
+          this.autobus.hbc.send("freed/" + oldValue);
+          return;
+       }
 
   } else if (variable == "tags") {
        var i, l;
@@ -49,12 +64,12 @@ BusAgent.prototype.setted = function(variable, value) {
   }
 
   var name = (variable == "name" ? oldValue : this.name);
-  if (this.location !== BusAgent.prototype.there && name)
+  if (this.here() && name)
      this.autobus.hbc.send("model/" + name + "/" + variable, jsonize(value));
 }
 
 BusAgent.prototype.set = function(variable, value) {
-   if (this.location !== BusAgent.prototype.there) {
+   if (this.here()) {
        this.setted(variable, value);
    } else {
        this.autobus.hbc.send("control/" + this.name + "/set/" + variable, jsonize(value));
@@ -62,7 +77,7 @@ BusAgent.prototype.set = function(variable, value) {
 }
 
 BusAgent.prototype.call = function(fnName) {
-   if (this.location !== BusAgent.prototype.there) {
+   if (this.here()) {
        this[fnName].apply(this, arguments.splice(1));
    } else {
        this.autobus.hbc.send("control/" + this.name + "/" + fnName, jsonize(arguments.splice(1)));
@@ -74,9 +89,6 @@ BusAgent.prototype.setTags = function() {
 }
 
 BusAgent.prototype.forget = function() {
-   if (this.location == BusAgent.prototype.here) {
-      this.autobus.hbc.send("collapse/" + this.name);
-   }
    this.setted("tags", []);
    this.setted("name", undefined);
    this.unsubscribe();
