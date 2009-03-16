@@ -2,30 +2,33 @@
 "http://www.w3.org/TR/html4/loose.dtd">
 <html><head><title>Bus Sniffer</title>
 <meta http-equiv="Content-Type" content="text/html; charset=8859-1">
-</head><body><p>Here is a simple <i>HTTP Bus</i> get/post tool.</p>
+</head><body><p>Here is a simple <i>HandBaller HTTP Bus based</i> instant messaging prototype. You may exchange messages from 2 running browsers.</p>This demo requires a "Multipart Push AJAX" compatible browser like Firefox 3. Otherwise, try <a href="hello.html">this generic version</a>.
 <h2>Post a  message</h2>
 
 <form action="javascript:postClick()">
- <input type="text" id="myLabel">
- <input type="text" id="myMessage">
+label: <input type="text" id="myLabel">
+body: <input type="text" id="myBody">
  <input type="submit" value="POST">
 </form>
 
-
-<h2>Last message trace</h2>
+<h2>Messages history</h2>
 <pre id="trace" name="trace"  style="border:2px solid black;background:#EFE;min-height:100px"></pre>
-<!-- Invisible resources -->
 
 <script type="text/javascript">
-
 var get_xhr = new XMLHttpRequest();
 var post_xhr = new XMLHttpRequest();
 get_xhr.multipart = true;       
-get_xhr.onload = function(e)   
-{           
- var channel_message = this.responseText.split("\n") ;
- document.getElementById('trace').innerHTML += channel_message[0] + ':' + channel_message[1].replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + "\n";
-};       
+
+var msgHistory = [];
+get_xhr.onload = function(e) {           
+   var label_body = this.responseText.split("\n") ;
+   var e = document.getElementById('trace');
+  
+  msgHistory.unshift(label_body[0] + ':' + label_body[1].replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+  msgHistory.splice(6, 50);
+  e.innerHTML = msgHistory.join("\n");
+
+};
 
 get_xhr.open('GET', "/bus/**?label&push=XXX", true);       
 get_xhr.send(null);    
@@ -37,13 +40,10 @@ function handballerPost(label, body) {
 
 function postClick(){
   label = document.getElementById('myLabel').value;
-  body = document.getElementById('myMessage').value;
+  body = document.getElementById('myBody').value;
 
   handballerPost(label, body);
 }
-
 </script>
-
-
 </body>
 </html>
