@@ -14,6 +14,14 @@ Autobus.prototype.messageCB = function(label, body) {
   var command = null ;
   var id = null ;
 
+  if (label.substring(0,6)== "freed/")
+    {
+      var agentName = label.substring(6);
+      obj = this.tagsonomy.getIndex(agentName)[0];
+      if (obj && obj.there()) obj.forget();
+      return;
+    }
+
   if (label.substring(0,8)== "control/")
     {
       var slashIdx = label.indexOf("/",8);
@@ -28,7 +36,7 @@ Autobus.prototype.messageCB = function(label, body) {
       }
 
       obj = this.tagsonomy.getIndex(agentName);
-      if (obj && obj.location !== BusAgent.prototype.there) {
+      if (obj && obj.here()) {
         if (command == "set") {
            obj.set(parameter, eval("(" + body + ")"));
         } else {
@@ -43,11 +51,12 @@ Autobus.prototype.messageCB = function(label, body) {
       var slot = label.substring(slashIdx + 1);
       
       obj = this.tagsonomy.getIndex(agentName)[0];
+
       if (!obj) {
          obj = new BusAgent(this, agentName, BusAgent.prototype.there);
       }
  
-      if (obj.location !== BusAgent.prototype.here) {
+      if (obj.there()) {
          obj.setted(slot, eval("(" + body + ")"));
       } 
    }
