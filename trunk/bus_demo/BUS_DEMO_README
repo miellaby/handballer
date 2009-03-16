@@ -1,10 +1,12 @@
-#Star thttpd from "bus_demo" directory
+#Star thttpd from "bus_demo" directory by activating console trace
 ../handballer -p 7007 -l - -b 'bus/**' -D &
-#ouvrir la demo
-http://localhost:7007/demo.html
-#poster une valeur en ligne de commande
-wget --post-data="coucou" http://localhost:7007/bus/demo/exemple
-#ou utiliser l'outil hbcpost fourni avec la libhbc
-buspost demo/exemple coucou
 
+# open the demo URL in your favorite browser
+http://localhost:7007/demo.html
+
+#you may experiment with message posting via some command line web client (e.g. wget)
+wget --post-data="coucou" http://localhost:7007/bus/demo/exemple
+
+#you may also use the hbcpost tool based upon libhbc (handballer client lib)
+hbcpost demo/example "hello world!"
 
