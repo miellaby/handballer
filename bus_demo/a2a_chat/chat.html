@@ -42,9 +42,14 @@ autobus.hbc.logCB = function(msg) {
 
 var pingsLog = {};
 
+function log(msg) {
+   return;
+   puts(msg);
+}
+
 function onIntendeePing(intendee, variable, value) {
     pingsLog[intendee.name] = intendee;
-    puts("intendee " + intendee.name + " heard at " + new Date());
+    log("intendee " + intendee.name + " heard at " + new Date());
 }
 
 function onIntendeeNickname(intendee, variable, value) {
@@ -52,7 +57,10 @@ function onIntendeeNickname(intendee, variable, value) {
 }
 
 function onMessageContent(message, variable, value) {
-    puts("intendee " + message.intendee + " said: " + value);
+    var intendee = autobus.tagsonomy.getIndex(message.intendee)[0];
+    var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + message.intendee);
+
+    puts(who + " said: " + value);
 }
 
 function onNewIntendee(tagsnomy, tag, intendee) {
@@ -63,12 +71,12 @@ function onNewIntendee(tagsnomy, tag, intendee) {
 
 var messagesQueue = [];
 function onNewMessage(tagsonomy, tag, message) {
-   puts("new message " + message.name);
+   log("new message " + message.name);
    message.subscribe("content", onMessageContent);
    messagesQueue.unshift(message);
    var removed = messagesQueue.splice(10,10);
    for (var lst = removed, l = lst.length, i = l - 1; i >= 0; i--) {
-      puts("message " + lst[i].name + " forgotten");
+      log("message " + lst[i].name + " forgotten");
       lst[i].forget();
    }
 }
