@@ -144,7 +144,10 @@
 ** You can override this in the config file with the "charset" setting,
 ** or on the command like with the -T flag.
 */
-#define DEFAULT_CHARSET "iso-8859-1"
+/* handballer: more likely UTF-8 as data sources are often web RUI
+** #define DEFAULT_CHARSET "iso-8859-1" */
+#define DEFAULT_CHARSET "utf-8"
+
 
 
 /* Most people won't want to change anything below here. */
