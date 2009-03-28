@@ -171,7 +171,7 @@ static box_t* box_find(httpd_server* hs, char* cookie, char* clientkey) {
 
   // to be optimized through hash_table
   box_t* found = hs->box_list;
-  while (found && (strcmp(found->key, clientkey) || strcmp(found->cookie, handballer_box_cookie)))
+  while (found && !(found->key && found->cookie && !strcmp(found->key, clientkey) && !strcmp(found->cookie, handballer_box_cookie)))
     found = found->next;
 
   // return a box if clientkey & cookie match
@@ -518,7 +518,7 @@ bus( httpd_conn* hc )
     {
     int r;
     
-    hc->type = "text/html; charset=%s";
+    hc->type = "text/plain; charset=%s";
 
     if ( hc->method == METHOD_GET )
       { // METHOD GET
@@ -650,7 +650,11 @@ bus( httpd_conn* hc )
             /*
              * Send BUS GET preambule
              */
-            if (hc->bus_flags & BUS_NETSCAPEPUSH_MODE)
+            if (hc->bus_flags & BUS_SCRIPT_MODE)
+              {
+                hc->type = "text/html; charset=%s";
+              }
+            else if (hc->bus_flags & BUS_NETSCAPEPUSH_MODE)
               {
                 char *btype ;
                 hc->type = "multipart/x-mixed-replace;boundary=" ;
