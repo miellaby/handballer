@@ -3,7 +3,7 @@
 <html>
 <head>
 <title>A2A CHAT</title>
-<meta http-equiv="Content-Type" content="text/html; charset=8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 
 <body>
@@ -35,7 +35,7 @@ function puts(msg) {
 var autobus = new Autobus();
 autobus.init();
 
-if(0)
+if(1)
 autobus.hbc.logCB = function(msg) {
   puts("logCB: " + msg) ;
 }
@@ -121,8 +121,8 @@ function cleanGone() {
 }
 
 me.doPing();
-setInterval(function() { me.doPing() }, 60 * 2 * 100 - 30 * Math.random() * 100);
-setInterval(cleanGone, 60 * 2 * 100);
+setInterval(function() { me.doPing() }, 60 * 2 * 1000 - 30 * Math.random() * 1000);
+setInterval(cleanGone, 60 * 2 * 1000);
 
 
 </script>
