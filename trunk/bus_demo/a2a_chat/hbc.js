@@ -68,25 +68,19 @@ Hbc.prototype.poll = function() {
    var r = this.receiveXHR.responseText;
 
    while (true) { // received message parsing loop
-      var labelSizeEndIdx = r.indexOf("\n", this.pollIdx);
-      if (labelSizeEndIdx == -1) break;
-      var labelSize = parseInt("0x" + r.substring(this.pollIdx, labelSizeEndIdx));
-      var bodySizeIdx = 1 + labelSizeEndIdx + labelSize;
-      if (bodySizeIdx >= r.length) break;
-      var bodySizeEndIdx = r.indexOf("\n", bodySizeIdx);
-      if (bodySizeEndIdx == -1) break;
-      var bodySize = parseInt("0x" + r.substring(bodySizeIdx, bodySizeEndIdx));
-      var bodyIdx = 1 + bodySizeEndIdx;
-      if (bodyIdx + bodySize >= r.length) break;
-      var label = r.substring(1 + labelSizeEndIdx, bodySizeIdx);
-      var body = r.substr(bodyIdx, bodySize);
+      var labelEnd = r.indexOf("\x00", this.pollIdx);
+      if (labelEnd == -1) break;
+      var bodyEnd = r.indexOf("\x00", labelEnd+1);
+      if (bodyEnd == -1) break;
+      var label = r.substring(this.pollIdx, labelEnd);
+      var body = r.substring(labelEnd+1, bodyEnd);
       try {
          if (this.logCB) this.logCB("receiving " + label + ": " + body);
          this.receiveCB(label, body);
       } catch (e) {
          if (this.logCB) this.logCB("error in CB: " + e.message + " [" + e.name + "]");
       }
-      this.pollIdx = bodyIdx + bodySize + 1;
+      this.pollIdx = bodyEnd + 1;
    }
 
    if (this.receiveXHR.readyState == 4) {
@@ -130,7 +124,7 @@ Hbc.prototype.openXHR = function() {
   if (this.receiveXHR.multipart)
      url += "&push=XYZ";
   else
-     url += "&indexed&flush&box=" + this.token + this.clientId;
+     url += "&null&flush&box=" + this.token + this.clientId;
 
   this.receiveXHR.open('GET', url, true);
   this.receiveXHR.send(null);
