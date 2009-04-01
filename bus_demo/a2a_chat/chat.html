@@ -97,9 +97,9 @@ me.postMessage = function() {
   v.value = "";
 }
 
-me.pingCounter = 1;
+me.ping = 0;
 me.doPing = function() {
-   this.set("ping", me.pingCounter++);
+   this.set("ping", me.ping + 1);
 }
 
 
