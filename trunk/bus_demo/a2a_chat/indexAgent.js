@@ -6,6 +6,7 @@ function IndexAgent() {
   PubSubAgent.call(this);
   this.cbPushList = {};
   this.cbRemoveList = {};
+  this.push("index", this);
 };
 
 IndexAgent.prototype.push = function(name, object) {

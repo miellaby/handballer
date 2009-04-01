@@ -25,6 +25,8 @@ function PubSubAgent() {
   this.cbList = {};
 };
 
+PubSubAgent.prototype.privates = { privates: true, cbList: true } ;
+
 PubSubAgent.prototype.subscribe = function (variable, cb) {
   if (this.cbList[variable])
     this.cbList[variable].push(cb);
@@ -74,9 +76,11 @@ PubSubAgent.prototype.setted = function(variable, newValue) {
 PubSubAgent.prototype.set = PubSubAgent.prototype.setted;
 
 PubSubAgent.prototype.status = function() {
-  var status = new Object();
-  for (p in this)
-    if (p != "cbList")
-       status[p] = this[p];
-  return status;
+  var pic = {};
+  for (p in this) {
+    if (typeof this[p] == "function") continue;
+    if (this.privates[p]) continue;
+    pic[p] = this[p];
+  }
+  return pic;
 }

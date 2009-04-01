@@ -5,25 +5,25 @@
 function Autobus(hbc) {
    this.tagsonomy = new IndexAgent();
    this.hbc = (hbc ? hbc : new Hbc());
+   Autobus.prototype.singleton = this;
 };
 
+Autobus.prototype.singleton = null;
 
-Autobus.prototype.messageCB = function(label, body) {
-  var obj = null ;
-  var variable = null ;
-  var command = null ;
-  var id = null ;
+Autobus.prototype.callback = function(label, body) {
+   var obj = null ;
+   var variable = null ;
+   var command = null ;
+   var id = null ;
 
-  if (label.substring(0,6)== "freed/")
-    {
+   if (label.substring(0,6)== "freed/") {
       var agentName = label.substring(6);
       obj = this.tagsonomy.getIndex(agentName)[0];
       if (obj && obj.there()) obj.forget();
       return;
-    }
+   }
 
-  if (label.substring(0,8)== "control/")
-    {
+   if (label.substring(0,8)== "control/") {
       var slashIdx = label.indexOf("/",8);
       var slash2Idx = label.indexOf("/", slashIdx+1);
       var agentName = label.substring(8, slashIdx);
@@ -35,8 +35,9 @@ Autobus.prototype.messageCB = function(label, body) {
         command = label.substring(slashIdx + 1);
       }
 
-      obj = this.tagsonomy.getIndex(agentName);
-      if (obj && obj.here()) {
+      for (var lst = this.tagsonomy.getIndex(agentName), l = lst.length, i = 0; i < l; i++) {
+        var obj = lst[i];
+        if (!obj.here()) continue;
         if (command == "set") {
            obj.set(parameter, eval("(" + body + ")"));
         } else {
@@ -45,8 +46,7 @@ Autobus.prototype.messageCB = function(label, body) {
       }
 
    } else if (label.substring(0,6) == "model/") {
-
-      var slashIdx = label.indexOf("/",6);
+      var slashIdx = label.indexOf("/", 6);
       var agentName = label.substring(6, slashIdx);
       var slot = label.substring(slashIdx + 1);
       
@@ -59,11 +59,21 @@ Autobus.prototype.messageCB = function(label, body) {
       if (obj.there()) {
          obj.setted(slot, eval("(" + body + ")"));
       } 
+
+   } else if (label.substring(0,7) == "status/") {
+      var agentName = label.substring(7);
+  
+      for (var lst = this.tagsonomy.getIndex(agentName), l = lst.length, i = 0; i < l; i++) {
+        var obj = lst[i];
+        if (!obj.here()) continue;
+        obj.status();
+      } 
    }
 }
 
 Autobus.prototype.init = function() {
   var a = this;
-  this.hbc.receiveCB = function(l,b) { return a.messageCB(l,b); };
+  this.hbc.receiveCB = function(l,b) { return a.callback(l,b); };
   this.hbc.init();
+  this.hbc.send("status/here", "");
 }

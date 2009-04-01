@@ -11,7 +11,9 @@ function BusAgent(autobus, name, here) {
   this.autobus = autobus;
   this.name = name;
   this.location = (here === undefined ? BusAgent.prototype.there : here);
-  this.autobus.tagsonomy.push("agents", this);
+  this.autobus.tagsonomy.push("agent", this);
+  if (this.here())
+    this.autobus.tagsonomy.push("here", this);
   this.autobus.tagsonomy.push(name, this);
 };
 
@@ -20,6 +22,8 @@ BusAgent.prototype.constructor = BusAgent;
 BusAgent.prototype.here = 1;
 BusAgent.prototype.there = 2;
 BusAgent.prototype.both = 3;
+
+PubSubAgent.prototype.privates = { privates: true, cbList: true, autobus: true, name: true, location: true, both: true } ;
 
 BusAgent.prototype.here = function() {
    return this.location !== BusAgent.prototype.there;
@@ -96,6 +100,25 @@ BusAgent.prototype.forget = function() {
    this.setted("name", undefined);
    this.unsubscribe();
 }
+
+BusAgent.prototype.status = function() {
+
+  if (this.here()) {
+    var pic = {};  
+    for (p in this) {
+      if (typeof this[p] == "function") continue;
+      if (this.privates[p]) continue;
+      pic[p] = this[p];
+      this.autobus.hbc.send("model/" + this.name + "/" + p, jsonize(pic[p]));
+    }
+    return pic;
+
+  } else {
+    this.autobus.hbc.send("control/" + this.name + "/status", jsonize(value));
+    return null;
+  }
+}
+
 
 function busAgentUUID(prefix) {
   return prefix + Math.random().toString().substring(2);

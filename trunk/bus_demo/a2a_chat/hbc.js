@@ -22,7 +22,10 @@ function Hbc() {
   // default client ID
   this.clientId = "top";
   this.token = String(Number(new Date()) % (Math.random() * 0xAFF00000)).substr(0,9);
+  Hbc.prototype.singleton = this;
 }
+
+Hbc.prototype.singleton = null;
 
 // bus message sending section
 // =========================================================================
