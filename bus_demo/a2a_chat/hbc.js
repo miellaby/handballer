@@ -34,6 +34,7 @@ Hbc.prototype.singleton = null;
 Hbc.prototype.sendOne = function(label, body) {
   this.isSending=true;
 
+  if (this.logCB) this.logCB("sending " + label + ": " + body);
   this.sendXhr.open("POST", this.baseURL + label, true);
   var hbc = this;
   this.sendXhr.onreadystatechange = function() {
@@ -55,7 +56,6 @@ Hbc.prototype.sendNext = function() {
 
 // public function to send a message on the bus
 Hbc.prototype.send = function(label, body) {
-  if (this.logCB) this.logCB("sending " + label + ": " + body);
   this.sendFifo.push([label, body]);
   if (this.isSending) return;
   this.sendNext();
@@ -73,10 +73,10 @@ Hbc.prototype.poll = function() {
    while (true) { // received message parsing loop
       var labelEnd = r.indexOf("\x00", this.pollIdx);
       if (labelEnd == -1) break;
-      var bodyEnd = r.indexOf("\x00", labelEnd+1);
+      var bodyEnd = r.indexOf("\x00", labelEnd + 1);
       if (bodyEnd == -1) break;
       var label = r.substring(this.pollIdx, labelEnd);
-      var body = r.substring(labelEnd+1, bodyEnd);
+      var body = r.substring(labelEnd + 1, bodyEnd);
       try {
          if (this.logCB) this.logCB("receiving " + label + ": " + body);
          this.receiveCB(label, body);
@@ -88,6 +88,11 @@ Hbc.prototype.poll = function() {
 
    if (this.receiveXHR.readyState == 4) {
         // if connexion is stopped, let's relaunch it
+         if (this.logCB) {
+           var junk = r.substr(this.pollIdx);
+           if (junk) this.logCB("unparsed junk: " + junk);
+        }
+
         this.receiveXHR.abort();
         this.openXHR();
    } else {
@@ -155,6 +160,11 @@ Hbc.prototype.init = function() {
   if (!this.receiveXHR.multipart) {
      var self = this;
      // no multipart support ==> polling
-     this.pollInterval = setInterval(function(){self.poll()}, this.pollPeriod);
+     this.pollInterval = setInterval(function() {
+        try{
+          self.poll();
+        } catch(e) {
+         if (self.logCB) self.logCB("error in poll: " + e.message + " [" + e.name + "]");
+        }}, this.pollPeriod);
   }
 }
