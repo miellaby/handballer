@@ -39,7 +39,10 @@ Autobus.prototype.callback = function(label, body) {
         var obj = lst[i];
         if (!obj.here()) continue;
         if (command == "set") {
-           obj.set(parameter, eval("(" + body + ")"));
+           if (parameter)
+             obj.set(parameter, eval("(" + body + ")"));
+           else
+             obj.sets(eval("(" + body + ")"));
         } else {
            obj.get(command).apply(this, eval("[" + body + "]"));
         }
@@ -47,8 +50,9 @@ Autobus.prototype.callback = function(label, body) {
 
    } else if (label.substring(0,6) == "model/") {
       var slashIdx = label.indexOf("/", 6);
-      var agentName = label.substring(6, slashIdx);
-      var slot = label.substring(slashIdx + 1);
+ 
+      var agentName = slashIdx != -1 ? label.substring(6, slashIdx) : label.substring(6);
+      var slot = slashIdx != -1 ? label.substring(slashIdx + 1) : undefined;
       
       obj = this.tagsonomy.getIndex(agentName)[0];
 
@@ -57,7 +61,10 @@ Autobus.prototype.callback = function(label, body) {
       }
  
       if (obj.there()) {
-         obj.setted(slot, eval("(" + body + ")"));
+         if (slot)
+           obj.setted(slot, eval("(" + body + ")"));
+         else
+           obj.setteds(eval("(" + body + ")"));
       } 
 
    } else if (label.substring(0,7) == "status/") {

@@ -7,14 +7,12 @@
 
 function BusAgent(autobus, name, here) {
   (name.length > 0);
-  PubSubAgent.call(this);
   this.autobus = autobus;
-  this.name = name;
+  PubSubAgent.call(this, autobus.tagsonomy);
   this.location = (here === undefined ? BusAgent.prototype.there : here);
-  this.autobus.tagsonomy.push("agent", this);
+  this.setted("name", name);
   if (this.here())
-    this.autobus.tagsonomy.push("here", this);
-  this.autobus.tagsonomy.push(name, this);
+    this.tagsonomy.push("here", this);
 };
 
 BusAgent.prototype = new PubSubAgent();
@@ -23,7 +21,7 @@ BusAgent.prototype.here = 1;
 BusAgent.prototype.there = 2;
 BusAgent.prototype.both = 3;
 
-PubSubAgent.prototype.privates = { privates: true, cbList: true, autobus: true, name: true, location: true, both: true } ;
+PubSubAgent.prototype.privates = { privates: true, cbList: true, tagsonomy: true, autobus: true, name: true, location: true, both: true } ;
 
 BusAgent.prototype.here = function() {
    return this.location !== BusAgent.prototype.there;
@@ -33,43 +31,52 @@ BusAgent.prototype.there = function() {
    return this.location !== BusAgent.prototype.here;
 }
 
-BusAgent.prototype.setted = function(variable, value) {
-  var oldValue = this[variable]; // to trace change in particular cases
+BusAgent.prototype.setted = function(variable, newValue) {
+  var currentValue = (this[variable] !== undefined ? this[variable] : null); 
 
-  PubSubAgent.prototype.setted.call(this, variable, value);      
+  if (newValue == currentValue)
+    return newValue;
 
-  value = this[variable]; // it may have change
+  newValue = this.set_and_fire(variable, newValue);
+  // note value may have changed
 
-  if (value == oldValue) return;
-
-  if (variable == "name") {
-       if (oldValue) this.autobus.tagsonomy.remove(oldValue, this);
-       
-       if (value)
-         this.autobus.tagsonomy.push(value, this);
-       else if (this.here() && oldValue) {
-          this.autobus.hbc.send("freed/" + oldValue);
-          return;
-       }
-
-  } else if (variable == "tags") {
-       var i, l;
-       if (!oldValue) oldValue = [];
-       for (i = 0, l = oldValue.length; i < l; i++) {
-          var v = oldValue[i];
-          if (value.indexOf(v) == -1)
-             this.autobus.tagsonomy.remove(v, this);
-       }
-       for (i = 0, l = value.length; i < l; i++) {
-          var v = value[i];
-          if (oldValue.indexOf(v) == -1)
-             this.autobus.tagsonomy.push(v, this);
-       }
+  if (this.here()) {
+    if (variable == "name") {
+      if (currentValue) {
+        if (!newValue) {
+          this.autobus.hbc.send("freed/" + currentValue);
+        } else {
+          this.autobus.hbc.send("model/" + currentValue + "/name", jsonize(newValue));
+        }
+      }
+    } else {
+      this.autobus.hbc.send("model/" + this.name + "/" + variable, jsonize(newValue));
+    }
   }
 
-  var name = (variable == "name" ? oldValue : this.name);
+  return newValue;
+}
+
+BusAgent.prototype.setteds = function(deltaObj) {
+  var name = this.name;
+
+  var deltaObj2 = {};
+  for (variable in deltaObj) {
+    var newValue = deltaObj[variable];
+    var currentValue = (this[variable] !== undefined ? this[variable] : null); 
+
+    if (newValue == currentValue) continue;
+
+    newValue = this.set_and_fire(variable, newValue);
+
+    if (newValue != currentValue)
+     deltaObj2[variable] = newValue;
+  }
+
+  if (!name) name = this.name;
+
   if (this.here() && name)
-     this.autobus.hbc.send("model/" + name + "/" + variable, jsonize(value));
+    this.autobus.hbc.send("model/" + name, jsonize(deltaObj2));
 }
 
 BusAgent.prototype.set = function(variable, value) {
@@ -77,6 +84,14 @@ BusAgent.prototype.set = function(variable, value) {
        this.setted(variable, value);
    } else {
        this.autobus.hbc.send("control/" + this.name + "/set/" + variable, jsonize(value));
+   }
+}
+
+BusAgent.prototype.sets = function(deltaObj) {
+   if (this.here()) {
+       this.setteds(deltaObj);
+   } else {
+       this.autobus.hbc.send("control/" + this.name + "/set", jsonize(deltaObj));
    }
 }
 
@@ -88,19 +103,6 @@ BusAgent.prototype.call = function(fnName) {
    }
 }
 
-BusAgent.prototype.setTags = function() {
-   this.set("tags", arguments);
-}
-
-BusAgent.prototype.forget = function() {
-   for (i = 0, l = this.tags.length; i < l; i++) {
-      this.autobus.tagsonomy.remove(this.tags[i], this);
-   }
-   this.tags=[];
-   this.setted("name", undefined);
-   this.unsubscribe();
-}
-
 BusAgent.prototype.status = function() {
 
   if (this.here()) {
@@ -109,8 +111,8 @@ BusAgent.prototype.status = function() {
       if (typeof this[p] == "function") continue;
       if (this.privates[p]) continue;
       pic[p] = this[p];
-      this.autobus.hbc.send("model/" + this.name + "/" + p, jsonize(pic[p]));
     }
+    this.autobus.hbc.send("model/" + this.name, jsonize(pic));
     return pic;
 
   } else {
@@ -118,7 +120,6 @@ BusAgent.prototype.status = function() {
     return null;
   }
 }
-
 
 function busAgentUUID(prefix) {
   return prefix + Math.random().toString().substring(2);

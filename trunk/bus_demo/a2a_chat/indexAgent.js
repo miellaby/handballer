@@ -3,7 +3,7 @@
 // =========================================================================
 
 function IndexAgent() {
-  PubSubAgent.call(this);
+  PubSubAgent.call(this, null);
   this.cbPushList = {};
   this.cbRemoveList = {};
   this.push("index", this);

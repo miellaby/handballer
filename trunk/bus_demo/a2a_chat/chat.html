@@ -27,6 +27,7 @@ You say:&nbsp;&nbsp;&nbsp;<input type="text" id="messageBody" value="Hello world
 <script type="text/javascript" src='autobus.js'></script>
 
 <script type="text/javascript">
+
 function puts(msg) {
   var t = document.getElementById("trace");
   t.innerHTML = t.innerHTML.replace(/^/, msg + "\n") ;
@@ -50,11 +51,24 @@ function log(msg) {
 function onIntendeePing(intendee, variable, value) {
     pingsLog[intendee.name] = intendee;
     log("intendee " + intendee.name + " heard at " + new Date());
+    if (me.ping < value) me.ping = value;
 }
 
 function onIntendeeNickname(intendee, variable, value) {
-    puts("intendee " + intendee.name + " is also known as " + value);
+    puts("intendee " + intendee.name + " nickname is " + value);
 }
+
+function onIntendeeIcon(intendee, variable, value) {
+    puts("intendee " + intendee.name + " icon url is " + value);
+}
+
+function onNewIntendee(tagsnomy, tag, intendee) {
+   puts("new intendee " + intendee.name);
+   intendee.subscribe("ping", onIntendeePing);
+   intendee.subscribe("nickname", onIntendeeNickname);
+   intendee.subscribe("icon", onIntendeeIcon);
+}
+
 
 function onMessageContent(message, variable, value) {
     var intendee = autobus.tagsonomy.getIndex(message.intendee)[0];
@@ -63,16 +77,16 @@ function onMessageContent(message, variable, value) {
     puts(who + " said: " + value);
 }
 
-function onNewIntendee(tagsnomy, tag, intendee) {
-   puts("new intendee " + intendee.name);
-   intendee.subscribe("ping", onIntendeePing);
-   intendee.subscribe("nickname", onIntendeeNickname);
+function onMessageTimestamp(message, variable, value) {
+    if (me.ping < value) me.ping = value;
 }
 
 var messagesQueue = [];
+
 function onNewMessage(tagsonomy, tag, message) {
    log("new message " + message.name);
    message.subscribe("content", onMessageContent);
+   message.subscribe("timestamp", onMessageTimestamp);
    messagesQueue.unshift(message);
    var removed = messagesQueue.splice(10,10);
    for (var lst = removed, l = lst.length, i = l - 1; i >= 0; i--) {
@@ -90,16 +104,19 @@ me.setTags("intendee");
 me.postMessage = function() {
   var v = document.getElementById('messageBody');
   var msg = new BusAgent(autobus, busAgentUUID("m"), BusAgent.prototype.here);
-  msg.setTags("message");
-  msg.set("intendee", me.name);
-  //msg.set("to", otherIntendee);
-  msg.set("content", v.value);
+  msg.sets({
+    tags: ["message"],
+    intendee: me.name,
+    //to: otherIntendee,
+    content: v.value,
+    timestamp: 1 + me.ping
+  });
   v.value = "";
 }
 
 me.ping = 0;
 me.doPing = function() {
-   this.set("ping", me.ping + 1);
+   this.set("ping", 1 + me.ping);
 }
 
 
