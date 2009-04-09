@@ -113,7 +113,7 @@ Hbc.prototype.openXHR = function() {
   this.receiveXHR = new XMLHttpRequest();
 
   var multipartSupport = (this.receiveXHR.multipart !== undefined);
-  multipartSupport = false;
+  //multipartSupport = false;
   if (multipartSupport) {
      // newest Gecko versions : multipart support
      this.receiveXHR.multipart = true;

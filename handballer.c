@@ -462,6 +462,8 @@ int get_message_from_box(httpd_conn* get_hc) {
       add_response_buffer(get_hc, "\r\n--") ;
       add_response_buffer(get_hc, get_hc->bus_getparam) ;
       add_response_buffer( get_hc, "\r\n" ) ;
+      if (get_hc->one_one)
+        add_response_buffer(get_hc, "\r\n") ;
     }
   else if (get_hc->bus_flags & BUS_INDEXED_MODE)
     { // INDEXED MODE : \n after message
@@ -697,6 +699,8 @@ bus( httpd_conn* hc )
                 add_response_buffer(hc, "--") ;
                 add_response_buffer(hc, hc->bus_getparam) ;
                 add_response_buffer(hc, "\r\n") ;
+                if (hc->one_one)
+                   add_response_buffer(hc, "\r\n") ;
                 free(hc->type) ;
                 hc->type = "";
               }
