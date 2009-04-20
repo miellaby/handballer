@@ -149,7 +149,7 @@ static box_t* box_find(httpd_server* hs, char* cookie, char* clientkey) {
   char *handballer_box_cookie=NULL;
   int  clientkeylen = strlen(clientkey);
   
-  TRACE(hs->logfp, "EXTRACT handballer_%.200s COOKIE IN '%.200s'", clientkey, clientcookies);
+  // TRACE(hs->logfp, "EXTRACT handballer_%.200s COOKIE IN '%.200s'", clientkey, clientcookies);
   while (clientcookies)
     {
       while (*clientcookies == ' ') clientcookies++;
@@ -167,13 +167,18 @@ static box_t* box_find(httpd_server* hs, char* cookie, char* clientkey) {
     TRACE(hs->logfp, "NO HANDBALLER COOKIE");
     return NULL;
   }
-  TRACE(hs->logfp, "LOOK FOR Box with x-ref ('%.200s','%.200s')'", clientkey, handballer_box_cookie);
+  // TRACE(hs->logfp, "LOOK FOR Box with x-ref ('%.200s','%.200s')", clientkey, handballer_box_cookie);
 
   // to be optimized through hash_table
   box_t* found = hs->box_list;
   while (found && !(found->key && found->cookie && !strcmp(found->key, clientkey) && !strcmp(found->cookie, handballer_box_cookie)))
     found = found->next;
 
+  if (found) {
+    TRACE(hs->logfp, "FOUND BOX %p with x-ref ('%.200s','%.200s')",  found, clientkey, handballer_box_cookie);
+  } else {
+    TRACE(hs->logfp, "NO BOX with x-ref ('%.200s','%.200s')", clientkey, handballer_box_cookie);
+  }
   // return a box if clientkey & cookie match
   return found;
 }
@@ -508,7 +513,7 @@ static int bus_forward_post(httpd_conn* hc, char *label, char *body, int body_le
       }
 
   if ((--m->ref_count) == 0) {
-    TRACE(hc->hs->logfp, "FREE 2 Msg %p", m);
+    TRACE(hc->hs->logfp, "FREE NOW Msg %p", m);
     msg_free( m ) ;
   }
 
