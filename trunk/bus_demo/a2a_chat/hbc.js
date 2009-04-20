@@ -38,7 +38,7 @@ Hbc.prototype.sendOne = function(label, body) {
   this.sendXhr.open("POST", this.baseURL + label, true);
   var hbc = this;
   this.sendXhr.onreadystatechange = function() {
-     if (hbc.sendXhr.readyState >= 3) {
+     if (hbc.sendXhr.readyState >= 4) {
         hbc.isSending = false;
         hbc.sendNext();
   } };
@@ -87,14 +87,15 @@ Hbc.prototype.poll = function() {
    }
 
    if (this.receiveXHR.readyState == 4) {
-        // if connexion is stopped, let's relaunch it
          if (this.logCB) {
            var junk = r.substr(this.pollIdx);
            if (junk) this.logCB("unparsed junk: " + junk);
         }
 
-        this.receiveXHR.abort();
-        this.openXHR();
+        //this.receiveXHR.abort(); // useless afak
+
+        // if connection aborted, try to relaunch it once
+        if (this.lastXHRstate >= 3) this.openXHR();
    } else {
         this.lastXHRstate = this.receiveXHR.readyState;
    }
@@ -112,9 +113,9 @@ Hbc.prototype.openXHR = function() {
   // bus message receiving dedicated XHR
   this.receiveXHR = new XMLHttpRequest();
 
-  var multipartSupport = (this.receiveXHR.multipart !== undefined);
-  //multipartSupport = false;
-  if (multipartSupport) {
+  this.multipartSupport = (this.receiveXHR.multipart !== undefined);
+  // this.multipartSupport = false; // for my test on FF3
+  if (this.multipartSupport) {
      // newest Gecko versions : multipart support
      this.receiveXHR.multipart = true;
      var hbc = this;
@@ -129,17 +130,26 @@ Hbc.prototype.openXHR = function() {
   }
 
   var url =  this.baseURL + this.pattern + "?label&timestamp=" + Number(new Date());
-  if (this.receiveXHR.multipart)
+  if (this.multipartSupport)
      url += "&push=XYZ";
   else
      url += "&null&flush&box=" + this.token + this.clientId;
 
   this.receiveXHR.open('GET', url, true);
+
+  if (!this.multipartSupport) {
+     var hbc = this;
+     this.receiveXHR.onreadystatechange = function() {
+        hbc.poll();
+     }
+  }
+
   this.receiveXHR.send(null);
 }
 
 // initialize the library
 Hbc.prototype.init = function() {
+
   if (this.pollInterval !== undefined) { // resilience to multiple init call
     clearInterval(this.pollInterval);
     this.pollInterval = undefined;
@@ -157,14 +167,16 @@ Hbc.prototype.init = function() {
   // open the receiving XHR
   this.openXHR();
   
-  if (!this.receiveXHR.multipart) {
-     var self = this;
-     // no multipart support ==> polling
-     this.pollInterval = setInterval(function() {
-        try{
-          self.poll();
-        } catch(e) {
-         if (self.logCB) self.logCB("error in poll: " + e.message + " [" + e.name + "]");
-        }}, this.pollPeriod);
+  if (0) { // no more polling since flush feature is available
+    if (!this.multipartSupport) {
+       var self = this;
+       // no multipart support ==> polling
+       this.pollInterval = setInterval(function() {
+          try{
+            self.poll();
+          } catch(e) {
+           if (self.logCB) self.logCB("error in poll: " + e.message + " [" + e.name + "]");
+          }}, this.pollPeriod);
+    }
   }
 }
