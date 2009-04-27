@@ -28,9 +28,27 @@ You say:&nbsp;&nbsp;&nbsp;<input type="text" id="messageBody" value="Hello world
 
 <script type="text/javascript">
 
+var cookies = {
+   get:  function(name) {
+      var start = document.cookie.indexOf(name + "=");
+      if (start == -1) return null;
+      var len = start + name.length + 1;
+      var end = document.cookie.indexOf(";", len);
+      if (end == -1) end = document.cookie.length;
+      return unescape(document.cookie.substring(len, end));
+   },
+   set: function(name, value, expires, path, domain, secure) {
+      document.cookie = name + "=" + escape(value) +
+          ( expires ? ";expires=" + expires.toGMTString() : "") +
+          ( path ? ";path=" + path : "") + 
+          ( domain ? ";domain=" + domain : "") +
+          ( secure ? ";secure" : "");
+   }
+};
+
 function puts(msg) {
   var t = document.getElementById("trace");
-  t.innerHTML = t.innerHTML.replace(/^/, msg + "\n") ;
+  t.innerHTML = t.innerHTML.replace(/^/, msg + "\n");
 }
 
 var autobus = new Autobus();
@@ -41,29 +59,40 @@ autobus.hbc.logCB = function(msg) {
   puts("logCB: " + msg) ;
 }
 
-var pingsLog = {};
-
 function log(msg) {
    return;
    puts(msg);
 }
 
+var pingsLog = {};
 function onIntendeePing(intendee, variable, value) {
     pingsLog[intendee.name] = intendee;
     log("intendee " + intendee.name + " heard at " + new Date());
     if (me.ping < value) me.ping = value;
 }
 
+var url_map = eval("(" + (cookies.get("a2ac_icons") || "null") + ")")
+                  || { "red": "./img/red.gif", "blue": "./img/blue.gif", "green": "./img/green.gif" };
 function onIntendeeNickname(intendee, variable, value) {
     puts("intendee " + intendee.name + " nickname is " + value);
+    if (intendee === me) {
+      var url = url_map[value] || "./img/guest.gif";
+      me.set("icon", url);
+    }
 }
 
 function onIntendeeIcon(intendee, variable, value) {
     puts("intendee " + intendee.name + " icon url is " + value);
+    if (intendee === me) {
+       url_map[intendee.nickname] = value
+       var expire = new Date();
+       expire.setTime(Date.now() + 3600 * 24 * 100)
+       cookies.set("a2ac_icons", jsonize(url_map), expire);
+    }
 }
 
 function onNewIntendee(tagsnomy, tag, intendee) {
-   puts("new intendee " + intendee.name);
+   puts("new intendee id " + intendee.name);
    intendee.subscribe("ping", onIntendeePing);
    intendee.subscribe("nickname", onIntendeeNickname);
    intendee.subscribe("icon", onIntendeeIcon);
@@ -120,26 +149,51 @@ me.doPing = function() {
 }
 
 
-var lastPingsLog = null;
+var lastPingsLog = {};
 function cleanGone() {
-   if (!lastPingsLog) { // 1st call
-      lastPingsLog = pingsLog;
-      return;
+  for (var lst = autobus.tagsonomy.getIndex("intendee"), l = lst.length, i = l - 1; i >= 0; i--) {
+     var intendee=lst[i];
+     if (intendee === me || pingsLog[intendee.name] || lastPingsLog[intendee.name])
+        continue; // intendee still here
+
+     // intendee is gone
+     puts("intendee " + intendee.name + " is gone!");
+     intendee.forget();
    }
-     
-   for (i in lastPingsLog) {
-     if (pingsLog[i]) continue; // intendee still here
-     // intendee gone
-     puts("intendee " + i + " is gone!");
-     lastPingsLog[i].forget();
-   }
-   lastPingsLog = pingsLog; 
+
+   lastPingsLog = pingsLog;
    pingsLog = {};
 }
 
 me.doPing();
 setInterval(function() { me.doPing() }, 60 * 2 * 1000 - 30 * Math.random() * 1000);
 setInterval(cleanGone, 60 * 2 * 1000);
+
+
+function autoConfig() {
+  var nick = cookies.get("a2ac_nick");
+  if (!nick) {
+    var names = [];
+    var intendees = autobus.tagsonomy.getIndex("intendee");
+    for (var l = intendees.length, i = l - 1; i >= 0; i--)
+      names.push(intendees[i].nickname);
+    
+    var lst = [ "red", "blue", "green", "purple", "orange", "pink", "gray" ];
+    for (var l = lst.length, i = l - 1; i >= 0; i--) {
+       if (names.indexOf(lst[i]) != -1) continue;
+       nick = lst[i];
+    }   
+    if (!nick) {
+      var default_prefix = "guest";
+      var i = 2;
+      while (names.indexOf(default_prefix + i) != -1) i++;
+      nick = default_prefix + i;
+    }
+  }
+  me.set("nickname", nick);
+}
+
+setTimeout(autoConfig, 3 * 1000);
 
 
 </script>
