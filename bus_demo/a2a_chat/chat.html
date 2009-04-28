@@ -76,6 +76,7 @@ var url_map = eval("(" + (cookies.get("a2ac_icons") || "null") + ")")
 function onIntendeeNickname(intendee, variable, value) {
     puts("intendee " + intendee.name + " nickname is " + value);
     if (intendee === me) {
+      cookies.set("a2ac_nick", value);
       var url = url_map[value] || "./img/guest.gif";
       me.set("icon", url);
     }
