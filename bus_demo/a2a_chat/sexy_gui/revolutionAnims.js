@@ -1,58 +1,60 @@
-function RevolutionIOAnim(list, start, howMany, in) {
+function RevolutionIOAnim(revolution, start, howMany, inout) {
     Anim.call(this);
-    this.list = list;
+    this.revolution = revolution;
     this.start = start;
     this.howMany = howMany;
-    this.in = (in === undefined ? true: in);
-    this.step = this.c0
+    this.inout = (inout === undefined ? true: inout);
+    this.ratio = this.inout ? 0 : 1;
+    this.speed = this.inout ? this.c0 : 0;
 }
 RevolutionIOAnim.prototype = new Anim();
 
 RevolutionIOAnim.prototype.iterate = function() {
-    this.step = this.step * this.c1;
-    var step = this.step;
-    if (!this.in) step *= -1;
     var done = true;
-    for (var lst = this.list.items, i = this.start, n = this.start + this.howMany ; i < n; i++) {
+    this.ratio += this.speed;
+    if (this.ratio < 0)
+        this.ratio = 0;
+    else if (this.ratio > 1)
+        this.ratio = 1;
+    else
+        done = false;
+
+    this.speed -= this.c1;
+    if (this.inout && this.speed < this.c1) this.speed = this.c1;
+    for (var lst = this.revolution.items, i = this.start, n = this.start + this.howMany ; i < n; i++) {
         var elt = lst[i];
-        elt.inFactor += step;
-        if (elt.inFactor < 0)
-            elt.inFactor = 0;
-        else if (elt.inFactor > 1)
-            elt.inFactor = 1;
-        else
-            done = false;
+        elt.inFactor = this.ratio;
     }
-    return done;
+    return !done;
 };
 
 RevolutionIOAnim.prototype.onSplice = function(start, howMany /*, item, item, ... */) {
-    if (this.start >= start) this.start += Math.min(0, arguments.length - 2) - howMany;
+    if (this.start >= start) this.start += Math.max(0, arguments.length - 2) - howMany;
 }
 
 RevolutionIOAnim.prototype.onFinish = function() {
-    this.list.innerAnims.remove(this);
-    if (!this.in && this["start"] !== undefined) 
-        this.list.doRemove(this.start, this.howMany);
+    this.revolution.innerAnims.remove(this);
+    if (!this.inout && this["start"] !== undefined) 
+        this.revolution.doRemove(this.start, this.howMany);
 };
 
-RevolutionIOAnim.prototype.c0 = 2;
-RevolutionIOAnim.prototype.c1 = 1.5;
+RevolutionIOAnim.prototype.c0 = 0.189;
+RevolutionIOAnim.prototype.c1 = 0.02;
 
-function RevolutionShiftAnim(list, start, offset) {
+function RevolutionShiftAnim(revolution, start, offset) {
     Anim.call(this);
-    this.list = list;
+    this.revolution = revolution;
     this.start = start;
     this.offset = offset;
-    this.current = 0;
+    this.current = start;
     this.minStep = this.c0 * Math.abs(this.offset);
 } 
 
 RevolutionShiftAnim.prototype = new Anim();
 
 RevolutionShiftAnim.prototype.iterate = function() {
-    var ratio = this.current / this.offset - 0.5;
-    var step = this.c1 * (ratio*ratio) ;
+    var ratio = 2 * (this.current - this.start) / (this.offset - this.start) - 1;
+    var step = this.c1 * (1 - ratio*ratio) ;
     if (step < this.minStep)
         step = this.minStep;
     var delta = this.offset < 0 ? -step : step;
@@ -64,24 +66,24 @@ RevolutionShiftAnim.prototype.iterate = function() {
         done = true;
     }
     
-    var i = this.start, n = this.list.items.length;
+    var i = this.start, n = this.revolution.items.length;
     while (i < n) {
-        this.list[i].pos += delta;
+        this.revolution.items[i].pos += delta;
         i++;
     }
     
     this.current += delta;
 
-    return done;
+    return !done;
 };
 
 RevolutionShiftAnim.prototype.onSplice = function(start, howMany /*, item, item, ... */) {
-    if (this.start >= start) this.start += Math.min(0, arguments.length - 2) - howMany;
+    if (this.start >= start) this.start += Math.max(0, arguments.length - 2) - howMany;
 }
 
 RevolutionShiftAnim.prototype.onFinish = function() {
-    this.list.innerAnims.remove(this);
+    this.revolution.innerAnims.remove(this);
 }
 
-RevolutionShiftAnim.prototype.c0 = 0.05;
-RevolutionShiftAnim.prototype.c1 = 10;
+RevolutionShiftAnim.prototype.c0 = 0.03;
+RevolutionShiftAnim.prototype.c1 = 20;
