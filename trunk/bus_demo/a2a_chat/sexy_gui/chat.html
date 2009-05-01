@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+   <HEAD>
+      <META http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <TITLE>A2A Chat!</TITLE>
+      <SCRIPT type="text/javascript" src="../myPrototype.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="../jsonize.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="animator.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="anim.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="cell.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="revolutionAnims.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="revolution.js"></SCRIPT>
+      <SCRIPT type="text/javascript">
+//<!--
+if (typeof console != "object") var console = { log: function() {} };
+
+function a2ac_init() {
+   var i = 0;
+   var intendeeCells = ImgDescCell.extract("ipic", "idesc", 10);
+   var revolution = new Revolution();
+   revolution.init(intendeeCells, 140);
+   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue" }, { img: "images/red.gif", desc: "red" + (i++) });
+   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue" }, { img: "images/red.gif", desc: "red" + (i++) });
+   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue" }, { img: "images/red.gif", desc: "red" + (i++) });
+   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue" }, { img: "images/red.gif", desc: "red" + (i++) });
+   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue" }, { img: "images/red.gif", desc: "red" + (i++) });
+   setInterval(function() { revolution.splice(1, 0, { img: "images/green.gif", desc: "green" + (i++) });}, 3000);
+   setInterval(function() { revolution.splice(0, 0, { img: "images/red.gif", desc: "red" + (i++) });}, 2000);
+   setInterval(function() { revolution.splice(2, 0, { img: "images/blue.gif", desc: "blue" + (i++) });}, 7000);
+   setInterval(function() { revolution.splice(1, 1);}, 2000);
+
+   document.getElementById("intendeesBack").onmousedown = function() { revolution.friction = 50; revolution.resume(); };
+   document.getElementById("intendeesBack").onmouseup = function() { revolution.friction = null; };
+   document.getElementById("intendeesForward").onmousedown = function() { revolution.friction = -50; revolution.resume(); };
+   document.getElementById("intendeesForward").onmouseup = function() { revolution.friction = null; };
+}
+//-->
+     </SCRIPT>
+      <STYLE type="text/css">
+body {
+   background-color: #000;
+}
+
+#intendeesBack {
+  background-color: #FFF;
+  position: absolute;
+  left: 0%;
+  top: 0%;
+  width: 9%;
+  height: 200px;
+  overflow: hidden;
+}
+
+#intendeesArea {
+  background-color: #FFF;
+  position: absolute;
+  left: 10%;
+  top: 0%;
+  width: 80%;
+  height: 200px;
+  overflow: hidden;
+}
+
+#intendeesForward {
+  background-color: #FFF;
+  position: absolute;
+  right: 0%;
+  top: 0%;
+  width: 9%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.intendeePic {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 90px;
+  height: 140px;
+}
+
+.intendeePicOver {
+  position: absolute;
+  width: 90px;
+  height: 140px;
+}
+
+.intendeeDesc {
+  position: absolute;
+  text-align: center;
+  overflow: hidden;
+  left: 0px;
+  top: 0px;
+  width: 90px;
+  height: 30px;
+  line-height:1.5em;
+  font-family:'Bitstream Vera Sans','sans';
+  font-size:13px;
+}
+
+      </STYLE>
+
+   </HEAD>
+   <BODY onload="a2ac_init();">
+<div id="intendeesBack"></div>
+<div id="intendeesForward"></div>
+<div id="intendeesArea">
+  <img id="ipic0" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc0" class="intendeeDesc"></p>
+  <img id="ipic1" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc1" class="intendeeDesc"></p>
+  <img id="ipic2" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc2" class="intendeeDesc"></p>
+  <img id="ipic3" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc3" class="intendeeDesc"></p>
+  <img id="ipic4" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc4" class="intendeeDesc"></p>
+  <img id="ipic5" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc5" class="intendeeDesc"></p>
+  <img id="ipic6" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc6" class="intendeeDesc"></p>
+  <img id="ipic7" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc7" class="intendeeDesc"></p>
+  <img id="ipic8" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc8" class="intendeeDesc"></p>
+  <img id="ipic9" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc9" class="intendeeDesc"></p>
+</div>
+
+   </BODY>
+</HTML>

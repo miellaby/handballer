@@ -26,6 +26,8 @@ function Hbc() {
 }
 
 Hbc.prototype.singleton = null;
+Hbc.prototype.logCB = null;
+
 
 // bus message sending section
 // =========================================================================
