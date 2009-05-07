@@ -33,12 +33,13 @@ ImgDescCell.prototype.show = function(item) {
 ImgDescCell.prototype.setCoords = function(inFactor, x) {
     // .log("inFactor " + inFactor + "; x " + x);
     this.img.style.top = ((inFactor - 1.0) * this.height) + "px";
-    this.img.style.left = x + "px";
+    this.img.style.left = (x * this.itemOffset) + "px";
     this.desc.style.top = (inFactor * this.height) + "px";
-    this.desc.style.left = x + "px";
+    this.desc.style.left = (x * this.itemOffset) + "px";
 };
 
 ImgDescCell.prototype.height = 140;
+ImgDescCell.prototype.itemOffset = 90;
 ImgDescCell.prototype.defaultImg = "./images/blank.gif";
 ImgDescCell.prototype.defaultDesc = "";
 

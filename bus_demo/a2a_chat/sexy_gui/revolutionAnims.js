@@ -46,14 +46,14 @@ function RevolutionShiftAnim(revolution, start, offset) {
     this.revolution = revolution;
     this.start = start;
     this.offset = offset;
-    this.current = start;
+    this.current = 0;
     this.minStep = this.c0 * Math.abs(this.offset);
 } 
 
 RevolutionShiftAnim.prototype = new Anim();
 
 RevolutionShiftAnim.prototype.iterate = function() {
-    var ratio = 2 * (this.current - this.start) / (this.offset - this.start) - 1;
+    var ratio = 2 * this.current / this.offset - 1;
     var step = this.c1 * (1 - ratio*ratio) ;
     if (step < this.minStep)
         step = this.minStep;
@@ -86,4 +86,4 @@ RevolutionShiftAnim.prototype.onFinish = function() {
 }
 
 RevolutionShiftAnim.prototype.c0 = 0.03;
-RevolutionShiftAnim.prototype.c1 = 20;
+RevolutionShiftAnim.prototype.c1 = 0.3;
