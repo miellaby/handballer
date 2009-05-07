@@ -30,9 +30,9 @@ function a2ac_init() {
    setInterval(function() { revolution.splice(2, 0, { img: "images/blue.gif", desc: "blue" + (i++) });}, 7000);
    setInterval(function() { revolution.splice(1, 1);}, 2000);
 
-   document.getElementById("intendeesBack").onmousedown = function() { revolution.friction = 50; revolution.resume(); };
+   document.getElementById("intendeesBack").onmousedown = function() { revolution.friction = 0.5; revolution.resume(); };
    document.getElementById("intendeesBack").onmouseup = function() { revolution.friction = null; };
-   document.getElementById("intendeesForward").onmousedown = function() { revolution.friction = -50; revolution.resume(); };
+   document.getElementById("intendeesForward").onmousedown = function() { revolution.friction = -0.5; revolution.resume(); };
    document.getElementById("intendeesForward").onmouseup = function() { revolution.friction = null; };
 }
 //-->

@@ -15,14 +15,12 @@ function Revolution() {
 
 Revolution.prototype = new Anim();
 
-Revolution.prototype.init = function (disposableCells, itemOffset) {
+Revolution.prototype.init = function (disposableCells) {
 
     //Parameters
     this.items = [];
-    this.itemOffset = itemOffset;
     
     // Initial states 
-    this.lastItem = null;
     this.pool = { disposables: disposableCells, useds: []};
     this.poolSize = disposableCells.length;
     this.innerAnims = [];
@@ -39,22 +37,17 @@ Revolution.prototype.getItem = function(i) {
     return this.items[i];
 };
 
-Revolution.prototype.getMaxPos = function() {
-    return (this.lastItem != null ? this.lastItem.pos : 0) + this.itemOffset;
-};
-
 Revolution.prototype.splice = function(index, howMany) {
-    if (howMany == undefined) howMany = 0;
+    if (howMany === undefined) howMany = 0;
 
     var newItems = [];
-    var itemAtIndex = this.getItem(index);
-    var newItemPos = (itemAtIndex === undefined ? this.getMaxPos() : itemAtIndex.pos); 
+    var newItemPos = index + 1.0; 
 
     for (var lst = arguments, i = 2, n = lst.length ; i < n; i++) {
         var data = lst[i];
-        var lastNewItem = new RevolutionItem(newItemPos, 0, data);
-        newItems.push(lastNewItem);
-        newItemPos += this.itemOffset;
+        var newItem = new RevolutionItem(newItemPos, 0, data);
+        newItems.push(newItem);
+        newItemPos += 1.0;
     }
     
     // var spliceArgs = [index, howMany]; // items removal delayed after the animation
@@ -81,12 +74,10 @@ Revolution.prototype.splice = function(index, howMany) {
     }
                              
     if (index + howMany + newItems.length < this.items.length) {
-        var shiftMotion = new RevolutionShiftAnim(this, index + howMany + newItems.length, this.itemOffset * (newItems.length - howMany));
+        var shiftMotion = new RevolutionShiftAnim(this, index + howMany + newItems.length, (newItems.length - howMany));
         this.innerAnims.push(shiftMotion);
         shiftMotion.resume();
     };
-
-    this.lastItem = this.items.length ? this.items[this.items.length -1] : null;
 
     this.resume();
 };
@@ -99,47 +90,44 @@ Revolution.prototype.doRemove = function(index, howMany) {
     }
 
     this.items.splice(index, howMany);
-    this.lastItem = this.items.length ? this.items[this.items.length -1] : null;
 }
 
 
 Revolution.prototype.isMoving = function() {
-    return this.innerAnims.length > 0 || this.friction || Math.abs(this.speed) > 0.3 || Math.abs(this.localOffset) > 1;
+    return this.innerAnims.length > 0 || this.friction || Math.abs(this.speed) > 0.006 || Math.abs(this.localOffset) > 0.005;
 };
 
 Revolution.prototype.computeSpeed = function() {
 
     if (this.friction != null) { // external friction
-        this.speed = (this.friction + 3 * this.speed) / 4;
-        this.speed = Math.max(this.speed, -0.66 * this.itemOffset);
-        this.speed = Math.min(this.speed, 0.66 * this.itemOffset);
+        this.speed = (this.friction + 6.0 * this.speed) / 7.0;
+        this.speed = Math.max(this.speed, -0.2);
+        this.speed = Math.min(this.speed, 0.2);
 
     } else { // no external friction
 
-        if (Math.abs(this.speed) > this.itemOffset * 0.1)
+        if (Math.abs(this.speed) > 0.05)
             this.speed *= 0.9; // slowing down
 
         else { // notch motion
 
-            this.speed = this.localOffset > 0
-                ? Math.min(-this.localOffset * 0.2, -0.2) 
-                : Math.max(-this.localOffset * 0.2, 0.2); 
+            this.speed = this.localOffset * -0.04;
         }
     }
 };
 
 Revolution.prototype.iterate = function() {
-    var localOffset = this.pos % this.itemOffset;
-    localOffset = (localOffset < this.itemOffset / 2 
+    var localOffset = this.pos % 1.0;
+    localOffset = (localOffset < 0.5 
                    ? localOffset
-                   : localOffset -this.itemOffset);
+                   : localOffset - 1.0);
     this.localOffset = localOffset;
 
     this.computeSpeed();
     
     // apply speed
     var pos = this.pos + this.speed;
-    var max = Math.max(this.getMaxPos(), this.poolSize * this.itemOffset);
+    var max = Math.max(this.items.length + 1.0, this.poolSize) + 1;
     this.pos = pos < 0 ? max - (pos % max) : pos % max;
     this.redraw();
 
@@ -147,13 +135,13 @@ Revolution.prototype.iterate = function() {
 };
 
 Revolution.prototype.redraw = function() {
-    var max =  this.getMaxPos();
+    var max =  this.items.length + 1.0;
     var pos = this.pos;
-    var localOffset = pos % this.itemOffset;
+    var localOffset = pos % 1.0;
     var nbItem = this.items.length;
     var padding = Math.max(nbItem, this.poolSize);
 
-    var n = parseInt(pos / this.itemOffset) % padding;
+    var n = parseInt(pos) % padding;
 	 
     // free freedable sharables
     if (this.n !== undefined) {
@@ -199,7 +187,7 @@ Revolution.prototype.redraw = function() {
             cell.hide();
 
         if (j < nbItem) {
-            cell.setCoords(this.items[j].inFactor, (max + (this.items[j].pos - pos)) % max - this.itemOffset);
+            cell.setCoords(this.items[j].inFactor, (max + (this.items[j].pos - pos)) % max - 1.0);
         }
     }
 };
