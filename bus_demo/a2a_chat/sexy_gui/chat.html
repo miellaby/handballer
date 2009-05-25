@@ -17,22 +17,26 @@ if (typeof console != "object") var console = { log: function() {} };
 
 function a2ac_init() {
    var i = 0;
-   var intendeeCells = ImgDescCell.extract("ipic", "idesc", 10);
+   var intendeeCells = ImgDescCell.extract("ipic", "idesc", 12);
    var revolution = new Revolution();
-   revolution.init(intendeeCells, 140);
-   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue" }, { img: "images/red.gif", desc: "red" + (i++) });
-   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue" }, { img: "images/red.gif", desc: "red" + (i++) });
-   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue" }, { img: "images/red.gif", desc: "red" + (i++) });
-   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue" }, { img: "images/red.gif", desc: "red" + (i++) });
-   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue" }, { img: "images/red.gif", desc: "red" + (i++) });
+   revolution.init(intendeeCells);
+   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) });
+   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) });
+//   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) });
+//   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) });
+//   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) });
+//   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) });
+//   setTimeout(function() { revolution.splice(1, 0, { img: "images/green.gif", desc: "green" + (i++) });
+//          console.trace(revolution.items.jsonize());
+//     }, 3000);
    setInterval(function() { revolution.splice(1, 0, { img: "images/green.gif", desc: "green" + (i++) });}, 3000);
-   setInterval(function() { revolution.splice(0, 0, { img: "images/red.gif", desc: "red" + (i++) });}, 2000);
-   setInterval(function() { revolution.splice(2, 0, { img: "images/blue.gif", desc: "blue" + (i++) });}, 7000);
-   setInterval(function() { revolution.splice(1, 1);}, 2000);
+   //setInterval(function() { revolution.splice(0, 0, { img: "images/red.gif", desc: "red" + (i++) });}, 2000);
+   setInterval(function() { revolution.splice(2, 0, { img: "images/blue.gif", desc: "blue" + (i++) });}, 4000);
+   setInterval(function() { revolution.splice(1, 1);}, 5000);
 
-   document.getElementById("intendeesBack").onmousedown = function() { revolution.friction = 0.5; revolution.resume(); };
+   document.getElementById("intendeesBack").onmousedown = function() { revolution.friction = 1; revolution.resume(); };
    document.getElementById("intendeesBack").onmouseup = function() { revolution.friction = null; };
-   document.getElementById("intendeesForward").onmousedown = function() { revolution.friction = -0.5; revolution.resume(); };
+   document.getElementById("intendeesForward").onmousedown = function() { revolution.friction = -1; revolution.resume(); };
    document.getElementById("intendeesForward").onmouseup = function() { revolution.friction = null; };
 }
 //-->
@@ -126,6 +130,12 @@ body {
   <p id="idesc8" class="intendeeDesc"></p>
   <img id="ipic9" src="images/empty.gif" class="intendeePic"/>
   <p id="idesc9" class="intendeeDesc"></p>
+  <img id="ipic10" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc10" class="intendeeDesc"></p>
+  <img id="ipic11" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc11" class="intendeeDesc"></p>
+  <img id="ipic12" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc12" class="intendeeDesc"></p>
 </div>
 
    </BODY>

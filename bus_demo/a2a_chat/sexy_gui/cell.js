@@ -31,15 +31,16 @@ ImgDescCell.prototype.show = function(item) {
 };
 
 ImgDescCell.prototype.setCoords = function(inFactor, x) {
-    // .log("inFactor " + inFactor + "; x " + x);
+    //console.log("inFactor " + inFactor + "; x " + x);
+
     this.img.style.top = ((inFactor - 1.0) * this.height) + "px";
-    this.img.style.left = (x * this.itemOffset) + "px";
+    this.img.style.left = ((x-1) * this.itemOffset) + "px";
     this.desc.style.top = (inFactor * this.height) + "px";
-    this.desc.style.left = (x * this.itemOffset) + "px";
+    this.desc.style.left = ((x-1) * this.itemOffset) + "px";
 };
 
 ImgDescCell.prototype.height = 140;
-ImgDescCell.prototype.itemOffset = 90;
+ImgDescCell.prototype.itemOffset = 110;
 ImgDescCell.prototype.defaultImg = "./images/blank.gif";
 ImgDescCell.prototype.defaultDesc = "";
 
