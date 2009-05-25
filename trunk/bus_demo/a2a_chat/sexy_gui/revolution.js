@@ -1,13 +1,9 @@
-function RevolutionItem(pos, inFactor, data) {
-    this.pos = pos;
+function RevolutionItem(pos, inFactor) {
+    this.revolutionPos = pos;
     this.inFactor = inFactor;
-    this.data = data;
+    this.cell = null;
 }
 
-RevolutionItem.prototype.onclick = function() {
-    if (typeof this.data == "Object" && this.data["onclick"])
-        this.data.onclick();
-}
 
 function Revolution() {
   Anim.call(this);
@@ -15,19 +11,22 @@ function Revolution() {
 
 Revolution.prototype = new Anim();
 
-Revolution.prototype.init = function (disposableCells) {
+Revolution.prototype.init = function (cellPool) {
 
     //Parameters
-    this.items = [];
-    
+    this.items = []; // data model = list
+    this.leavings = [] ; // transitional list of "leaving" (i.e. displayed as being removed) items
     // Initial states 
-    this.pool = { disposables: disposableCells, useds: []};
-    this.poolSize = disposableCells.length;
-    this.innerAnims = [];
+    this.generation = false; // swapping boolean to detect recyclable cells between 2 successive frames
+    this.pool= cellPool; // pool of cells
+    this.poolSize = cellPool.length;
+    this.visibleCells = [];
+    this.innerAnims = []; // list of motions within this UI 
     this.friction=0;
     this.pos = 0;
     this.speed = 0;
     this.n = undefined;
+    this.nbItem = undefined;
     this.localOffset = 0;
 
     this.iterate();
@@ -39,58 +38,54 @@ Revolution.prototype.getItem = function(i) {
 
 Revolution.prototype.splice = function(index, howMany) {
     if (howMany === undefined) howMany = 0;
-
     var newItems = [];
-    var newItemPos = index + 1.0; 
+    var newItemPos = index; 
 
-    for (var lst = arguments, i = 2, n = lst.length ; i < n; i++) {
-        var data = lst[i];
-        var newItem = new RevolutionItem(newItemPos, 0, data);
+    for (var l = arguments, i = 2 /* jump over 2 first args */, n = l.length; i < n; ++i) {
+        var newItem = l[i];
+        RevolutionItem.call(newItem, newItemPos, 0);
         newItems.push(newItem);
         newItemPos += 1.0;
     }
     
-    // var spliceArgs = [index, howMany]; // items removal delayed after the animation
-    var spliceArgs = [index + howMany, 0];
-    var spliceArgs = spliceArgs.concat(newItems);
-    for (var lst = this.innerAnims, i = 0, n = lst.length ; i < n; i++) {
-        var elt = lst[i];
-        if (elt["onSplice"])
-            elt.onSplice.apply(elt, spliceArgs);
+    var spliceArgs = [index, howMany];
+    if (newItems.length)
+        spliceArgs.push.apply(spliceArgs, newItems);
+
+    for (var l = this.innerAnims, i = 0, n = l.length; i < n; ++i) {
+        var anim = l[i];
+        if (anim["onSplice"])
+            anim.onSplice.apply(anim, spliceArgs);
     }
 
-    this.items.splice.apply(this.items, spliceArgs);
-    
+    var outs = this.items.splice.apply(this.items, spliceArgs);
+
     if (newItems.length) {
-        var inMotion = new RevolutionIOAnim(this, index + howMany, newItems.length, true);
-        this.innerAnims.push(inMotion);
-        inMotion.resume();
+        var inAnim = new RevolutionInAnim(this, index, newItems.length);
+        this.innerAnims.push(inAnim);
+        inAnim.resume();
     }
 
-    if (howMany) {
-        var outMotion = new RevolutionIOAnim(this, index, howMany, false);
-        this.innerAnims.push(outMotion);
-        outMotion.resume();
+    if (outs.length) {
+        //console.log("outs " + outs.length);
+        this.leavings.push.apply(this.leavings, outs);
+
+        var outAnim = new RevolutionOutAnim(this, index, outs);
+        this.innerAnims.push(outAnim);
+        outAnim.resume();
     }
                              
-    if (index + howMany + newItems.length < this.items.length) {
-        var shiftMotion = new RevolutionShiftAnim(this, index + howMany + newItems.length, (newItems.length - howMany));
-        this.innerAnims.push(shiftMotion);
-        shiftMotion.resume();
+    if (newItems.length != howMany && index + newItems.length < this.items.length) {
+        var shiftAnim = new RevolutionShiftAnim(this,
+                                                /* start */ index + newItems.length,
+                                                /* howMany */ this.items.length - index - newItems.length,
+                                                /* offset */ newItems.length - howMany);
+        this.innerAnims.push(shiftAnim);
+        shiftAnim.resume();
     };
 
     this.resume();
 };
-
-Revolution.prototype.doRemove = function(index, howMany) {
-    for (var lst = this.innerAnims, i = 0, n = lst.length ; i < n; i++) {
-        var elt = lst[i];
-        if (elt["onSplice"])
-            elt.onSplice(index, howMany);
-    }
-
-    this.items.splice(index, howMany);
-}
 
 
 Revolution.prototype.isMoving = function() {
@@ -127,7 +122,7 @@ Revolution.prototype.iterate = function() {
     
     // apply speed
     var pos = this.pos + this.speed;
-    var max = Math.max(this.items.length + 1.0, this.poolSize) + 1;
+    var max = Math.max(this.items.length + 1, this.poolSize);
     this.pos = pos < 0 ? max - (pos % max) : pos % max;
     this.redraw();
 
@@ -135,59 +130,75 @@ Revolution.prototype.iterate = function() {
 };
 
 Revolution.prototype.redraw = function() {
-    var max =  this.items.length + 1.0;
+    var nbItem = this.items.length;
+    var max = 1.0 * Math.max(nbItem + 1, this.poolSize);
+    var padding = Math.max(nbItem, this.poolSize);
     var pos = this.pos;
     var localOffset = pos % 1.0;
-    var nbItem = this.items.length;
-    var padding = Math.max(nbItem, this.poolSize);
 
     var n = parseInt(pos) % padding;
-	 
-    // free freedable sharables
-    if (this.n !== undefined) {
-        var d = (n - this.n);
-        if (d) {
-            if (d > padding / 2)
-                d -= padding;
-            else if (d < -padding / 2)
-                d += padding;
-            
-            if (d > 0) {
-                for (var i = this.n; i < this.n + Math.min(d, this.poolSize); i++) {
-                    var cell = this.pool.useds[i % padding];
-                    if (cell) {
-                        cell.hide()
-                        this.pool.useds[i % padding] = null;
-                        this.pool.disposables.push(cell);
-                    }
-                }
-            } else if (d < 0) {
-                for (var i = this.n + Math.max(0, this.poolSize + d); i < this.n + this.poolSize; i++) {
-                    var cell = this.pool.useds[i % padding];
-                    if (cell ) {
-                        cell.hide();
-                        this.pool.useds[i % padding] = null;
-                        this.pool.disposables.push(cell);
-                    }
-                }
-            }
-        }
-    }
-    this.n = n;
-    for (var i = n, end = n + this.poolSize; i < end; i++) {
-        var j = i % padding;
-        var cell = this.pool.useds[j];
-        if (!cell) {
-            cell = this.pool.useds[j] = this.pool.disposables.shift();
-        }
-        if (j < nbItem) {
-            if (cell.item !== this.items[j].data)
-                cell.show(this.items[j].data);
-        } else if (cell.item != null)
-            cell.hide();
+    this.generation ^= true;
 
-        if (j < nbItem) {
-            cell.setCoords(this.items[j].inFactor, (max + (this.items[j].pos - pos)) % max - 1.0);
+
+    //    if (this.n != n || this.nbItem != nbItem) {
+        this.n = n;
+        this.nbItem = nbItem;
+
+        var toGet = [];
+
+
+        for (var i = 0, m = this.poolSize-1; i < m; ++i) {
+            var j = (i + n) % padding;
+            if (j >= nbItem) continue;
+            var cell = this.items[j].cell;
+            if (cell != null) {
+                cell.generation = this.generation;
+            } else
+                toGet.push(this.items[j]);
+        }
+
+        for (var lst = this.visibleCells, i = 0, m = lst.length; i < m; ++i) {
+            var cell = lst[i];
+            if (cell.generation == this.generation) continue;
+            // not visible any more
+            cell.item.cell = null;
+            this.pool.push(cell);
+            cell.hide();
+            lst.splice(i--,1);
+            m--;
+        }
+
+        while (toGet.length) {
+            var item = toGet.shift();
+            var cell = this.pool.shift();
+            item.cell = cell;
+            cell.show(item);
+            this.visibleCells.push(cell);
+        }
+    //}
+
+    for (var lst = this.visibleCells, i = 0, m = lst.length; i < m; ++i) {
+        var cell = lst[i];
+        cell.generation = this.generation;
+        cell.setCoords(cell.item.inFactor, (max + (cell.item.revolutionPos - pos)) % max);
+    }
+
+    for (var lst = this.leavings, i = 0, m = lst.length; i < m; i++) {
+        var item = lst[i];
+        if (item.inFactor <= 0) {
+            if (item.cell) {
+                this.pool.push(item.cell);
+                item.cell.hide();
+                item.cell = null;
+            }
+            lst.splice(i--,1);
+            m--;
+        } else {
+            if (!item.cell) {
+                item.cell = this.pool.shift();
+                item.cell.show(item);
+            }
+            item.cell.setCoords(item.inFactor, (max + (item.revolutionPos - pos)) % max);
         }
     }
 };
