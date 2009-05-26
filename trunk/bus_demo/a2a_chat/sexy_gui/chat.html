@@ -17,22 +17,21 @@ if (typeof console != "object") var console = { log: function() {} };
 
 function a2ac_init() {
    var i = 0;
-   var intendeeCells = ImgDescCell.extract("ipic", "idesc", 12);
+   var intendeeCells = ImgDescCell.extract("ipic", "idesc", 13);
    var revolution = new Revolution();
    revolution.init(intendeeCells);
-   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) });
-   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) });
-//   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) });
-//   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) });
-//   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) });
-//   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) });
-//   setTimeout(function() { revolution.splice(1, 0, { img: "images/green.gif", desc: "green" + (i++) });
+   revolution.splice(0, 0, { img: "images/blue.png", desc: "blue"  + (i++) }, { img: "images/red.png", desc: "red" + (i++) }, { img: "images/green.png", desc: "green" + (i++) });
+   revolution.splice(0, 0, { img: "images/blue.png", desc: "blue"  + (i++) }, { img: "images/red.png", desc: "red" + (i++) }, { img: "images/green.png", desc: "green" + (i++) });
+   revolution.splice(0, 0, { img: "images/blue.png", desc: "blue"  + (i++) }, { img: "images/red.png", desc: "red" + (i++) }, { img: "images/green.png", desc: "green" + (i++) });
+   revolution.splice(0, 0, { img: "images/blue.png", desc: "blue"  + (i++) }, { img: "images/red.png", desc: "red" + (i++) }, { img: "images/green.png", desc: "green" + (i++) });
+   revolution.splice(0, 0, { img: "images/blue.png", desc: "blue"  + (i++) }, { img: "images/red.png", desc: "red" + (i++) }, { img: "images/green.png", desc: "green" + (i++) });
+//   setTimeout(function() { revolution.splice(1, 0, { img: "images/green.png", desc: "green" + (i++) });
 //          console.trace(revolution.items.jsonize());
 //     }, 3000);
-   setInterval(function() { revolution.splice(1, 0, { img: "images/green.gif", desc: "green" + (i++) });}, 3000);
-   //setInterval(function() { revolution.splice(0, 0, { img: "images/red.gif", desc: "red" + (i++) });}, 2000);
-   setInterval(function() { revolution.splice(2, 0, { img: "images/blue.gif", desc: "blue" + (i++) });}, 4000);
-   setInterval(function() { revolution.splice(1, 1);}, 5000);
+//   setInterval(function() { revolution.splice(1, 0, { img: "images/green.png", desc: "green" + (i++) });}, 3000);
+   //setInterval(function() { revolution.splice(0, 0, { img: "images/red.png", desc: "red" + (i++) });}, 2000);
+//   setInterval(function() { revolution.splice(2, 0, { img: "images/blue.png", desc: "blue" + (i++) });}, 4000);
+//   setInterval(function() { revolution.splice(1, 1);}, 5000);
 
    document.getElementById("intendeesBack").onmousedown = function() { revolution.friction = 1; revolution.resume(); };
    document.getElementById("intendeesBack").onmouseup = function() { revolution.friction = null; };
@@ -52,7 +51,7 @@ body {
   left: 0%;
   top: 0%;
   width: 9%;
-  height: 200px;
+  height: 330px;
   overflow: hidden;
 }
 
@@ -62,7 +61,7 @@ body {
   left: 10%;
   top: 0%;
   width: 80%;
-  height: 200px;
+  height: 330px;
   overflow: hidden;
 }
 
@@ -72,7 +71,7 @@ body {
   right: 0%;
   top: 0%;
   width: 9%;
-  height: 200px;
+  height: 330px;
   overflow: hidden;
 }
 
@@ -80,27 +79,28 @@ body {
   position: absolute;
   left: 0px;
   top: 0px;
-  width: 90px;
-  height: 140px;
+  width: 197px;
+  height: 267px;
 }
 
 .intendeePicOver {
   position: absolute;
-  width: 90px;
-  height: 140px;
+  width: 197px;
+  height: 267px;
 }
 
 .intendeeDesc {
+  background: white;
   position: absolute;
   text-align: center;
   overflow: hidden;
   left: 0px;
   top: 0px;
-  width: 90px;
+  width: 197px;
   height: 30px;
-  line-height:1.5em;
+!  line-height:1.5em;
   font-family:'Bitstream Vera Sans','sans';
-  font-size:13px;
+  font-size:16px;
 }
 
       </STYLE>

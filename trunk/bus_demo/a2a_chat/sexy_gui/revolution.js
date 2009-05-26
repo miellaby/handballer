@@ -106,7 +106,7 @@ Revolution.prototype.computeSpeed = function() {
 
         else { // notch motion
 
-            this.speed = this.localOffset * -0.04;
+            this.speed = ( this.pos % 1.0 ) * -0.04;
         }
     }
 };
