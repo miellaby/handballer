@@ -39,8 +39,8 @@ ImgDescCell.prototype.setCoords = function(inFactor, x) {
     this.desc.style.left = ((x-1) * this.itemOffset) + "px";
 };
 
-ImgDescCell.prototype.height = 140;
-ImgDescCell.prototype.itemOffset = 110;
+ImgDescCell.prototype.height = 270;
+ImgDescCell.prototype.itemOffset = 200;
 ImgDescCell.prototype.defaultImg = "./images/blank.gif";
 ImgDescCell.prototype.defaultDesc = "";
 
