@@ -39,7 +39,7 @@ Revolution.prototype.getItem = function(i) {
 Revolution.prototype.splice = function(index, howMany) {
     if (howMany === undefined) howMany = 0;
     var newItems = [];
-    var newItemPos = index; 
+    var newItemPos = 1.0 + index; // we add 1.0 because it will be displayed outside otherelse (because of the nice clipping)
 
     for (var l = arguments, i = 2 /* jump over 2 first args */, n = l.length; i < n; ++i) {
         var newItem = l[i];
@@ -132,7 +132,7 @@ Revolution.prototype.iterate = function() {
 Revolution.prototype.redraw = function() {
     var nbItem = this.items.length;
     var max = 1.0 * Math.max(nbItem + 1, this.poolSize);
-    var padding = Math.max(nbItem, this.poolSize);
+    var padding = Math.max(nbItem + 1, this.poolSize);
     var pos = this.pos;
     var localOffset = pos % 1.0;
 
