@@ -32,15 +32,15 @@ ImgDescCell.prototype.show = function(item) {
 
 ImgDescCell.prototype.setCoords = function(inFactor, x) {
     //console.log("inFactor " + inFactor + "; x " + x);
-
-    this.img.style.top = ((inFactor - 1.0) * this.height) + "px";
-    this.img.style.left = ((x-1) * this.itemOffset) + "px";
-    this.desc.style.top = (inFactor * this.height) + "px";
-    this.desc.style.left = ((x-1) * this.itemOffset) + "px";
+    var offset = (this.itemOffset ? this.itemOffset : this.img.width + 10), height = (this.height ? this.height : this.img.height);
+    this.img.style.top = ((inFactor - 1.0) * height) + "px";
+    this.img.style.left = ((x-1) * offset) + "px";
+    this.desc.style.top = (inFactor * height) + "px";
+    this.desc.style.left = ((x-1) * offset) + "px";
 };
 
-ImgDescCell.prototype.height = 270;
-ImgDescCell.prototype.itemOffset = 200;
+ImgDescCell.prototype.height = null;
+ImgDescCell.prototype.itemOffset = null;
 ImgDescCell.prototype.defaultImg = "./images/blank.gif";
 ImgDescCell.prototype.defaultDesc = "";
 

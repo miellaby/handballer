@@ -1,6 +1,6 @@
 function Animator(freq) {
     this.anims = [];
-    this.freq = freq || 10;
+    this.freq = freq || 14;
     this.interval = null;
     this.TraceDiv = null;
     this.TT = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
