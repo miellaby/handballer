@@ -11,13 +11,18 @@
       <SCRIPT type="text/javascript" src="cell.js"></SCRIPT>
       <SCRIPT type="text/javascript" src="revolutionAnims.js"></SCRIPT>
       <SCRIPT type="text/javascript" src="revolution.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="a2ac_ui.js"></SCRIPT>
       <SCRIPT type="text/javascript">
 //<!--
 if (typeof console != "object") var console = { log: function() {} };
 
+var intendeeCells;
+var msgCells;
+
 function a2ac_init() {
+   intendeeCells = IntendeeCell.prototype.extract("ipic", "idesc", 13);
+   msgCells = MessageCell.prototype.extract("mpic", "mdesc", 13);
    var i = 0;
-   var intendeeCells = ImgDescCell.extract("ipic", "idesc", 13);
    var revolution = new Revolution();
    revolution.init(intendeeCells);
    revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) }, { img: "images/green.gif", desc: "green" + (i++) });
@@ -28,10 +33,15 @@ function a2ac_init() {
 //   setTimeout(function() { revolution.splice(1, 0, { img: "images/green.gif", desc: "green" + (i++) });
 //          console.trace(revolution.items.jsonize());
 //     }, 3000);
-//   setInterval(function() { revolution.splice(1, 0, { img: "images/green.gif", desc: "green" + (i++) });}, 3000);
-   //setInterval(function() { revolution.splice(0, 0, { img: "images/red.gif", desc: "red" + (i++) });}, 2000);
-//   setInterval(function() { revolution.splice(2, 0, { img: "images/blue.gif", desc: "blue" + (i++) });}, 4000);
-//   setInterval(function() { revolution.splice(1, 1);}, 5000);
+   setInterval(function() { revolution.splice(1, 0, { img: "images/green.gif", desc: "green" + (i++) });}, 3000);
+   setInterval(function() { revolution.splice(0, 0, { img: "images/red.gif", desc: "red" + (i++) });}, 2000);
+   setInterval(function() { revolution.splice(2, 0, { img: "images/blue.gif", desc: "blue" + (i++) });}, 4000);
+   setInterval(function() { revolution.splice(1, 1);}, 5000);
+
+   var revolMsg = new Revolution();
+   revolMsg.init(msgCells);
+   revolMsg.push({ img: "images/blue.gif", desc: "hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello " });
+   setInterval(function() { revolMsg.unshift({ img: "images/green.gif", desc: "green hello" + (i++) });}, 3000);
 
    document.getElementById("intendeesBack").onmousedown = function() { revolution.friction = 1; revolution.resume(); };
    document.getElementById("intendeesBack").onmouseup = function() { revolution.friction = null; };
@@ -42,7 +52,7 @@ function a2ac_init() {
      </SCRIPT>
       <STYLE type="text/css">
 body {margin: 0px; padding: 0px;} 
-body {background-color: #000;}
+body {background-color: transparent;}
 
 #intendeesBack {
   background-color: transparent;
@@ -55,15 +65,15 @@ body {background-color: #000;}
 }
 
 #intendeesArea {
-!  background-color: #FFF;
+/*  background-color: #FFF; */
   background-color: transparent;
   position: absolute;
-!  left: 0%;
-!  top: 0%;
+/*  left: 0%; */
+/*  top: 0%; */
   width: 100%;
   height: 200px;
   overflow: hidden;
-! display:block;
+/* display:block; */
  z-index:10;
 }
 
@@ -79,8 +89,8 @@ body {background-color: #000;}
 
 .intendeePic {
   position: absolute;
-  left: 0px;
-  top: 0px;
+/*  left: 0px; */
+/*  top: 0px; */
   width: 99px;
   height: 133px;
 }
@@ -92,41 +102,65 @@ body {background-color: #000;}
 }
 
 .intendeeDesc {
-!  background: white;
-   background: transparent;
+/* background: white; */
+  background: transparent;
   position: absolute;
   text-align: center;
   overflow: hidden;
-  left: 0px;
-  top: 0px;
+/*  left: 0px; */
+/*  top: 0px; */
   width: 99px;
   height: 30px;
-!  line-height:1.5em;
+/*  line-height:1.5em; */
   font-family:'Bitstream Vera Sans','sans';
   font-size:16px;
+  margin: 0;
 }
 
 #msgsArea {
-  background-color: #EEE;
+/* background-color: #EEE; */
   position: absolute;
-!  top: 200px;
-  top: 0px;
-  width: 100%;
-  height: 100%;
+/*  top: 200px; */
+  bottom: 0px;
+  top: 1%;
+  left: 1%;
+  width: 98%;
+  height: 98%;
   overflow: hidden;
+/* padding:1%; */
+}
+
+
+.msgPic {
+  position: absolute;
+  background-color: white;
+/*  width: 25px; */
+  height: 30px;
+}
+
+.msgPicOver {
+  position: absolute;
+  background-color: white;
+/*  width: 25px; */
+  height: 30px;
 }
 
 
 .msgDesc {
-  background: white;
-  text-align: left;
-  left: 0px;
-  top: 0px;
-  padding:1%;
-  width: 99%;
-  height: 30px;
+  position: absolute;
+  background-color: white;
+  color: black;
+/*  text-align: left; */
+  left: 30px;
+  /*width: 90%; */
+  right: 0px;
+  line-height: 30px;
+  height: 30px ;
   font-family:'Bitstream Vera Sans','sans';
   font-size:18px;
+  padding:0%;
+  overflow: auto;
+  margin:0;
 }
 
       </STYLE>
@@ -165,32 +199,32 @@ body {background-color: #000;}
 </div>
 </div>
 <div id="msgsArea">
-  <img id="mpic0" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc0" class="msgDesc"></p>
-  <img id="mpic1" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc1" class="msgDesc"></p>
-  <img id="mpic2" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc2" class="msgDesc"></p>
-  <img id="mpic3" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc3" class="msgDesc"></p>
-  <img id="mpic4" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc4" class="msgDesc"></p>
-  <img id="mpic5" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc5" class="msgDesc"></p>
-  <img id="mpic6" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc6" class="msgDesc"></p>
-  <img id="mpic7" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc7" class="msgDesc"></p>
-  <img id="mpic8" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc8" class="msgDesc"></p>
-  <img id="mpic9" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc9" class="msgDesc"></p>
-  <img id="mpic10" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc10" class="msgDesc"></p>
-  <img id="mpic11" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc11" class="msgDesc"></p>
-  <img id="mpic12" src="images/empty.gif" class="msgPic"/>
-  <p id="mdesc12" class="msgDesc">coucou</p>
+    <img id="mpic0" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc0" class="msgDesc"></p>
+    <img id="mpic1" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc1" class="msgDesc"></p>
+    <img id="mpic2" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc2" class="msgDesc"></p>
+    <img id="mpic3" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc3" class="msgDesc"></p>
+    <img id="mpic4" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc4" class="msgDesc"></p>
+    <img id="mpic5" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc5" class="msgDesc"></p>
+    <img id="mpic6" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc6" class="msgDesc"></p>
+    <img id="mpic7" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc7" class="msgDesc"></p>
+    <img id="mpic8" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc8" class="msgDesc"></p>
+    <img id="mpic9" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc9" class="msgDesc"></p>
+    <img id="mpic10" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc10" class="msgDesc"></p>
+    <img id="mpic11" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc11" class="msgDesc"></p>
+    <img id="mpic12" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc12" class="msgDesc"></p>
 </div>
 
    </BODY>

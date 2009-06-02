@@ -6,13 +6,14 @@
 // =========================================================================
 
 function BusAgent(autobus, name, here) {
-  (name.length > 0);
   this.autobus = autobus;
-  PubSubAgent.call(this, autobus.tagsonomy);
+  PubSubAgent.call(this, autobus !== undefined ? autobus.tagsonomy : undefined);
   this.location = (here === undefined ? BusAgent.prototype.there : here);
-  this.setted("name", name);
-  if (this.here())
-    this.tagsonomy.push("here", this);
+  if (name && name.length) {
+      this.setted("name", name);
+      if (this.here())
+          this.tagsonomy.push("here", this);
+  }
 };
 
 BusAgent.prototype = new PubSubAgent();

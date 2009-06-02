@@ -1,0 +1,404 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>A2A CHAT</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+body {margin: 0px; padding: 0px;} 
+body {background-color: transparent;}
+
+#intendeesBack {
+  background-color: transparent;
+  position: absolute;
+  left: 0%;
+  top: 0%;
+  width: 9%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#intendeesArea {
+/*  background-color: #FFF; */
+  background-color: transparent;
+  position: absolute;
+/*  left: 0%; */
+/*  top: 0%; */
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+/* display:block; */
+ z-index:10;
+}
+
+#intendeesForward {
+  background-color: transparent;
+  position: absolute;
+  right: 0%;
+  top: 0%;
+  width: 9%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.intendeePic {
+  position: absolute;
+/*  left: 0px; */
+/*  top: 0px; */
+  width: 99px;
+  height: 133px;
+}
+
+.intendeePicOver {
+  position: absolute;
+  width: 99px;
+  height: 133px;
+}
+
+.intendeeDesc {
+/* background: white; */
+  background: transparent;
+  position: absolute;
+  text-align: center;
+  overflow: hidden;
+/*  left: 0px; */
+/*  top: 0px; */
+  width: 99px;
+  height: 30px;
+/*  line-height:1.5em; */
+  font-family:'Bitstream Vera Sans','sans';
+  font-size:16px;
+  margin: 0;
+}
+
+#msgsArea {
+/* background-color: #EEE; */
+  position: absolute;
+/*  top: 200px; */
+  bottom: 0px;
+  top: 1%;
+  left: 1%;
+  width: 98%;
+  height: 98%;
+  overflow: hidden;
+/* padding:1%; */
+}
+
+
+.msgPic {
+  position: absolute;
+  background-color: white;
+/*  width: 25px; */
+  height: 30px;
+}
+
+.msgPicOver {
+  position: absolute;
+  background-color: white;
+/*  width: 25px; */
+  height: 30px;
+}
+
+
+.msgDesc {
+  position: absolute;
+  background-color: white;
+  color: black;
+/*  text-align: left; */
+  left: 30px;
+  /*width: 90%; */
+  right: 0px;
+  line-height: 30px;
+  height: 30px ;
+  font-family:'Bitstream Vera Sans','sans';
+  font-size:18px;
+  padding:0%;
+  overflow: auto;
+  margin:0;
+}
+
+</style>
+<!-- Flavour layer -->
+<script type="text/javascript" src="myPrototype.js"></script>
+<script type="text/javascript" src="cookies.js"></script>
+<script type="text/javascript" src="jsonize.js"></script>
+<!-- BUS connectivity -->
+<script type="text/javascript" src="hbc.js"></script>
+<!-- pub/sub framework -->
+<script type="text/javascript" src="pubsubAgent.js"></script>
+<script type="text/javascript" src="indexAgent.js"></script>
+<script type="text/javascript" src="busAgent.js"></script>
+<script type="text/javascript" src="autobus.js"></script>
+<!-- UI technologies -->
+<script type="text/javascript" src="sexy_gui/animator.js"></script>
+<script type="text/javascript" src="sexy_gui/anim.js"></script>
+<script type="text/javascript" src="sexy_gui/cell.js"></script>
+<script type="text/javascript" src="sexy_gui/revolutionAnims.js"></script>
+<script type="text/javascript" src="sexy_gui/revolution.js"></script>
+<script type="text/javascript" src="sexy_gui/a2ac_ui.js"></script>
+
+<script type="text/javascript">
+//<!--
+if (typeof console != "object") var console = { log: function() {} };
+
+var revolutionOfIntendees;
+var revolutionOfMessages;
+
+function uiInit() {
+   var i = 0;
+   var intendeeCells = IntendeeCell.prototype.extract("ipic", "idesc", 13);
+   var msgCells = MessageCell.prototype.extract("mpic", "mdesc", 13);
+
+   revolutionOfIntendees = new Revolution();
+   revolutionOfIntendees.init(intendeeCells);
+   revolutionOfMessages = new Revolution();
+   revolutionOfMessages.init(msgCells);
+
+   document.getElementById("intendeesBack").onmousedown = function() { revolutionOfIntendees.friction = -1; revolutionOfIntendees.resume(); };
+   document.getElementById("intendeesBack").onmouseup = function() { revolutionOfIntendees.friction = null; };
+   document.getElementById("intendeesForward").onmousedown = function() { revolutionOfIntendees.friction = 1; revolutionOfIntendees.resume(); };
+   document.getElementById("intendeesForward").onmouseup = function() { revolutionOfIntendees.friction = null; };
+
+   document.getElementById("mdraggable").onmousedown = function() { revolutionOfMessages.friction = -1; };
+   document.getElementById("mdraggable").onmouseup = function() { revolutionOfMessages.friction = null; };
+}
+
+function puts(msg, pic) {
+  if (revolutionOfMessages !== undefined) revolutionOfMessages.unshift({"pic": pic, "desc": msg});
+}
+
+function log(msg) {
+   puts(msg);
+}
+
+var autobus = new Autobus();
+autobus.init();
+
+if(0)
+autobus.hbc.logCB = function(msg) {
+  puts("logCB: " + msg) ;
+}
+
+var pingsLog = {};
+function onIntendeePing(intendee, variable, value) {
+    pingsLog[intendee.name] = intendee;
+    log("intendee " + intendee.name + " heard at " + new Date());
+    if (me.ping < value) me.ping = value;
+}
+
+var url_map = eval("(" + (cookies.get("a2ac_icons") || "null") + ")")
+                  || { "red": "./img/red.gif", "blue": "./img/blue.gif", "green": "./img/green.gif" };
+function onIntendeeNickname(intendee, variable, value) {
+    puts("intendee " + intendee.name + " nickname is " + value);
+    if (intendee === me) {
+      cookies.set("a2ac_nick", value);
+      var url = url_map[value] || "./img/guest.gif";
+      me.set("icon", url);
+    }
+}
+
+function onIntendeeIcon(intendee, variable, value) {
+    puts("intendee " + intendee.name + " icon url is " + value);
+    // à étudier profondément : TBD : I AM HERE
+    //revolutionOfIntendees.splice(revolutionOfIntendees.items.indexOf({img: intendee.icon, desc: intendee.nickname, intendee: intendee});
+    if (intendee === me) {
+       url_map[intendee.nickname] = value
+       var expire = new Date();
+       expire.setTime(Date.now() + 3600 * 24 * 100)
+       cookies.set("a2ac_icons", jsonize(url_map), expire);
+    }
+}
+
+function onNewIntendee(tagsnomy, tag, intendee) {
+   puts("new intendee id " + intendee.name);
+   revolutionOfIntendees.unshift({img: intendee.icon, desc: intendee.nickname, intendee: intendee});
+   intendee.subscribe("ping", onIntendeePing);
+   intendee.subscribe("nickname", onIntendeeNickname);
+   intendee.subscribe("icon", onIntendeeIcon);
+}
+
+
+function onMessageContent(message, variable, value) {
+    var intendee = autobus.tagsonomy.getIndex(message.intendee)[0];
+    var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + message.intendee);
+
+    puts(who + " said: " + value);
+}
+
+function onMessageTimestamp(message, variable, value) {
+    if (me.ping < value) me.ping = value;
+}
+
+var messagesQueue = [];
+
+function onNewMessage(tagsonomy, tag, message) {
+   //log("new message " + message.name);
+   message.subscribe("content", onMessageContent);
+   message.subscribe("timestamp", onMessageTimestamp);
+   messagesQueue.unshift(message);
+   var removed = messagesQueue.splice(10,10);
+   for (var lst = removed, l = lst.length, i = l - 1; i >= 0; i--) {
+      //log("message " + lst[i].name + " forgotten");
+      lst[i].forget();
+   }
+}
+
+autobus.tagsonomy.setSubscribe("intendee", onNewIntendee);
+autobus.tagsonomy.setSubscribe("message", onNewMessage);
+
+var me;
+
+function Me() {
+   BusAgent.call(this, autobus, busAgentUUID("i"), BusAgent.prototype.here);
+   this.setTags("intendee");
+   this.ping = 0;
+}
+Me.prototype = new BusAgent();
+Me.prototype.postMessage = function() {
+  v = document.getElementById('messageBody');
+  var msg = new BusAgent(autobus, busAgentUUID("m"), BusAgent.prototype.here);
+  msg.sets({
+    tags: ["message"],
+    intendee: me.name,
+    //to: otherIntendee,
+    content: v.value,
+    timestamp: 1 + me.ping
+  });
+  v.value = "";
+}
+
+Me.prototype.doPing = function() {
+   this.set("ping", 1 + me.ping);
+}
+
+var lastPingsLog = {};
+function cleanGone() {
+  for (var lst = autobus.tagsonomy.getIndex("intendee"), l = lst.length, i = l - 1; i >= 0; i--) {
+     var intendee=lst[i];
+     if (intendee === me || pingsLog[intendee.name] || lastPingsLog[intendee.name])
+        continue; // intendee still here
+
+     // intendee is gone
+     puts("intendee " + intendee.name + " is gone!");
+     intendee.forget();
+   }
+
+   lastPingsLog = pingsLog;
+   pingsLog = {};
+}
+
+function autoConfig() {
+  var nick = cookies.get("a2ac_nick");
+  if (!nick) {
+    var names = [];
+    var intendees = autobus.tagsonomy.getIndex("intendee");
+    for (var l = intendees.length, i = l - 1; i >= 0; i--)
+      names.push(intendees[i].nickname);
+    
+    var lst = [ "red", "blue", "green", "purple", "orange", "pink", "gray" ];
+    for (var l = lst.length, i = l - 1; i >= 0; i--) {
+       if (names.indexOf(lst[i]) != -1) continue;
+       nick = lst[i];
+    }   
+    if (!nick) {
+      var default_prefix = "guest";
+      var i = 2;
+      while (names.indexOf(default_prefix + i) != -1) i++;
+      nick = default_prefix + i;
+    }
+  }
+  me.set("nickname", nick);
+}
+
+function meInit() {
+   me = new Me();
+   me.doPing();
+   setInterval(function() { me.doPing() }, 60 * 2 * 1000 - 30 * Math.random() * 1000);
+   setInterval(cleanGone, 60 * 2 * 1000);
+   setTimeout(autoConfig, 3 * 1000);
+}
+
+
+//-->
+</script>
+</head>
+
+<body onload="uiInit();meInit();">
+
+<div id="intendeesArea">
+  <img id="ipic0" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc0" class="intendeeDesc"></p>
+  <img id="ipic1" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc1" class="intendeeDesc"></p>
+  <img id="ipic2" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc2" class="intendeeDesc"></p>
+  <img id="ipic3" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc3" class="intendeeDesc"></p>
+  <img id="ipic4" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc4" class="intendeeDesc"></p>
+  <img id="ipic5" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc5" class="intendeeDesc"></p>
+  <img id="ipic6" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc6" class="intendeeDesc"></p>
+  <img id="ipic7" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc7" class="intendeeDesc"></p>
+  <img id="ipic8" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc8" class="intendeeDesc"></p>
+  <img id="ipic9" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc9" class="intendeeDesc"></p>
+  <img id="ipic10" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc10" class="intendeeDesc"></p>
+  <img id="ipic11" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc11" class="intendeeDesc"></p>
+  <img id="ipic12" src="images/empty.gif" class="intendeePic"/>
+  <p id="idesc12" class="intendeeDesc"></p>
+  <div id="intendeesBack"></div>
+  <div id="intendeesForward"></div>
+</div>
+
+<div id="msgsArea">
+    <img id="mpic0" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc0" class="msgDesc"></p>
+    <img id="mpic1" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc1" class="msgDesc"></p>
+    <img id="mpic2" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc2" class="msgDesc"></p>
+    <img id="mpic3" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc3" class="msgDesc"></p>
+    <img id="mpic4" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc4" class="msgDesc"></p>
+    <img id="mpic5" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc5" class="msgDesc"></p>
+    <img id="mpic6" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc6" class="msgDesc"></p>
+    <img id="mpic7" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc7" class="msgDesc"></p>
+    <img id="mpic8" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc8" class="msgDesc"></p>
+    <img id="mpic9" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc9" class="msgDesc"></p>
+    <img id="mpic10" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc10" class="msgDesc"></p>
+    <img id="mpic11" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc11" class="msgDesc"></p>
+    <img id="mpic12" src="images/empty.gif" class="msgPic"/>
+    <p id="mdesc12" class="msgDesc"></p>
+    <div id="mdraggable" style="position:absolute;background-color:transparent;width:100%;height:100%;"></div>
+</div>
+
+<div style="position:absolute; width:25%; height:20%; right:5px; top:100px; z-index:20; background-color:white; opacity: 0.66;"></div>
+<div style="position:absolute; width:25%; height:20%; right:5px; top:100px; z-index:21; background-color:transparent; opacity:1">
+  <h2>A2A Chat</h2>
+  <form action="javascript:me.set('nickname',document.getElementById('meName').value)">
+    <h3>You are:&nbsp;&nbsp;&nbsp;<input type="text" id="meName" value="guest" style="background-color:white;">
+      <input type="submit" value="Set nickname!" style="background-color:white;">
+  </h3></form>
+  <h3><form action="javascript:me.postMessage()">
+      You say:&nbsp;&nbsp;&nbsp;<input type="text" id="messageBody" value="Hello world!"  style="background-color:white">
+      <input type="submit" value="Shout!" style="background-color:white;">
+  </h3></form>
+</div>
+
+
+</body>
+</html>
