@@ -25,7 +25,7 @@ Revolution.prototype.init = function (cellPool) {
     this.friction=0;
     this.pos = 0;
     this.speed = 0;
-    this.n = undefined;
+    this.n = undefined; // don't use for your own
     this.nbItem = undefined;
     this.localOffset = 0;
 
@@ -35,6 +35,16 @@ Revolution.prototype.init = function (cellPool) {
 Revolution.prototype.getItem = function(i) {
     return this.items[i];
 };
+
+Revolution.prototype.push = function() {
+    var args = Array.prototype.slice.call(arguments);
+    this.splice.apply(this, [this.items.length, 0].concat(args));
+}
+
+Revolution.prototype.unshift = function() {
+    var args = Array.prototype.slice.call(arguments);
+    this.splice.apply(this, [0, 0].concat(args));
+}
 
 Revolution.prototype.splice = function(index, howMany) {
     if (howMany === undefined) howMany = 0;
