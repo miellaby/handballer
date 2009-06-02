@@ -159,7 +159,7 @@ function uiInit() {
    document.getElementById("intendeesForward").onmousedown = function() { revolutionOfIntendees.friction = 1; revolutionOfIntendees.resume(); };
    document.getElementById("intendeesForward").onmouseup = function() { revolutionOfIntendees.friction = null; };
 
-   document.getElementById("mdraggable").onmousedown = function() { revolutionOfMessages.friction = -1; };
+   document.getElementById("mdraggable").onmousedown = function() { revolutionOfMessages.friction = -1; revolutionOfMessages.resume();};
    document.getElementById("mdraggable").onmouseup = function() { revolutionOfMessages.friction = null; };
 }
 
