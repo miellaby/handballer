@@ -1,19 +1,18 @@
 // library "Bus Agent" :
 // A Bus Agent is a Pub/Sub Agent distributed over the web thanks to Handballer HTTP Bus.
 // - If it is "here", you may directly set its attributs
-// - It it is "there", you may set a value by pass it through the bus
-// - It also may be "both" here and there!
+// - It it is "there", you may set a value via the bus
+// - It also may be "both" mirrored here and there!
 // =========================================================================
 
 function BusAgent(autobus, name, here) {
-  this.autobus = autobus;
-  PubSubAgent.call(this, autobus !== undefined ? autobus.tagsonomy : undefined);
   this.location = (here === undefined ? BusAgent.prototype.there : here);
-  if (name && name.length) {
-      this.setted("name", name);
-      if (this.here())
-          this.tagsonomy.push("here", this);
-  }
+
+  this.autobus = autobus;
+  PubSubAgent.call(this, name, autobus ? autobus.tagsonomy : undefined);
+
+  if (this.tagsonomy && name && name.length && this.here())
+     this.tagsonomy.pushIn("here", this);
 };
 
 BusAgent.prototype = new PubSubAgent();
@@ -21,8 +20,6 @@ BusAgent.prototype.constructor = BusAgent;
 BusAgent.prototype.here = 1;
 BusAgent.prototype.there = 2;
 BusAgent.prototype.both = 3;
-
-PubSubAgent.prototype.privates = { privates: true, cbList: true, tagsonomy: true, autobus: true, name: true, location: true, both: true } ;
 
 BusAgent.prototype.here = function() {
    return this.location !== BusAgent.prototype.there;
@@ -33,13 +30,13 @@ BusAgent.prototype.there = function() {
 }
 
 BusAgent.prototype.setted = function(variable, newValue) {
-  var currentValue = (this[variable] !== undefined ? this[variable] : null); 
+  var currentValue = this[variable]; 
 
   if (newValue == currentValue)
     return newValue;
 
   newValue = this.set_and_fire(variable, newValue);
-  // note value may have changed
+  // note value may have changed twice
 
   if (this.here()) {
     if (variable == "name") {
@@ -64,7 +61,7 @@ BusAgent.prototype.setteds = function(deltaObj) {
   var deltaObj2 = {};
   for (variable in deltaObj) {
     var newValue = deltaObj[variable];
-    var currentValue = (this[variable] !== undefined ? this[variable] : null); 
+    var currentValue = this[variable]; 
 
     if (newValue == currentValue) continue;
 
@@ -109,8 +106,7 @@ BusAgent.prototype.status = function() {
   if (this.here()) {
     var pic = {};  
     for (p in this) {
-      if (typeof this[p] == "function") continue;
-      if (this.privates[p]) continue;
+      if (typeof this[p] == "function" || !this.cbList[p]) continue;
       pic[p] = this[p];
     }
     this.autobus.hbc.send("model/" + this.name, jsonize(pic));
@@ -120,8 +116,4 @@ BusAgent.prototype.status = function() {
     this.autobus.hbc.send("control/" + this.name + "/status", jsonize(value));
     return null;
   }
-}
-
-function busAgentUUID(prefix) {
-  return prefix + Math.random().toString().substring(2);
 }

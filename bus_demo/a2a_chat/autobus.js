@@ -3,7 +3,7 @@
 // =========================================================================
 
 function Autobus(hbc) {
-   this.tagsonomy = new IndexAgent();
+   this.tagsonomy = new PubSubAgent();
    this.hbc = (hbc ? hbc : new Hbc());
    Autobus.prototype.singleton = this;
 };
@@ -18,7 +18,7 @@ Autobus.prototype.callback = function(label, body) {
 
    if (label.substring(0,6)== "freed/") {
       var agentName = label.substring(6);
-      obj = this.tagsonomy.getIndex(agentName)[0];
+      obj = this.tagsonomy.getOr(agentName,[])[0];
       if (obj && obj.there()) obj.forget();
       return;
    }
@@ -35,7 +35,7 @@ Autobus.prototype.callback = function(label, body) {
         command = label.substring(slashIdx + 1);
       }
 
-      for (var lst = this.tagsonomy.getIndex(agentName), l = lst.length, i = 0; i < l; i++) {
+      for (var lst = this.tagsonomy.getOr(agentName,[]), l = lst.length, i = 0; i < l; i++) {
         var obj = lst[i];
         if (!obj.here()) continue;
         if (command == "set") {
@@ -54,7 +54,7 @@ Autobus.prototype.callback = function(label, body) {
       var agentName = slashIdx != -1 ? label.substring(6, slashIdx) : label.substring(6);
       var slot = slashIdx != -1 ? label.substring(slashIdx + 1) : undefined;
       
-      obj = this.tagsonomy.getIndex(agentName)[0];
+      obj = this.tagsonomy.getOr(agentName,[])[0];
 
       if (!obj) {
          obj = new BusAgent(this, agentName, BusAgent.prototype.there);
@@ -70,7 +70,7 @@ Autobus.prototype.callback = function(label, body) {
    } else if (label.substring(0,7) == "status/") {
       var agentName = label.substring(7);
   
-      for (var lst = this.tagsonomy.getIndex(agentName), l = lst.length, i = 0; i < l; i++) {
+      for (var lst = this.tagsonomy.getOr(agentName,[]), l = lst.length, i = 0; i < l; i++) {
         var obj = lst[i];
         if (!obj.here()) continue;
         obj.status();

@@ -23,7 +23,6 @@ You say:&nbsp;&nbsp;&nbsp;<input type="text" id="messageBody" value="Hello world
 <script type="text/javascript" src='hbc.js'></script>
 <script type="text/javascript" src='jsonize.js'></script>
 <script type="text/javascript" src='pubsubAgent.js'></script>
-<script type="text/javascript" src='indexAgent.js'></script>
 <script type="text/javascript" src='busAgent.js'></script>
 <script type="text/javascript" src='autobus.js'></script>
 
@@ -61,7 +60,7 @@ autobus.hbc.logCB = function(msg) {
 }
 
 function log(msg) {
-   return;
+//   return;
    puts(msg);
 }
 
@@ -93,16 +92,19 @@ function onIntendeeIcon(intendee, variable, value) {
     }
 }
 
-function onNewIntendee(tagsnomy, tag, intendee) {
-   puts("new intendee id " + intendee.name);
-   intendee.subscribe("ping", onIntendeePing);
-   intendee.subscribe("nickname", onIntendeeNickname);
-   intendee.subscribe("icon", onIntendeeIcon);
+function onIntendeeSplice(tag, index, howMany) {
+   for (var i = 3; i < arguments.length ; i++) {
+      var intendee = arguments[i];
+      puts("new intendee id " + intendee.name);
+      intendee.subscribe("ping", onIntendeePing);
+      intendee.subscribe("nickname", onIntendeeNickname);
+      intendee.subscribe("icon", onIntendeeIcon);
+   }
 }
 
 
 function onMessageContent(message, variable, value) {
-    var intendee = autobus.tagsonomy.getIndex(message.intendee)[0];
+    var intendee = autobus.tagsonomy.getOr(message.intendee,[])[0];
     var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + message.intendee);
 
     puts(who + " said: " + value);
@@ -114,27 +116,31 @@ function onMessageTimestamp(message, variable, value) {
 
 var messagesQueue = [];
 
-function onNewMessage(tagsonomy, tag, message) {
-   log("new message " + message.name);
-   message.subscribe("content", onMessageContent);
-   message.subscribe("timestamp", onMessageTimestamp);
-   messagesQueue.unshift(message);
-   var removed = messagesQueue.splice(10,10);
-   for (var lst = removed, l = lst.length, i = l - 1; i >= 0; i--) {
-      log("message " + lst[i].name + " forgotten");
-      lst[i].forget();
+function onMessageSplice(tag, index, howMany) {
+   for (var i = 3; i < arguments.length ; i++) {
+     var message = arguments[i];
+
+     log("new message " + message.name);
+     message.subscribe("content", onMessageContent);
+     message.subscribe("timestamp", onMessageTimestamp);
+     messagesQueue.unshift(message);
+     var removed = messagesQueue.splice(10,10);
+     for (var lst = removed, l = lst.length, j = l - 1; j >= 0; j--) {
+        log("message " + lst[j].name + " forgotten");
+        lst[j].forget();
+     }
    }
 }
 
-autobus.tagsonomy.setSubscribe("intendee", onNewIntendee);
-autobus.tagsonomy.setSubscribe("message", onNewMessage);
+autobus.tagsonomy.subscribe("intendee", onIntendeeSplice);
+autobus.tagsonomy.subscribe("message", onMessageSplice);
 
-var me = new BusAgent(autobus, busAgentUUID("i"), BusAgent.prototype.here);
+var me = new BusAgent(autobus, agentUUID("i"), BusAgent.prototype.here);
 me.setTags("intendee");
 
 me.postMessage = function() {
   var v = document.getElementById('messageBody');
-  var msg = new BusAgent(autobus, busAgentUUID("m"), BusAgent.prototype.here);
+  var msg = new BusAgent(autobus, agentUUID("m"), BusAgent.prototype.here);
   msg.sets({
     tags: ["message"],
     intendee: me.name,
@@ -153,7 +159,7 @@ me.doPing = function() {
 
 var lastPingsLog = {};
 function cleanGone() {
-  for (var lst = autobus.tagsonomy.getIndex("intendee"), l = lst.length, i = l - 1; i >= 0; i--) {
+  for (var lst = autobus.tagsonomy.getOr("intendee",[]), l = lst.length, i = l - 1; i >= 0; i--) {
      var intendee=lst[i];
      if (intendee === me || pingsLog[intendee.name] || lastPingsLog[intendee.name])
         continue; // intendee still here
@@ -176,7 +182,7 @@ function autoConfig() {
   var nick = cookies.get("a2ac_nick");
   if (!nick) {
     var names = [];
-    var intendees = autobus.tagsonomy.getIndex("intendee");
+    var intendees = autobus.tagsonomy.getOr("intendee",[]);
     for (var l = intendees.length, i = l - 1; i >= 0; i--)
       names.push(intendees[i].nickname);
     
