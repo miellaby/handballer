@@ -1,6 +1,9 @@
 function ImgDescCell(img, desc) {
     this.img = img;
     this.desc = desc;
+
+    var cell=this;
+    this.selfUpdate = function() { cell.show(cell.item); };
      
     if (this.img) {
         var self = this;
@@ -13,13 +16,25 @@ function ImgDescCell(img, desc) {
 }
 
 ImgDescCell.prototype.hide = function() {
-    this.item = null;
+    if (this.item && this.item.unsubscribe) {
+      this.item.unsubscribe("img", this.selfUpdate);
+      this.item.unsubscribe("desc", this.selfUpdate);
+      this.item = null;
+    }
     if (this.img) this.img.style.display = "none";
     if (this.desc) this.desc.style.display = "none";
 };
 
 ImgDescCell.prototype.show = function(item) {
-    this.item = item; 
+  if (item !== this.item) {
+    this.item = item;
+    var cell = this;
+    if (item.subscribe) {
+      item.subscribe("img", this.selfUpdate);
+      item.subscribe("desc", this.selfUpdate);
+    }
+  }
+
     if (this.img) {
         this.img.src = (item["img"] ? item.img : this.defaultImg);
         this.desc.style.display = "block";
