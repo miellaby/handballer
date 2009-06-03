@@ -164,7 +164,7 @@ function uiInit() {
 }
 
 function puts(msg, pic) {
-  if (revolutionOfMessages !== undefined) revolutionOfMessages.unshift({"pic": pic, "desc": msg});
+  revolutionOfMessages && revolutionOfMessages.unshift({"from": "log", "content": msg});
 }
 
 function log(msg) {
@@ -189,8 +189,6 @@ function onIntendeePing(intendee, variable, value) {
 var url_map = eval("(" + (cookies.get("a2ac_icons") || "null") + ")")
                   || { "red": "./sexy_gui/images/red.gif", "blue": "./sexy_gui/images/blue.gif", "green": "./sexy_gui/images/green.gif" };
 function onIntendeeNickname(intendee, variable, value) {
-    puts("intendee " + intendee.name + " nickname is " + value);
-    intendee.set("desc", value);
     if (intendee === me) {
       cookies.set("a2ac_nick", value);
       var url = url_map[value] || "./img/guest.gif";
@@ -199,8 +197,6 @@ function onIntendeeNickname(intendee, variable, value) {
 }
 
 function onIntendeeIcon(intendee, variable, value) {
-    puts("intendee " + intendee.name + " icon url is " + value);
-    intendee.set("img", value);
     if (intendee === me) {
        url_map[intendee.nickname] = value
        var expire = new Date();
@@ -212,9 +208,7 @@ function onIntendeeIcon(intendee, variable, value) {
 function onIntendeesSplice(tag, index, howMany /*, intendee, intendee ... */) {
   for (var j = 3; j < arguments.length; j++) {
    var intendee = arguments[j];
-   puts("new intendee id " + intendee.name);
-   intendee.set("desc", intendee.name);
-   intendee.set("img", null);
+   log("new intendee id " + intendee.name);
    revolutionOfIntendees.unshift(intendee);
    intendee.subscribe("ping", onIntendeePing);
    intendee.subscribe("nickname", onIntendeeNickname);
@@ -223,10 +217,9 @@ function onIntendeesSplice(tag, index, howMany /*, intendee, intendee ... */) {
 
 
 function onMessageContent(message, variable, value) {
-    var intendee = autobus.tagsonomy.getOr(message.intendee,[])[0];
-    var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + message.intendee);
-
-    puts(who + " said: " + value);
+    //var intendee = autobus.tagsonomy.getOr(message.from,null);
+    //var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + message.from);
+    //log(who + " said: " + value);
 }
 
 function onMessageTimestamp(message, variable, value) {
@@ -242,6 +235,8 @@ function onMessagesSplice(tag, index, howMany /*, message, message ... */) {
    message.subscribe("content", onMessageContent);
    message.subscribe("timestamp", onMessageTimestamp);
    messagesQueue.unshift(message);
+   revolutionOfMessages.unshift(message);
+
    var removed = messagesQueue.splice(10,10);
    for (var lst = removed, l = lst.length, i = l - 1; i >= 0; i--) {
       //log("message " + lst[i].name + " forgotten");
@@ -265,7 +260,7 @@ Me.prototype.postMessage = function() {
   var msg = new BusAgent(autobus, agentUUID("m"), BusAgent.prototype.here);
   msg.sets({
     tags: ["message"],
-    intendee: me.name,
+    from: me.name,
     //to: otherIntendee,
     content: v.value,
     timestamp: 1 + me.ping
@@ -332,62 +327,62 @@ function meInit() {
 <body onload="uiInit();meInit();">
 
 <div id="intendeesArea">
-  <img id="ipic0" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic0" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc0" class="intendeeDesc"></p>
-  <img id="ipic1" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic1" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc1" class="intendeeDesc"></p>
-  <img id="ipic2" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic2" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc2" class="intendeeDesc"></p>
-  <img id="ipic3" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic3" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc3" class="intendeeDesc"></p>
-  <img id="ipic4" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic4" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc4" class="intendeeDesc"></p>
-  <img id="ipic5" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic5" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc5" class="intendeeDesc"></p>
-  <img id="ipic6" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic6" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc6" class="intendeeDesc"></p>
-  <img id="ipic7" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic7" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc7" class="intendeeDesc"></p>
-  <img id="ipic8" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic8" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc8" class="intendeeDesc"></p>
-  <img id="ipic9" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic9" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc9" class="intendeeDesc"></p>
-  <img id="ipic10" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic10" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc10" class="intendeeDesc"></p>
-  <img id="ipic11" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic11" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc11" class="intendeeDesc"></p>
-  <img id="ipic12" src="images/empty.gif" class="intendeePic"/>
+  <img id="ipic12" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc12" class="intendeeDesc"></p>
   <div id="intendeesBack"></div>
   <div id="intendeesForward"></div>
 </div>
 
 <div id="msgsArea">
-    <img id="mpic0" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic0" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc0" class="msgDesc"></p>
-    <img id="mpic1" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic1" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc1" class="msgDesc"></p>
-    <img id="mpic2" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic2" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc2" class="msgDesc"></p>
-    <img id="mpic3" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic3" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc3" class="msgDesc"></p>
-    <img id="mpic4" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic4" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc4" class="msgDesc"></p>
-    <img id="mpic5" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic5" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc5" class="msgDesc"></p>
-    <img id="mpic6" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic6" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc6" class="msgDesc"></p>
-    <img id="mpic7" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic7" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc7" class="msgDesc"></p>
-    <img id="mpic8" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic8" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc8" class="msgDesc"></p>
-    <img id="mpic9" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic9" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc9" class="msgDesc"></p>
-    <img id="mpic10" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic10" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc10" class="msgDesc"></p>
-    <img id="mpic11" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic11" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc11" class="msgDesc"></p>
-    <img id="mpic12" src="images/empty.gif" class="msgPic"/>
+    <img id="mpic12" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc12" class="msgDesc"></p>
     <div id="mdraggable" style="position:absolute;background-color:transparent;width:100%;height:100%;"></div>
 </div>
