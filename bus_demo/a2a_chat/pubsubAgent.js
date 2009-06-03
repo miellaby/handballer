@@ -168,7 +168,7 @@ PubSubAgent.prototype.set = PubSubAgent.prototype.setted;
 PubSubAgent.prototype.setTags = function() {
     //var args = Array.prototype.slice.call(arguments);
     //this.spliceIn.apply(this, ["tags", 0, this.getOr("tags", []).length].concat(args));
-    this.setted("tags", arguments);
+    this.setted("tags", Array.prototype.slice.call(arguments));
 }
 
 PubSubAgent.prototype.forget = function() {

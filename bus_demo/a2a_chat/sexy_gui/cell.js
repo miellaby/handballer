@@ -12,7 +12,8 @@ function ImgDescCell(img, desc) {
         this.img.onmouseover = function() { this.className += 'Over'; } ;
         this.img.onmouseout = function() { this.className = this.getAttribute('initClass'); } ;
     }
-    this.hide();
+    if (this.img) this.img.style.display = "none";
+    if (this.desc) this.desc.style.display = "none";
 }
 
 ImgDescCell.prototype.show = function(item) { };
@@ -24,10 +25,6 @@ ImgDescCell.prototype.hide = function() { };
 ImgDescCell.prototype.height = null;
 
 ImgDescCell.prototype.itemOffset = null;
-
-ImgDescCell.prototype.defaultImg = "./images/blank.gif";
-
-ImgDescCell.prototype.defaultDesc = "";
 
 ImgDescCell.prototype.extract = function(imgPrefix, descPrefix, howMany) {
     var cells = [];
