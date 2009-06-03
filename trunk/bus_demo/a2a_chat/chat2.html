@@ -187,9 +187,10 @@ function onIntendeePing(intendee, variable, value) {
 }
 
 var url_map = eval("(" + (cookies.get("a2ac_icons") || "null") + ")")
-                  || { "red": "./img/red.gif", "blue": "./img/blue.gif", "green": "./img/green.gif" };
+                  || { "red": "./sexy_gui/images/red.gif", "blue": "./sexy_gui/images/blue.gif", "green": "./sexy_gui/images/green.gif" };
 function onIntendeeNickname(intendee, variable, value) {
     puts("intendee " + intendee.name + " nickname is " + value);
+    intendee.set("desc", value);
     if (intendee === me) {
       cookies.set("a2ac_nick", value);
       var url = url_map[value] || "./img/guest.gif";
@@ -199,8 +200,7 @@ function onIntendeeNickname(intendee, variable, value) {
 
 function onIntendeeIcon(intendee, variable, value) {
     puts("intendee " + intendee.name + " icon url is " + value);
-    // à étudier profondément : TBD : I AM HERE
-    //revolutionOfIntendees.splice(revolutionOfIntendees.items.indexOf({img: intendee.icon, desc: intendee.nickname, intendee: intendee});
+    intendee.set("img", value);
     if (intendee === me) {
        url_map[intendee.nickname] = value
        var expire = new Date();
@@ -209,17 +209,21 @@ function onIntendeeIcon(intendee, variable, value) {
     }
 }
 
-function onNewIntendee(tagsnomy, tag, intendee) {
+function onIntendeesSplice(tag, index, howMany /*, intendee, intendee ... */) {
+  for (var j = 3; j < arguments.length; j++) {
+   var intendee = arguments[j];
    puts("new intendee id " + intendee.name);
-   revolutionOfIntendees.unshift({img: intendee.icon, desc: intendee.nickname, intendee: intendee});
+   intendee.set("desc", intendee.name);
+   intendee.set("img", null);
+   revolutionOfIntendees.unshift(intendee);
    intendee.subscribe("ping", onIntendeePing);
    intendee.subscribe("nickname", onIntendeeNickname);
    intendee.subscribe("icon", onIntendeeIcon);
-}
+} }
 
 
 function onMessageContent(message, variable, value) {
-    var intendee = autobus.tagsonomy.getIndex(message.intendee)[0];
+    var intendee = autobus.tagsonomy.getOr(message.intendee,[])[0];
     var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + message.intendee);
 
     puts(who + " said: " + value);
@@ -231,7 +235,9 @@ function onMessageTimestamp(message, variable, value) {
 
 var messagesQueue = [];
 
-function onNewMessage(tagsonomy, tag, message) {
+function onMessagesSplice(tag, index, howMany /*, message, message ... */) {
+  for (var j = 3; j < arguments.length; j++) { 
+   var message = arguments[j];
    //log("new message " + message.name);
    message.subscribe("content", onMessageContent);
    message.subscribe("timestamp", onMessageTimestamp);
@@ -240,23 +246,23 @@ function onNewMessage(tagsonomy, tag, message) {
    for (var lst = removed, l = lst.length, i = l - 1; i >= 0; i--) {
       //log("message " + lst[i].name + " forgotten");
       lst[i].forget();
-   }
+  } }
 }
 
-autobus.tagsonomy.setSubscribe("intendee", onNewIntendee);
-autobus.tagsonomy.setSubscribe("message", onNewMessage);
+autobus.tagsonomy.subscribe("intendee", onIntendeesSplice);
+autobus.tagsonomy.subscribe("message", onMessagesSplice);
 
 var me;
 
 function Me() {
-   BusAgent.call(this, autobus, busAgentUUID("i"), BusAgent.prototype.here);
+   BusAgent.call(this, autobus, agentUUID("i"), BusAgent.prototype.here);
    this.setTags("intendee");
    this.ping = 0;
 }
 Me.prototype = new BusAgent();
 Me.prototype.postMessage = function() {
   v = document.getElementById('messageBody');
-  var msg = new BusAgent(autobus, busAgentUUID("m"), BusAgent.prototype.here);
+  var msg = new BusAgent(autobus, agentUUID("m"), BusAgent.prototype.here);
   msg.sets({
     tags: ["message"],
     intendee: me.name,
@@ -273,7 +279,7 @@ Me.prototype.doPing = function() {
 
 var lastPingsLog = {};
 function cleanGone() {
-  for (var lst = autobus.tagsonomy.getIndex("intendee"), l = lst.length, i = l - 1; i >= 0; i--) {
+  for (var lst = autobus.tagsonomy.getOr("intendee",[]), l = lst.length, i = l - 1; i >= 0; i--) {
      var intendee=lst[i];
      if (intendee === me || pingsLog[intendee.name] || lastPingsLog[intendee.name])
         continue; // intendee still here
@@ -291,7 +297,7 @@ function autoConfig() {
   var nick = cookies.get("a2ac_nick");
   if (!nick) {
     var names = [];
-    var intendees = autobus.tagsonomy.getIndex("intendee");
+    var intendees = autobus.tagsonomy.getOr("intendee",[]);
     for (var l = intendees.length, i = l - 1; i >= 0; i--)
       names.push(intendees[i].nickname);
     
