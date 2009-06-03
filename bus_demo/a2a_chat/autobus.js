@@ -5,10 +5,10 @@
 function Autobus(hbc) {
    this.tagsonomy = new PubSubAgent();
    this.hbc = (hbc ? hbc : new Hbc());
-   Autobus.prototype.singleton = this;
+   Autobus.singleton = this;
 };
 
-Autobus.prototype.singleton = null;
+Autobus.singleton = null;
 
 Autobus.prototype.callback = function(label, body) {
    var obj = null ;

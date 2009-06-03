@@ -104,7 +104,7 @@ function onIntendeeSplice(tag, index, howMany) {
 
 
 function onMessageContent(message, variable, value) {
-    var intendee = autobus.tagsonomy.getOr(message.intendee,[])[0];
+    var intendee = autobus.tagsonomy.getOr(message.intendee,null);
     var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + message.intendee);
 
     puts(who + " said: " + value);

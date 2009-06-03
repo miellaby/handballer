@@ -14,11 +14,12 @@ function PubSubAgent(name, tagsonomy) {
   this.cbList = {};
   this.tagsonomy = tagsonomy;
 
-  if (name && name.length)
+  if (name)
     this.setted("name", name);
 
-  if (tagsonomy)
-    tagsonomy.pushIn("agent", this);
+  if (tagsonomy) {
+      tagsonomy.pushIn("agent", this);
+  }
 };
 
 PubSubAgent.prototype.subscribe = function (attribut, cb) {
@@ -74,8 +75,8 @@ PubSubAgent.prototype.set_and_fire = function(attribut, value) {
   // special attributs related to tagsonomy
 
   if (attribut == "name" && oldValue != value) {
-    if (oldValue) this.tagsonomy.removeIn(oldValue, this);
-    if (value)    this.tagsonomy.pushIn(value, this);
+    if (oldValue) this.tagsonomy.set(oldValue, undefined);
+    if (value)    this.tagsonomy.set(value, this);
   }
 
   if (attribut == "tags") {
