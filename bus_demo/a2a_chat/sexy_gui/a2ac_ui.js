@@ -12,7 +12,7 @@ IntendeeCell.prototype.itemOffset = 130;
 
 IntendeeCell.prototype.height = 130;
 
-IntendeeCell.prototype.defaultImg = "./images/blank.gif";
+IntendeeCell.prototype.defaultImg = "./sexy_gui/images/guest.gif";
 
 IntendeeCell.prototype.defaultDesc = "???";
 
@@ -61,7 +61,7 @@ MessageCell.prototype.constructor = MessageCell;
 
 MessageCell.prototype.itemOffset = 40;
 
-MessageCell.prototype.defaultImg = "./images/star.gif";
+MessageCell.prototype.defaultImg = "./sexy_gui/images/star.gif";
 
 MessageCell.prototype.defaultDesc = "";
 

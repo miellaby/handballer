@@ -8,20 +8,29 @@
 body {margin: 0px; padding: 0px;} 
 body {background-color: transparent;}
 
-#intendeesBack {
-  background-color: transparent;
-  position: absolute;
-  left: 0%;
-  top: 0%;
-  width: 9%;
-  height: 100%;
-  overflow: hidden;
+button{
+    background-color:#ffffff;
+    border:1px solid #000000;
+}
+
+button:hover{
+    background-color:#dff4ff;
+    border:1px solid #c2e1ef;
+    color:#336699;
+}
+
+.trap {
+ position:absolute;
+ left:0;
+ top:0;
+ width:100%;
+ height:100%;
 }
 
 #intendeesArea {
+  position: absolute;
 /*  background-color: #FFF; */
   background-color: transparent;
-  position: absolute;
 /*  left: 0%; */
 /*  top: 0%; */
   width: 100%;
@@ -31,12 +40,26 @@ body {background-color: transparent;}
  z-index:10;
 }
 
+#intendeesBack {
+  background-color: transparent;
+  position: absolute;
+  left: 0%;
+  top: 0%;
+  width: 3%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#intendeesTrap {
+  z-index: 30;
+}
+
 #intendeesForward {
   background-color: transparent;
   position: absolute;
   right: 0%;
   top: 0%;
-  width: 9%;
+  width: 3%;
   height: 100%;
   overflow: hidden;
 }
@@ -49,7 +72,7 @@ body {background-color: transparent;}
   height: 133px;
 }
 
-.intendeePicOver {
+.intendeePic:hover {
   position: absolute;
   width: 99px;
   height: 133px;
@@ -72,16 +95,29 @@ body {background-color: transparent;}
 }
 
 #msgsArea {
-/* background-color: #EEE; */
   position: absolute;
-/*  top: 200px; */
-  bottom: 0px;
-  top: 1%;
+/* background-color: #EEE; */
+  top: 200px;
   left: 1%;
   width: 98%;
-  height: 98%;
+  bottom:60px;
   overflow: hidden;
 /* padding:1%; */
+}
+
+
+#msgsTrap {
+  z-index: 20;
+}
+
+#postArea {
+  position: absolute;
+  background-color: #EEE;
+  width: 100%;
+  bottom: 0px;
+  height: 60px;
+  z-index: 30;
+  margin: 2px;
 }
 
 
@@ -89,14 +125,14 @@ body {background-color: transparent;}
   position: absolute;
   background-color: white;
 /*  width: 25px; */
-  height: 30px;
+  height: 40px;
 }
 
-.msgPicOver {
+.msgPic:hover {
   position: absolute;
   background-color: white;
 /*  width: 25px; */
-  height: 30px;
+  height: 40px;
 }
 
 
@@ -105,7 +141,7 @@ body {background-color: transparent;}
   background-color: white;
   color: black;
 /*  text-align: left; */
-  left: 30px;
+  left: 44px;
   /*width: 90%; */
   right: 0px;
   line-height: 30px;
@@ -132,6 +168,7 @@ body {background-color: transparent;}
 <!-- UI technologies -->
 <script type="text/javascript" src="sexy_gui/animator.js"></script>
 <script type="text/javascript" src="sexy_gui/anim.js"></script>
+<script type="text/javascript" src="sexy_gui/trap.js"></script>
 <script type="text/javascript" src="sexy_gui/cell.js"></script>
 <script type="text/javascript" src="sexy_gui/revolutionAnims.js"></script>
 <script type="text/javascript" src="sexy_gui/revolution.js"></script>
@@ -141,26 +178,42 @@ body {background-color: transparent;}
 //<!--
 if (typeof console != "object") var console = { log: function() {} };
 
-var revolutionOfIntendees;
-var revolutionOfMessages;
+var autobus = new Autobus();
+var me;
+var revolutionOfIntendees = new Revolution();
+var revolutionOfMessages =  new Revolution();
+var iTrap = new Trap();
+var mTrap = new Trap();
 
 function uiInit() {
-   var i = 0;
    var intendeeCells = IntendeeCell.prototype.extract("ipic", "idesc", 13);
-   var msgCells = MessageCell.prototype.extract("mpic", "mdesc", 13);
-
-   revolutionOfIntendees = new Revolution();
    revolutionOfIntendees.init(intendeeCells);
-   revolutionOfMessages = new Revolution();
+
+   var msgCells = MessageCell.prototype.extract("mpic", "mdesc", 13);
    revolutionOfMessages.init(msgCells);
+
+   iTrap.bind(document.getElementById("intendeesTrap"));
+   iTrap.onResume = function() { revolutionOfIntendees.resume(); }
+   iTrap.onPause = function() { revolutionOfIntendees.friction=null; }
+   iTrap.iterate = function() {
+      Trap.prototype.iterate.call(this);
+      revolutionOfIntendees.friction = this.down ? - this.dx / IntendeeCell.prototype.itemOffset : null;
+      return this.down;
+   }
+
+   mTrap.bind(document.getElementById("msgsTrap"));
+   mTrap.onResume = function() { revolutionOfMessages.resume(); }
+   mTrap.onPause = function() { revolutionOfMessages.friction=null; }
+   mTrap.iterate = function() {
+      Trap.prototype.iterate.call(this);
+      revolutionOfMessages.friction = this.down ? this.dy / MessageCell.prototype.itemOffset : null;
+      return this.down;
+   }
 
    document.getElementById("intendeesBack").onmousedown = function() { revolutionOfIntendees.friction = -1; revolutionOfIntendees.resume(); };
    document.getElementById("intendeesBack").onmouseup = function() { revolutionOfIntendees.friction = null; };
    document.getElementById("intendeesForward").onmousedown = function() { revolutionOfIntendees.friction = 1; revolutionOfIntendees.resume(); };
    document.getElementById("intendeesForward").onmouseup = function() { revolutionOfIntendees.friction = null; };
-
-   document.getElementById("mdraggable").onmousedown = function() { revolutionOfMessages.friction = -1; revolutionOfMessages.resume();};
-   document.getElementById("mdraggable").onmouseup = function() { revolutionOfMessages.friction = null; };
 }
 
 function puts(msg, pic) {
@@ -168,11 +221,10 @@ function puts(msg, pic) {
 }
 
 function log(msg) {
+   return;
    puts(msg);
 }
 
-var autobus = new Autobus();
-autobus.init();
 
 if(0)
 autobus.hbc.logCB = function(msg) {
@@ -191,7 +243,8 @@ var url_map = eval("(" + (cookies.get("a2ac_icons") || "null") + ")")
 function onIntendeeNickname(intendee, variable, value) {
     if (intendee === me) {
       cookies.set("a2ac_nick", value);
-      var url = url_map[value] || "./img/guest.gif";
+      document.getElementById("meName").value = value;
+      var url = url_map[value] || "./sexy_gui/images/guest.gif";
       me.set("icon", url);
     }
 }
@@ -244,16 +297,13 @@ function onMessagesSplice(tag, index, howMany /*, message, message ... */) {
   } }
 }
 
-autobus.tagsonomy.subscribe("intendee", onIntendeesSplice);
-autobus.tagsonomy.subscribe("message", onMessagesSplice);
-
-var me;
 
 function Me() {
    BusAgent.call(this, autobus, agentUUID("i"), BusAgent.prototype.here);
    this.setTags("intendee");
    this.ping = 0;
 }
+
 Me.prototype = new BusAgent();
 Me.prototype.postMessage = function() {
   v = document.getElementById('messageBody');
@@ -315,18 +365,28 @@ function meInit() {
    me = new Me();
    me.doPing();
    setInterval(function() { me.doPing() }, 60 * 2 * 1000 - 30 * Math.random() * 1000);
-   setInterval(cleanGone, 60 * 2 * 1000);
-   setTimeout(autoConfig, 3 * 1000);
 }
 
+function init() {
+   uiInit();
+
+   autobus.tagsonomy.subscribe("intendee", onIntendeesSplice);
+   autobus.tagsonomy.subscribe("message", onMessagesSplice);
+
+   autobus.init();
+   meInit();
+   setInterval(cleanGone, 60 * 2 * 1000);
+   setTimeout(autoConfig, 3 * 1000);   
+}
 
 //-->
 </script>
 </head>
 
-<body onload="uiInit();meInit();">
+<body onload="init();">
 
 <div id="intendeesArea">
+  <div class="trap" id="intendeesTrap"></div>
   <img id="ipic0" src="sexy_gui/images/empty.gif" class="intendeePic"/>
   <p id="idesc0" class="intendeeDesc"></p>
   <img id="ipic1" src="sexy_gui/images/empty.gif" class="intendeePic"/>
@@ -358,6 +418,7 @@ function meInit() {
 </div>
 
 <div id="msgsArea">
+    <div class="trap" id="msgsTrap"></div>
     <img id="mpic0" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc0" class="msgDesc"></p>
     <img id="mpic1" src="sexy_gui/images/empty.gif" class="msgPic"/>
@@ -384,22 +445,19 @@ function meInit() {
     <p id="mdesc11" class="msgDesc"></p>
     <img id="mpic12" src="sexy_gui/images/empty.gif" class="msgPic"/>
     <p id="mdesc12" class="msgDesc"></p>
-    <div id="mdraggable" style="position:absolute;background-color:transparent;width:100%;height:100%;"></div>
 </div>
 
-<div style="position:absolute; width:25%; height:20%; right:5px; top:100px; z-index:20; background-color:white; opacity: 0.66;"></div>
-<div style="position:absolute; width:25%; height:20%; right:5px; top:100px; z-index:21; background-color:transparent; opacity:1">
-  <h2>A2A Chat</h2>
+<div style="position:absolute; width:25%; height:20%; right:5px; top:100px; z-index:40; background-color:white; opacity: 0.66;"></div>
+<div style="position:absolute; width:25%; height:20%; right:5px; top:100px; z-index:41; background-color:transparent; opacity:1">
   <form action="javascript:me.set('nickname',document.getElementById('meName').value)">
-    <h3>You are:&nbsp;&nbsp;&nbsp;<input type="text" id="meName" value="guest" style="background-color:white;">
-      <input type="submit" value="Set nickname!" style="background-color:white;">
-  </h3></form>
-  <h3><form action="javascript:me.postMessage()">
-      You say:&nbsp;&nbsp;&nbsp;<input type="text" id="messageBody" value="Hello world!"  style="background-color:white">
-      <input type="submit" value="Shout!" style="background-color:white;">
+    <input type="text" id="meName" value="guest" style="background-color:white;"><button type="submit">nickname</button>
   </h3></form>
 </div>
 
+<form id="postArea" action="javascript:me.postMessage();">
+  <input id="messageBody"/>
+<button type="submit">submit</button>
+</form>
 
 </body>
 </html>

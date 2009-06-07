@@ -106,8 +106,8 @@ Revolution.prototype.computeSpeed = function() {
 
     if (this.friction != null) { // external friction
         this.speed = (this.friction + 6.0 * this.speed) / 7.0;
-        this.speed = Math.max(this.speed, -0.2);
-        this.speed = Math.min(this.speed, 0.2);
+        this.speed = Math.max(this.speed, -0.6);
+        this.speed = Math.min(this.speed, 0.6);
 
     } else { // no external friction
 
