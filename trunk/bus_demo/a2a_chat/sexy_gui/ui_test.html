@@ -16,37 +16,37 @@
 //<!--
 if (typeof console != "object") var console = { log: function() {} };
 
-var intendeeCells;
-var msgCells;
+var revolutionOfIntendees;
+var revolutionOfMessages;
 
 function a2ac_init() {
-   intendeeCells = IntendeeCell.prototype.extract("ipic", "idesc", 13);
-   msgCells = MessageCell.prototype.extract("mpic", "mdesc", 13);
    var i = 0;
-   var revolution = new Revolution();
-   revolution.init(intendeeCells);
-   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) }, { img: "images/green.gif", desc: "green" + (i++) });
-   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) }, { img: "images/green.gif", desc: "green" + (i++) });
-   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) }, { img: "images/green.gif", desc: "green" + (i++) });
-   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) }, { img: "images/green.gif", desc: "green" + (i++) });
-   revolution.splice(0, 0, { img: "images/blue.gif", desc: "blue"  + (i++) }, { img: "images/red.gif", desc: "red" + (i++) }, { img: "images/green.gif", desc: "green" + (i++) });
-//   setTimeout(function() { revolution.splice(1, 0, { img: "images/green.gif", desc: "green" + (i++) });
-//          console.trace(revolution.items.jsonize());
-//     }, 3000);
-   setInterval(function() { revolution.splice(1, 0, { img: "images/green.gif", desc: "green" + (i++) });}, 3000);
-   setInterval(function() { revolution.splice(0, 0, { img: "images/red.gif", desc: "red" + (i++) });}, 2000);
-   setInterval(function() { revolution.splice(2, 0, { img: "images/blue.gif", desc: "blue" + (i++) });}, 4000);
-   setInterval(function() { revolution.splice(1, 1);}, 5000);
+   revolutionOfIntendees = new Revolution();
+   revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
+   revolutionOfIntendees.splice(0, 0, { icon: "images/blue.gif", nickname: "blue"  + (i++) }, { icon: "images/red.gif", nickname: "red" + (i++) }, { icon: "images/green.gif", nickname: "green" + (i++) });
+if(1) {
+   revolutionOfIntendees.splice(0, 0, { icon: "images/blue.gif", nickname: "blue"  + (i++) }, { icon: "images/red.gif", nickname: "red" + (i++) }, { icon: "images/green.gif", nickname: "green" + (i++) });
+   revolutionOfIntendees.splice(0, 0, { icon: "images/blue.gif", nickname: "blue"  + (i++) }, { icon: "images/red.gif", nickname: "red" + (i++) }, { icon: "images/green.gif", nickname: "green" + (i++) });
+   revolutionOfIntendees.splice(0, 0, { icon: "images/blue.gif", nickname: "blue"  + (i++) }, { icon: "images/red.gif", nickname: "red" + (i++) }, { icon: "images/green.gif", nickname: "green" + (i++) });
+   revolutionOfIntendees.splice(0, 0, { icon: "images/blue.gif", nickname: "blue"  + (i++) }, { icon: "images/red.gif", nickname: "red" + (i++) }, { icon: "images/green.gif", nickname: "green" + (i++) });
+   setTimeout(function() { revolutionOfIntendees.splice(1, 0, { icon: "images/green.gif", nickname: "green" + (i++) });
+          console.trace(revolutionOfIntendees.items.jsonize());
+     }, 3000);
+   setInterval(function() { revolutionOfIntendees.splice(1, 0, { icon: "images/green.gif", nickname: "green" + (i++) });}, 3000);
+   setInterval(function() { revolutionOfIntendees.splice(0, 0, { icon: "images/red.gif", nickname: "red" + (i++) });}, 2000);
+   setInterval(function() { revolutionOfIntendees.splice(2, 0, { icon: "images/blue.gif", nickname: "blue" + (i++) });}, 4000);
+   setInterval(function() { revolutionOfIntendees.splice(1, 1);}, 5000);
+}
 
-   var revolMsg = new Revolution();
-   revolMsg.init(msgCells);
-   revolMsg.push({ img: "images/blue.gif", desc: "hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello " });
-   setInterval(function() { revolMsg.unshift({ img: "images/green.gif", desc: "green hello" + (i++) });}, 3000);
+   revolutionOfMessages = new Revolution();
+   revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, 50);
+   revolutionOfMessages.push({ icon: "images/blue.gif", content: "hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello " });
+   setInterval(function() { revolutionOfMessages.unshift({ icon: "images/green.gif", content: "green hello" + (i++) });}, 3000);
 
-   document.getElementById("intendeesBack").onmousedown = function() { revolution.friction = 1; revolution.resume(); };
-   document.getElementById("intendeesBack").onmouseup = function() { revolution.friction = null; };
-   document.getElementById("intendeesForward").onmousedown = function() { revolution.friction = -1; revolution.resume(); };
-   document.getElementById("intendeesForward").onmouseup = function() { revolution.friction = null; };
+   document.getElementById("intendeesBack").onmousedown = function() { revolutionOfIntendees.friction = 1; revolutionOfIntendees.resume(); };
+   document.getElementById("intendeesBack").onmouseup = function() { revolutionOfIntendees.friction = null; };
+   document.getElementById("intendeesForward").onmousedown = function() { revolutionOfIntendees.friction = -1; revolutionOfIntendees.resume(); };
+   document.getElementById("intendeesForward").onmouseup = function() { revolutionOfIntendees.friction = null; };
 }
 //-->
      </SCRIPT>
@@ -95,7 +95,7 @@ body {background-color: transparent;}
   height: 133px;
 }
 
-.intendeePicOver {
+.intendeePic:hover {
   position: absolute;
   width: 99px;
   height: 133px;
@@ -120,13 +120,11 @@ body {background-color: transparent;}
 #msgsArea {
 /* background-color: #EEE; */
   position: absolute;
-/*  top: 200px; */
-  bottom: 0px;
-  top: 1%;
+  top: 166px;
+  bottom: 10px;
   left: 1%;
-  width: 98%;
-  height: 98%;
-  overflow: hidden;
+  right: 1%;
+    overflow: hidden;
 /* padding:1%; */
 }
 
@@ -138,7 +136,7 @@ body {background-color: transparent;}
   height: 30px;
 }
 
-.msgPicOver {
+.msgPic:hover {
   position: absolute;
   background-color: white;
 /*  width: 25px; */
@@ -168,63 +166,11 @@ body {background-color: transparent;}
    </HEAD>
    <BODY onload="a2ac_init();">
 <div id="intendeesArea">
-  <img id="ipic0" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc0" class="intendeeDesc"></p>
-  <img id="ipic1" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc1" class="intendeeDesc"></p>
-  <img id="ipic2" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc2" class="intendeeDesc"></p>
-  <img id="ipic3" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc3" class="intendeeDesc"></p>
-  <img id="ipic4" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc4" class="intendeeDesc"></p>
-  <img id="ipic5" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc5" class="intendeeDesc"></p>
-  <img id="ipic6" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc6" class="intendeeDesc"></p>
-  <img id="ipic7" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc7" class="intendeeDesc"></p>
-  <img id="ipic8" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc8" class="intendeeDesc"></p>
-  <img id="ipic9" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc9" class="intendeeDesc"></p>
-  <img id="ipic10" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc10" class="intendeeDesc"></p>
-  <img id="ipic11" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc11" class="intendeeDesc"></p>
-  <img id="ipic12" src="images/empty.gif" class="intendeePic"/>
-  <p id="idesc12" class="intendeeDesc"></p>
   <div id="intendeesBack"></div>
   <div id="intendeesForward"></div>
 </div>
 </div>
 <div id="msgsArea">
-    <img id="mpic0" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc0" class="msgDesc"></p>
-    <img id="mpic1" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc1" class="msgDesc"></p>
-    <img id="mpic2" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc2" class="msgDesc"></p>
-    <img id="mpic3" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc3" class="msgDesc"></p>
-    <img id="mpic4" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc4" class="msgDesc"></p>
-    <img id="mpic5" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc5" class="msgDesc"></p>
-    <img id="mpic6" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc6" class="msgDesc"></p>
-    <img id="mpic7" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc7" class="msgDesc"></p>
-    <img id="mpic8" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc8" class="msgDesc"></p>
-    <img id="mpic9" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc9" class="msgDesc"></p>
-    <img id="mpic10" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc10" class="msgDesc"></p>
-    <img id="mpic11" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc11" class="msgDesc"></p>
-    <img id="mpic12" src="images/empty.gif" class="msgPic"/>
-    <p id="mdesc12" class="msgDesc"></p>
 </div>
 
    </BODY>

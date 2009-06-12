@@ -34,7 +34,7 @@ button:hover{
 /*  left: 0%; */
 /*  top: 0%; */
   width: 100%;
-  height: 200px;
+  height: 150px;
   overflow: hidden;
 /* display:block; */
  z-index:10;
@@ -52,6 +52,8 @@ button:hover{
 
 #intendeesTrap {
   z-index: 30;
+  left:3%;
+  right:3%;
 }
 
 #intendeesForward {
@@ -97,7 +99,7 @@ button:hover{
 #msgsArea {
   position: absolute;
 /* background-color: #EEE; */
-  top: 200px;
+  top: 150px;
   left: 1%;
   width: 98%;
   bottom:60px;
@@ -186,18 +188,15 @@ var iTrap = new Trap();
 var mTrap = new Trap();
 
 function uiInit() {
-   var intendeeCells = IntendeeCell.prototype.extract("ipic", "idesc", 13);
-   revolutionOfIntendees.init(intendeeCells);
-
-   var msgCells = MessageCell.prototype.extract("mpic", "mdesc", 13);
-   revolutionOfMessages.init(msgCells);
+   revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
+   revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, 50);
 
    iTrap.bind(document.getElementById("intendeesTrap"));
    iTrap.onResume = function() { revolutionOfIntendees.resume(); }
    iTrap.onPause = function() { revolutionOfIntendees.friction=null; }
    iTrap.iterate = function() {
       Trap.prototype.iterate.call(this);
-      revolutionOfIntendees.friction = this.down ? - this.dx / IntendeeCell.prototype.itemOffset : null;
+      revolutionOfIntendees.friction = this.down ? - this.dx / IntendeeCell.prototype.gap : null;
       return this.down;
    }
 
@@ -206,13 +205,13 @@ function uiInit() {
    mTrap.onPause = function() { revolutionOfMessages.friction=null; }
    mTrap.iterate = function() {
       Trap.prototype.iterate.call(this);
-      revolutionOfMessages.friction = this.down ? this.dy / MessageCell.prototype.itemOffset : null;
+      revolutionOfMessages.friction = this.down ? this.dy / MessageCell.prototype.gap : null;
       return this.down;
    }
 
-   document.getElementById("intendeesBack").onmousedown = function() { revolutionOfIntendees.friction = -1; revolutionOfIntendees.resume(); };
+   document.getElementById("intendeesBack").onmousedown = function() { revolutionOfIntendees.friction = -0.2; revolutionOfIntendees.resume(); };
    document.getElementById("intendeesBack").onmouseup = function() { revolutionOfIntendees.friction = null; };
-   document.getElementById("intendeesForward").onmousedown = function() { revolutionOfIntendees.friction = 1; revolutionOfIntendees.resume(); };
+   document.getElementById("intendeesForward").onmousedown = function() { revolutionOfIntendees.friction = 0.2; revolutionOfIntendees.resume(); };
    document.getElementById("intendeesForward").onmouseup = function() { revolutionOfIntendees.friction = null; };
 }
 
@@ -259,14 +258,18 @@ function onIntendeeIcon(intendee, variable, value) {
 }
 
 function onIntendeesSplice(tag, index, howMany /*, intendee, intendee ... */) {
-  for (var j = 3; j < arguments.length; j++) {
-   var intendee = arguments[j];
-   log("new intendee id " + intendee.name);
-   revolutionOfIntendees.unshift(intendee);
-   intendee.subscribe("ping", onIntendeePing);
-   intendee.subscribe("nickname", onIntendeeNickname);
-   intendee.subscribe("icon", onIntendeeIcon);
-} }
+                  
+   var args = Array.prototype.slice.call(arguments,1);
+
+   for (var j = 2; j < args.length; j++) {
+      var intendee = args[j];
+      log("new intendee id " + intendee.name);
+      intendee.subscribe("ping", onIntendeePing);
+      intendee.subscribe("nickname", onIntendeeNickname);
+      intendee.subscribe("icon", onIntendeeIcon);
+   }
+   revolutionOfIntendees.splice.apply(revolutionOfIntendees,args);
+ }
 
 
 function onMessageContent(message, variable, value) {
@@ -367,7 +370,7 @@ function meInit() {
    setInterval(function() { me.doPing() }, 60 * 2 * 1000 - 30 * Math.random() * 1000);
 }
 
-function init() {
+function a2aInit() {
    uiInit();
 
    autobus.tagsonomy.subscribe("intendee", onIntendeesSplice);
@@ -383,68 +386,16 @@ function init() {
 </script>
 </head>
 
-<body onload="init();">
+<body onload="a2aInit();">
 
 <div id="intendeesArea">
   <div class="trap" id="intendeesTrap"></div>
-  <img id="ipic0" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc0" class="intendeeDesc"></p>
-  <img id="ipic1" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc1" class="intendeeDesc"></p>
-  <img id="ipic2" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc2" class="intendeeDesc"></p>
-  <img id="ipic3" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc3" class="intendeeDesc"></p>
-  <img id="ipic4" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc4" class="intendeeDesc"></p>
-  <img id="ipic5" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc5" class="intendeeDesc"></p>
-  <img id="ipic6" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc6" class="intendeeDesc"></p>
-  <img id="ipic7" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc7" class="intendeeDesc"></p>
-  <img id="ipic8" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc8" class="intendeeDesc"></p>
-  <img id="ipic9" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc9" class="intendeeDesc"></p>
-  <img id="ipic10" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc10" class="intendeeDesc"></p>
-  <img id="ipic11" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc11" class="intendeeDesc"></p>
-  <img id="ipic12" src="sexy_gui/images/empty.gif" class="intendeePic"/>
-  <p id="idesc12" class="intendeeDesc"></p>
   <div id="intendeesBack"></div>
   <div id="intendeesForward"></div>
 </div>
 
 <div id="msgsArea">
     <div class="trap" id="msgsTrap"></div>
-    <img id="mpic0" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc0" class="msgDesc"></p>
-    <img id="mpic1" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc1" class="msgDesc"></p>
-    <img id="mpic2" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc2" class="msgDesc"></p>
-    <img id="mpic3" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc3" class="msgDesc"></p>
-    <img id="mpic4" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc4" class="msgDesc"></p>
-    <img id="mpic5" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc5" class="msgDesc"></p>
-    <img id="mpic6" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc6" class="msgDesc"></p>
-    <img id="mpic7" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc7" class="msgDesc"></p>
-    <img id="mpic8" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc8" class="msgDesc"></p>
-    <img id="mpic9" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc9" class="msgDesc"></p>
-    <img id="mpic10" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc10" class="msgDesc"></p>
-    <img id="mpic11" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc11" class="msgDesc"></p>
-    <img id="mpic12" src="sexy_gui/images/empty.gif" class="msgPic"/>
-    <p id="mdesc12" class="msgDesc"></p>
 </div>
 
 <div style="position:absolute; width:25%; height:20%; right:5px; top:100px; z-index:40; background-color:white; opacity: 0.66;"></div>
