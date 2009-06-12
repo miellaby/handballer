@@ -101,16 +101,16 @@ Revolution.prototype.splice = function(index, howMany) {
 
 
 Revolution.prototype.isMoving = function() {
-    return this.innerAnims.length > 0 || this.friction || Math.abs(this.speed) > 0.006 || Math.abs(this.offset) > 0.005;
+    return this.innerAnims.length > 0 || this.friction != null || Math.abs(this.speed) > 0.006 || Math.abs(this.offset) > 0.005;
 };
 
 Revolution.prototype.computeSpeed = function() {
     
     if (this.friction != null) { // external friction
         
-        var speed = (this.friction + 3.0 * this.speed) / 4.0;
-        speed = Math.max(speed, -0.6);
-        this.speed = Math.min(speed, 0.6);
+        var speed = (this.friction + 1.0 * this.speed) / 2.0;
+        speed = Math.max(speed, -0.8);
+        this.speed = Math.min(speed, 0.8);
     } else { // no external friction
 
         if (Math.abs(this.speed) > 0.05)
