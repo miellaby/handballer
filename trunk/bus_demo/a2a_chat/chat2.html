@@ -252,7 +252,7 @@ function onIntendeeIcon(intendee, variable, value) {
     if (intendee === me) {
        url_map[intendee.nickname] = value
        var expire = new Date();
-       expire.setTime(Date.now() + 3600 * 24 * 100)
+       expire.setTime(expire.getTime() + 3600 * 24 * 100)
        cookies.set("a2ac_icons", jsonize(url_map), expire);
     }
 }
