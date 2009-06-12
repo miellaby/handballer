@@ -4,30 +4,32 @@ function RevolutionItem(pos, inFactor) {
     this.cell = null;
 }
 
-
 function Revolution() {
   Anim.call(this);
 }
 
 Revolution.prototype = new Anim();
 
-Revolution.prototype.init = function (cellPool) {
+Revolution.prototype.init = function (areaElement, cellConstructor, nbSeens) {
 
     //Parameters
-    this.items = []; // data model = list
-    this.leavings = [] ; // transitional list of "leaving" (i.e. displayed as being removed) items
+    this.areaElement = areaElement;
+    this.cellConstructor = cellConstructor;
+    this.nbSeens = nbSeens;
+
     // Initial states 
+    this.items = []; // data model = list
+    this.leavings = [] ; // transitional list of "leaving" items (i.e. still displayed while already removed from the list)
     this.generation = false; // swapping boolean to detect recyclable cells between 2 successive frames
-    this.pool= cellPool; // pool of cells
-    this.poolSize = cellPool.length;
+    this.pool= []; // pool of cells
     this.visibleCells = [];
     this.innerAnims = []; // list of motions within this UI 
-    this.friction=0;
+    this.friction=null;
     this.pos = 0;
     this.speed = 0;
+    this.offset = 0;
     this.n = undefined; // don't use for your own
     this.nbItem = undefined;
-    this.localOffset = 0;
 
     this.iterate();
 };
@@ -99,76 +101,86 @@ Revolution.prototype.splice = function(index, howMany) {
 
 
 Revolution.prototype.isMoving = function() {
-    return this.innerAnims.length > 0 || this.friction || Math.abs(this.speed) > 0.006 || Math.abs(this.localOffset) > 0.005;
+    return this.innerAnims.length > 0 || this.friction || Math.abs(this.speed) > 0.006 || Math.abs(this.offset) > 0.005;
 };
 
 Revolution.prototype.computeSpeed = function() {
-
+    
     if (this.friction != null) { // external friction
-        this.speed = (this.friction + 6.0 * this.speed) / 7.0;
-        this.speed = Math.max(this.speed, -0.6);
-        this.speed = Math.min(this.speed, 0.6);
-
+        
+        var speed = (this.friction + 3.0 * this.speed) / 4.0;
+        speed = Math.max(speed, -0.6);
+        this.speed = Math.min(speed, 0.6);
     } else { // no external friction
 
         if (Math.abs(this.speed) > 0.05)
             this.speed *= 0.9; // slowing down
 
         else { // notch motion
-
-            this.speed = ( this.pos % 1.0 ) * -0.04;
+            var offset = this.pos % 1.0;
+            if (offset > 0.5) offset = 1 - offset; 
+            if (offset < - 0.5) offset = 1 + offset;
+            this.offset = offset;
+            this.speed = ( offset % 1.0 ) * -0.04;
         }
     }
 };
 
 Revolution.prototype.iterate = function() {
-    var localOffset = this.pos % 1.0;
-    localOffset = (localOffset < 0.5 
-                   ? localOffset
-                   : localOffset - 1.0);
-    this.localOffset = localOffset;
-
+    // compute speed from acceleration/strengths
     this.computeSpeed();
     
     // apply speed
-    var pos = this.pos + this.speed;
-    var max = Math.max(this.items.length + 1, this.poolSize);
-    this.pos = pos < 0 ? max - (pos % max) : pos % max;
+    this.pos += this.speed;
+
+    // redraw
     this.redraw();
 
+    // return anim status
     return this.isMoving();
 };
 
 Revolution.prototype.redraw = function() {
     var nbItem = this.items.length;
-    var max = 1.0 * Math.max(nbItem + 1, this.poolSize);
-    var padding = Math.max(nbItem + 1, this.poolSize);
-    var pos = this.pos;
-    var localOffset = pos % 1.0;
+    var pos    = this.pos;
+    var n      = pos > 0 ? parseInt(pos) : parseInt(pos) - 1 ;
 
-    var n = parseInt(pos) % padding;
     this.generation ^= true;
 
-
+    if (this.visibleCells.length || nbItem) {
     //    if (this.n != n || this.nbItem != nbItem) {
         this.n = n;
         this.nbItem = nbItem;
 
         var toGet = [];
 
-
-        for (var i = 0, m = this.poolSize-1; i < m; ++i) {
-            var j = (i + n) % padding;
-            if (j >= nbItem) continue;
-            var cell = this.items[j].cell;
+        var i, nothing=true,toRight=false;
+        for (i = 0; i < nbItem; ++i) {
+            var j = (i + n) %nbItem;
+            if (j < 0) j += nbItem;
+            var offset = this.items[j].revolutionPos - pos;
+            var visible = this.cellConstructor.prototype.visible(this.areaElement, offset);
+            if (visible > 0) {
+                toRight = true ;
+                continue;
+            }
+            if (visible) continue;
+            nothing = false;
+            cell = this.items[j].cell;
             if (cell != null) {
                 cell.generation = this.generation;
             } else
                 toGet.push(this.items[j]);
         }
 
-        for (var lst = this.visibleCells, i = 0, m = lst.length; i < m; ++i) {
-            var cell = lst[i];
+        if (nothing && nbItem) {
+            if (toRight) // every cell are far to the right
+                this.pos += this.cellConstructor.prototype.getOpeningSize(this.areaElement) + nbItem;
+            else // every cell are far to the left
+                this.pos -= this.cellConstructor.prototype.getOpeningSize(this.areaElement) + nbItem;
+        }
+
+        for (var lst = this.visibleCells, i = 0, cell; cell = lst[i]; ++i) {
             if (cell.generation == this.generation) continue;
             // not visible any more
             cell.item.cell = null;
@@ -180,17 +192,16 @@ Revolution.prototype.redraw = function() {
 
         while (toGet.length) {
             var item = toGet.shift();
-            var cell = this.pool.shift();
+            var cell = this.pool.shift() || new this.cellConstructor(this.areaElement);
             item.cell = cell;
             cell.show(item);
             this.visibleCells.push(cell);
         }
-    //}
+    }
 
-    for (var lst = this.visibleCells, i = 0, m = lst.length; i < m; ++i) {
-        var cell = lst[i];
+    for (var lst = this.visibleCells, i = 0, cell; cell = lst[i]; ++i) {
         cell.generation = this.generation;
-        cell.setCoords(cell.item.inFactor, (max + (cell.item.revolutionPos - pos)) % max);
+        cell.setCoords(cell.item.inFactor, cell.item.revolutionPos - pos);
     }
 
     for (var lst = this.leavings, i = 0, m = lst.length; i < m; i++) {
@@ -205,10 +216,10 @@ Revolution.prototype.redraw = function() {
             m--;
         } else {
             if (!item.cell) {
-                item.cell = this.pool.shift();
+                item.cell = this.pool.shift() || new this.cellConstructor(this.areaElement);
                 item.cell.show(item);
             }
-            item.cell.setCoords(item.inFactor, (max + (item.revolutionPos - pos)) % max);
+            item.cell.setCoords(item.inFactor, item.revolutionPos - pos);
         }
     }
 };
