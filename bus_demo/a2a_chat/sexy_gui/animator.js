@@ -48,7 +48,7 @@ Animator.prototype.iterate = function() {
     }
 
     if (this.logCB) {
-        var t0 = this.TT.shift(), t9 = Date.now();
+        var t0 = this.TT.shift(), t9 = new Date.getTime();
         this.TT.push(t9);
         if ((this.TTi++) % 10 == 0)
             this.logCB(parseInt(10000 / (t9 - t0)));
