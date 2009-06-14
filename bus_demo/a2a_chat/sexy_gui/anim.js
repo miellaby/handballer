@@ -36,20 +36,20 @@ Anim.prototype.onPause = new Function();
 function readDOM(obj, cornerX, cornerY) {
     var x = parseInt(obj.style[cornerX || "left"]);
     var y = parseInt(obj.style[cornerY || "top"]);
-    var w = parseInt(obj.style.width);
-    var h = parseInt(obj.style.heigh);
+    var w = parseInt(obj.clientWidth);
+    var h = parseInt(obj.clientHeight);
     return {
-        x: (x == NaN ? undefined : x),
-        y: (y == NaN ? undefined : y),
-        w: (w == NaN ? undefined : w),
-        h: (h == NaN ? undefined : h)
+        x: (isNaN(x) ? undefined : x),
+        y: (isNaN(y) ? undefined : y),
+        w: (isNaN(w) ? undefined : w),
+        h: (isNaN(h) ? undefined : h)
     };
 };
 
-function writeDOM(coords, obj, cornerX, cornerY) {
+function writeDOM(obj, coords, cornerX, cornerY, lengthX, lengthY) {
     if (coords.x !== undefined) obj.style[cornerX || "left"] = "" + coords.x + "px";
     if (coords.y !== undefined) obj.style[cornerY || "top"] = "" + coords.y + "px";
-    if (coords.w !== undefined) obj.style.width = "" + coords.w + "px";
-    if (coords.h !== undefined) obj.style.height = "" + coords.h  + "px";
+    if (coords.w !== undefined) obj.style[lengthX || "width"] = "" + coords.w + "px";
+    if (coords.h !== undefined) obj.style[lengthY || "height"] = "" + coords.h  + "px";
 };
 
