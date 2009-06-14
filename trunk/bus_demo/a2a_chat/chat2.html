@@ -5,18 +5,42 @@
 <title>A2A CHAT</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <style type="text/css">
-body {margin: 0px; padding: 0px;} 
-body {background-color: transparent;}
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Bitstream Vera Sans','sans';
+    background-color: transparent;
+}
 
 button{
-    background-color:#ffffff;
-    border:1px solid #000000;
+    background-color:#fff;
+    border:1px solid #000;
 }
 
 button:hover{
     background-color:#dff4ff;
     border:1px solid #c2e1ef;
-    color:#336699;
+    color:#369;
+}
+
+label {
+    margin-right: 100%;
+    float: right;
+    line-height:1.5em;
+    height:1px;
+}
+
+form p {
+    margin-left:240px;
+    clear:right;
+}
+
+input {
+    border: 1px solid #000;
+    padding: 2px 1px 3px 1px;
+    margin: 0 0 3px 1px;
+    -moz-border-radius:4px;
+    background-color:#FFF;
 }
 
 .trap {
@@ -34,11 +58,12 @@ button:hover{
 /*  left: 0%; */
 /*  top: 0%; */
   width: 100%;
-  height: 150px;
+  height: 180px;
   overflow: hidden;
 /* display:block; */
  z-index:10;
 }
+
 
 #intendeesBack {
   background-color: transparent;
@@ -48,12 +73,14 @@ button:hover{
   width: 3%;
   height: 100%;
   overflow: hidden;
+  z-index:10;
 }
 
 #intendeesTrap {
   z-index: 30;
   left:3%;
   right:3%;
+  width:94%;
 }
 
 #intendeesForward {
@@ -64,14 +91,19 @@ button:hover{
   width: 3%;
   height: 100%;
   overflow: hidden;
+  z-index:10;
 }
 
 .intendeePic {
   position: absolute;
-/*  left: 0px; */
-/*  top: 0px; */
   width: 99px;
   height: 133px;
+}
+
+.intendeeEmblem {
+  position: absolute;
+  width: 32px;
+  height: 32px;
 }
 
 .intendeePic:hover {
@@ -91,15 +123,19 @@ button:hover{
   width: 99px;
   height: 30px;
 /*  line-height:1.5em; */
-  font-family:'Bitstream Vera Sans','sans';
   font-size:16px;
   margin: 0;
 }
 
+.intendeeDesc quote {
+  font-size:12px;
+}
+
+
 #msgsArea {
   position: absolute;
 /* background-color: #EEE; */
-  top: 150px;
+  top: 180px;
   left: 1%;
   width: 98%;
   bottom:60px;
@@ -137,6 +173,18 @@ button:hover{
   height: 40px;
 }
 
+.ContextForm {
+    -moz-border-radius:20px;
+    -webkit-border-radius:20px;
+    position:absolute;
+    width:30%;
+    right:5px;
+    top:100px;
+    z-index:40;
+    background-color:white;
+    opacity: 0.90;
+}
+
 
 .msgDesc {
   position: absolute;
@@ -148,7 +196,6 @@ button:hover{
   right: 0px;
   line-height: 30px;
   height: 30px ;
-  font-family:'Bitstream Vera Sans','sans';
   font-size:18px;
   padding:0%;
   overflow: auto;
@@ -186,6 +233,7 @@ var revolutionOfIntendees = new Revolution();
 var revolutionOfMessages =  new Revolution();
 var iTrap = new Trap();
 var mTrap = new Trap();
+
 
 function uiInit() {
    revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
@@ -239,23 +287,6 @@ function onIntendeePing(intendee, variable, value) {
 
 var url_map = eval("(" + (cookies.get("a2ac_icons") || "null") + ")")
                   || { "red": "./sexy_gui/images/red.gif", "blue": "./sexy_gui/images/blue.gif", "green": "./sexy_gui/images/green.gif" };
-function onIntendeeNickname(intendee, variable, value) {
-    if (intendee === me) {
-      cookies.set("a2ac_nick", value);
-      document.getElementById("meName").value = value;
-      var url = url_map[value] || "./sexy_gui/images/guest.gif";
-      me.set("icon", url);
-    }
-}
-
-function onIntendeeIcon(intendee, variable, value) {
-    if (intendee === me) {
-       url_map[intendee.nickname] = value
-       var expire = new Date();
-       expire.setTime(expire.getTime() + 3600 * 24 * 100)
-       cookies.set("a2ac_icons", jsonize(url_map), expire);
-    }
-}
 
 function onIntendeesSplice(tag, index, howMany /*, intendee, intendee ... */) {
                   
@@ -265,8 +296,6 @@ function onIntendeesSplice(tag, index, howMany /*, intendee, intendee ... */) {
       var intendee = args[j];
       log("new intendee id " + intendee.name);
       intendee.subscribe("ping", onIntendeePing);
-      intendee.subscribe("nickname", onIntendeeNickname);
-      intendee.subscribe("icon", onIntendeeIcon);
    }
    revolutionOfIntendees.splice.apply(revolutionOfIntendees,args);
  }
@@ -341,8 +370,36 @@ function cleanGone() {
    pingsLog = {};
 }
 
+function onMeNickname(intendee, variable, value) {
+      document.getElementById("meName").value = value;
+      cookies.set("a2ac_nick", value);
+      var url = url_map[value] || "./sexy_gui/images/guest.gif";
+      me.set("icon", url);
+}
+
+function onMeIcon(intendee, variable, value) {
+       document.getElementById("mePic").value = value;
+       document.getElementById("mePicImg").src = value;
+       url_map[intendee.nickname] = value;
+       var expire = new Date();
+       expire.setTime(expire.getTime() + 3600 * 24 * 100)
+       cookies.set("a2ac_icons", jsonize(url_map), expire);
+}
+
+function onMeMind(intendee, variable, value) {
+       document.getElementById("meMind").value = value;
+       cookies.set("a2ac_mind", value);
+}
+
+function onMeEmblem(intendee, variable, value) {
+       document.getElementById("meEmblem").value = value;
+       document.getElementById("meEmblemImg").src = value;
+       cookies.set("a2ac_emblem", value);
+}
+
 function autoConfig() {
-  var nick = cookies.get("a2ac_nick");
+  var nick = cookies.get("a2ac_nick"), mind = cookies.get("a2ac_mind"), emblem = cookies.get("a2ac_emblem");
+
   if (!nick) {
     var names = [];
     var intendees = autobus.tagsonomy.getOr("intendee",[]);
@@ -362,6 +419,8 @@ function autoConfig() {
     }
   }
   me.set("nickname", nick);
+  if (mind) me.set("mind", mind);
+  if (emblem) me.set("emblem", emblem);
 }
 
 function meInit() {
@@ -378,6 +437,11 @@ function a2aInit() {
 
    autobus.init();
    meInit();
+   me.subscribe("nickname", onMeNickname);
+   me.subscribe("icon", onMeIcon);
+   me.subscribe("mind", onMeMind);
+   me.subscribe("emblem", onMeEmblem);
+
    setInterval(cleanGone, 60 * 2 * 1000);
    setTimeout(autoConfig, 3 * 1000);   
 }
@@ -397,13 +461,19 @@ function a2aInit() {
 <div id="msgsArea">
     <div class="trap" id="msgsTrap"></div>
 </div>
-
-<div style="position:absolute; width:25%; height:20%; right:5px; top:100px; z-index:40; background-color:white; opacity: 0.66;"></div>
-<div style="position:absolute; width:25%; height:20%; right:5px; top:100px; z-index:41; background-color:transparent; opacity:1">
-  <form action="javascript:me.set('nickname',document.getElementById('meName').value)">
-    <input type="text" id="meName" value="guest" style="background-color:white;"><button type="submit">nickname</button>
-  </h3></form>
-</div>
+<form id="contextForm" class="ContextForm" style="display:none;" action="javascript:submitContextForm();">
+  <img id="mePicImg" src="sexy_gui/images/blank.gif" style="float: left;"/>
+  <p><label for="meName">nick&nbsp;</label>
+     <input type="text" id="meName" value="guest" style=""></p>
+  <p><label for="mePic">pic&nbsp;</label>
+     <input type="text" id="mePic" value="" style=""></p>
+  <p><label for="meMind">mind&nbsp;</label>
+     <input type="text" id="meMind" value=""></p>
+  <p><label for="meEmblem">emblem&nbsp;</label>
+     <img id="meEmblemImg" src="sexy_gui/images/blank.gif" style="width: 32px; eight: 32px;"/>&nbsp;<input type="text" id="meEmblem" value="">
+  </p>
+  <input type="submit" value="Submit" style="float:right;"/>&nbsp;
+</form>
 
 <form id="postArea" action="javascript:me.postMessage();">
   <input id="messageBody"/>
