@@ -8,6 +8,7 @@ function showContextForm(e) {
     var c = contextForm.element = isMe? document.getElementById("contextForm") : null;
     if (!c) return;
     c.style.display = "block";
+
     var coords = readDOM(e.img);
     var coords2 = {
         x: coords.x + coords.w * 0.33,
@@ -17,7 +18,9 @@ function showContextForm(e) {
 }
 
 function submitContextForm(e) {
-    me.set('nickname', document.getElementById('meName').value);
+    var nickname = document.getElementById('meName').value;
+    if (me.get("nickname") != nickname)
+        setNickname(nickname);
     me.set('emblem', document.getElementById('meEmblem').value);
     me.set('mind', document.getElementById('meMind').value);
     me.set('icon', document.getElementById('mePic').value);
@@ -79,6 +82,8 @@ IntendeeCell.prototype.hide = function() {
     if (this.item.unsubscribe) {
         this.item.unsubscribe("icon", this.selfUpdate);
         this.item.unsubscribe("nickname", this.selfUpdate);
+        this.item.unsubscribe("emblem", this.selfUpdate);
+        this.item.unsubscribe("mind", this.selfUpdate);
     }
     this.emblem.style.display = "none";
     this.img.style.display = "none";
@@ -93,12 +98,14 @@ IntendeeCell.prototype.show = function(item) {
             item.subscribe("nickname", this.selfUpdate);
             item.subscribe("icon", this.selfUpdate);
             item.subscribe("emblem", this.selfUpdate);
+            item.subscribe("mind", this.selfUpdate);
         }
 
         this.emblem.style.display = "block";
         this.desc.style.display = "block";
         this.img.style.display = "block";
         this.desc.style.fontStyle = (item === window.me ? "italic" : "normal");
+        this.desc.style.fontWeight = (item === window.me ? "bold" : "normal");
     }
 
     this.img.src = item.icon || this.defaultImg;
@@ -182,3 +189,46 @@ MessageCell.prototype.onClick = function() {
 }
 
 MessageCell.prototype.gap = 50;
+
+var revolutionOfIntendees = new Revolution();
+var revolutionOfMessages =  new Revolution();
+var iTrap = new Trap();
+var mTrap = new Trap();
+
+function uiInit() {
+    revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
+    revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, 50);
+
+    iTrap.bind(document.getElementById("intendeesTrap"));
+    iTrap.onResume = function() { revolutionOfIntendees.resume(); }
+    iTrap.onPause = function() { revolutionOfIntendees.friction=null; }
+    iTrap.iterate = function() {
+        Trap.prototype.iterate.call(this);
+        revolutionOfIntendees.friction = this.down ? - this.dx / IntendeeCell.prototype.gap : null;
+        return this.down;
+    }
+
+    mTrap.bind(document.getElementById("msgsTrap"));
+    mTrap.onResume = function() { revolutionOfMessages.resume(); }
+    mTrap.onPause = function() { revolutionOfMessages.friction=null; }
+    mTrap.iterate = function() {
+        Trap.prototype.iterate.call(this);
+        revolutionOfMessages.friction = this.down ? this.dy / MessageCell.prototype.gap : null;
+        return this.down;
+    }
+
+    document.getElementById("intendeesBack").onmousedown = function() { revolutionOfIntendees.friction = -0.2; revolutionOfIntendees.resume(); };
+    document.getElementById("intendeesBack").onmouseup = function() { revolutionOfIntendees.friction = null; };
+    document.getElementById("intendeesForward").onmousedown = function() { revolutionOfIntendees.friction = 0.2; revolutionOfIntendees.resume(); };
+    document.getElementById("intendeesForward").onmouseup = function() { revolutionOfIntendees.friction = null; };
+ 
+    document.getElementById("meName").onblur = function() { setNickname(document.getElementById('meName').value); }
+
+    sound.preload("sexy_gui/sound/freesound__soaper__footsteps_1.mp3", "incoming");
+    sound.preload("sexy_gui/sound/freesound__FreqMan__011_Door_opens_and_shuts.mp3", "leaving");
+    sound.preload("sexy_gui/sound/freesound__acclivity__Goblet_G_Medium.mp3", "blah!");
+}
+
+function puts(msg, pic) {
+    revolutionOfMessages && revolutionOfMessages.unshift({"from": "log", "content": msg});
+}

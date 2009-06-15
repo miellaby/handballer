@@ -1,3 +1,6 @@
+// console
+if (typeof console != "object") var console = { log: function() {} };
+
 // occurences removal helper
 if (Array.prototype.remove === undefined) {
    Array.prototype.remove = function(s){

@@ -221,264 +221,42 @@ input {
 <script type="text/javascript" src="sexy_gui/cell.js"></script>
 <script type="text/javascript" src="sexy_gui/revolutionAnims.js"></script>
 <script type="text/javascript" src="sexy_gui/revolution.js"></script>
+<script type="text/javascript" src="sexy_gui/sound.js"></script>
 <script type="text/javascript" src="sexy_gui/a2ac_ui.js"></script>
-
-<script type="text/javascript">
-//<!--
-if (typeof console != "object") var console = { log: function() {} };
-
-var autobus = new Autobus();
-var me;
-var revolutionOfIntendees = new Revolution();
-var revolutionOfMessages =  new Revolution();
-var iTrap = new Trap();
-var mTrap = new Trap();
-
-
-function uiInit() {
-   revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
-   revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, 50);
-
-   iTrap.bind(document.getElementById("intendeesTrap"));
-   iTrap.onResume = function() { revolutionOfIntendees.resume(); }
-   iTrap.onPause = function() { revolutionOfIntendees.friction=null; }
-   iTrap.iterate = function() {
-      Trap.prototype.iterate.call(this);
-      revolutionOfIntendees.friction = this.down ? - this.dx / IntendeeCell.prototype.gap : null;
-      return this.down;
-   }
-
-   mTrap.bind(document.getElementById("msgsTrap"));
-   mTrap.onResume = function() { revolutionOfMessages.resume(); }
-   mTrap.onPause = function() { revolutionOfMessages.friction=null; }
-   mTrap.iterate = function() {
-      Trap.prototype.iterate.call(this);
-      revolutionOfMessages.friction = this.down ? this.dy / MessageCell.prototype.gap : null;
-      return this.down;
-   }
-
-   document.getElementById("intendeesBack").onmousedown = function() { revolutionOfIntendees.friction = -0.2; revolutionOfIntendees.resume(); };
-   document.getElementById("intendeesBack").onmouseup = function() { revolutionOfIntendees.friction = null; };
-   document.getElementById("intendeesForward").onmousedown = function() { revolutionOfIntendees.friction = 0.2; revolutionOfIntendees.resume(); };
-   document.getElementById("intendeesForward").onmouseup = function() { revolutionOfIntendees.friction = null; };
-}
-
-function puts(msg, pic) {
-  revolutionOfMessages && revolutionOfMessages.unshift({"from": "log", "content": msg});
-}
-
-function log(msg) {
-   return;
-   puts(msg);
-}
-
-
-if(0)
-autobus.hbc.logCB = function(msg) {
-  puts("logCB: " + msg) ;
-}
-
-var pingsLog = {};
-function onIntendeePing(intendee, variable, value) {
-    pingsLog[intendee.name] = intendee;
-    log("intendee " + intendee.name + " heard at " + new Date());
-    if (me.ping < value) me.ping = value;
-}
-
-var url_map = eval("(" + (cookies.get("a2ac_icons") || "null") + ")")
-                  || { "red": "./sexy_gui/images/red.gif", "blue": "./sexy_gui/images/blue.gif", "green": "./sexy_gui/images/green.gif" };
-
-function onIntendeesSplice(tag, index, howMany /*, intendee, intendee ... */) {
-                  
-   var args = Array.prototype.slice.call(arguments,1);
-
-   for (var j = 2; j < args.length; j++) {
-      var intendee = args[j];
-      log("new intendee id " + intendee.name);
-      intendee.subscribe("ping", onIntendeePing);
-   }
-   revolutionOfIntendees.splice.apply(revolutionOfIntendees,args);
- }
-
-
-function onMessageContent(message, variable, value) {
-    //var intendee = autobus.tagsonomy.getOr(message.from,null);
-    //var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + message.from);
-    //log(who + " said: " + value);
-}
-
-function onMessageTimestamp(message, variable, value) {
-    if (me.ping < value) me.ping = value;
-}
-
-var messagesQueue = [];
-
-function onMessagesSplice(tag, index, howMany /*, message, message ... */) {
-  for (var j = 3; j < arguments.length; j++) { 
-   var message = arguments[j];
-   //log("new message " + message.name);
-   message.subscribe("content", onMessageContent);
-   message.subscribe("timestamp", onMessageTimestamp);
-   messagesQueue.unshift(message);
-   revolutionOfMessages.unshift(message);
-
-   var removed = messagesQueue.splice(10,10);
-   for (var lst = removed, l = lst.length, i = l - 1; i >= 0; i--) {
-      //log("message " + lst[i].name + " forgotten");
-      lst[i].forget();
-  } }
-}
-
-
-function Me() {
-   BusAgent.call(this, autobus, agentUUID("i"), BusAgent.prototype.here);
-   this.setTags("intendee");
-   this.ping = 0;
-}
-
-Me.prototype = new BusAgent();
-Me.prototype.postMessage = function() {
-  v = document.getElementById('messageBody');
-  var msg = new BusAgent(autobus, agentUUID("m"), BusAgent.prototype.here);
-  msg.sets({
-    tags: ["message"],
-    from: me.name,
-    //to: otherIntendee,
-    content: v.value,
-    timestamp: 1 + me.ping
-  });
-  v.value = "";
-}
-
-Me.prototype.doPing = function() {
-   this.set("ping", 1 + me.ping);
-}
-
-var lastPingsLog = {};
-function cleanGone() {
-  for (var lst = autobus.tagsonomy.getOr("intendee",[]), l = lst.length, i = l - 1; i >= 0; i--) {
-     var intendee=lst[i];
-     if (intendee === me || pingsLog[intendee.name] || lastPingsLog[intendee.name])
-        continue; // intendee still here
-
-     // intendee is gone
-     puts("intendee " + intendee.name + " is gone!");
-     intendee.forget();
-   }
-
-   lastPingsLog = pingsLog;
-   pingsLog = {};
-}
-
-function onMeNickname(intendee, variable, value) {
-      document.getElementById("meName").value = value;
-      cookies.set("a2ac_nick", value);
-      var url = url_map[value] || "./sexy_gui/images/guest.gif";
-      me.set("icon", url);
-}
-
-function onMeIcon(intendee, variable, value) {
-       document.getElementById("mePic").value = value;
-       document.getElementById("mePicImg").src = value;
-       url_map[intendee.nickname] = value;
-       var expire = new Date();
-       expire.setTime(expire.getTime() + 3600 * 24 * 100)
-       cookies.set("a2ac_icons", jsonize(url_map), expire);
-}
-
-function onMeMind(intendee, variable, value) {
-       document.getElementById("meMind").value = value;
-       cookies.set("a2ac_mind", value);
-}
-
-function onMeEmblem(intendee, variable, value) {
-       document.getElementById("meEmblem").value = value;
-       document.getElementById("meEmblemImg").src = value;
-       cookies.set("a2ac_emblem", value);
-}
-
-function autoConfig() {
-  var nick = cookies.get("a2ac_nick"), mind = cookies.get("a2ac_mind"), emblem = cookies.get("a2ac_emblem");
-
-  if (!nick) {
-    var names = [];
-    var intendees = autobus.tagsonomy.getOr("intendee",[]);
-    for (var l = intendees.length, i = l - 1; i >= 0; i--)
-      names.push(intendees[i].nickname);
-    
-    var lst = [ "red", "blue", "green", "purple", "orange", "pink", "gray" ];
-    for (var l = lst.length, i = l - 1; i >= 0; i--) {
-       if (names.indexOf(lst[i]) != -1) continue;
-       nick = lst[i];
-    }   
-    if (!nick) {
-      var default_prefix = "guest";
-      var i = 2;
-      while (names.indexOf(default_prefix + i) != -1) i++;
-      nick = default_prefix + i;
-    }
-  }
-  me.set("nickname", nick);
-  if (mind) me.set("mind", mind);
-  if (emblem) me.set("emblem", emblem);
-}
-
-function meInit() {
-   me = new Me();
-   me.doPing();
-   setInterval(function() { me.doPing() }, 60 * 2 * 1000 - 30 * Math.random() * 1000);
-}
-
-function a2aInit() {
-   uiInit();
-
-   autobus.tagsonomy.subscribe("intendee", onIntendeesSplice);
-   autobus.tagsonomy.subscribe("message", onMessagesSplice);
-
-   autobus.init();
-   meInit();
-   me.subscribe("nickname", onMeNickname);
-   me.subscribe("icon", onMeIcon);
-   me.subscribe("mind", onMeMind);
-   me.subscribe("emblem", onMeEmblem);
-
-   setInterval(cleanGone, 60 * 2 * 1000);
-   setTimeout(autoConfig, 3 * 1000);   
-}
-
-//-->
-</script>
+<script type="text/javascript" src="chat2.js"></script>
 </head>
 
-<body onload="a2aInit();">
+<body onload="init();" onunload="finish();">
 
-<div id="intendeesArea">
-  <div class="trap" id="intendeesTrap"></div>
-  <div id="intendeesBack"></div>
-  <div id="intendeesForward"></div>
-</div>
+  <!-- intendy area technologies -->
+  <div id="intendeesArea">
+    <div class="trap" id="intendeesTrap"></div>
+    <div id="intendeesBack"></div>
+    <div id="intendeesForward"></div>
+  </div>
 
-<div id="msgsArea">
+  <div id="msgsArea">
     <div class="trap" id="msgsTrap"></div>
-</div>
-<form id="contextForm" class="ContextForm" style="display:none;" action="javascript:submitContextForm();">
-  <img id="mePicImg" src="sexy_gui/images/blank.gif" style="float: left;"/>
-  <p><label for="meName">nick&nbsp;</label>
-     <input type="text" id="meName" value="guest" style=""></p>
-  <p><label for="mePic">pic&nbsp;</label>
-     <input type="text" id="mePic" value="" style=""></p>
-  <p><label for="meMind">mind&nbsp;</label>
-     <input type="text" id="meMind" value=""></p>
-  <p><label for="meEmblem">emblem&nbsp;</label>
-     <img id="meEmblemImg" src="sexy_gui/images/blank.gif" style="width: 32px; eight: 32px;"/>&nbsp;<input type="text" id="meEmblem" value="">
-  </p>
-  <input type="submit" value="Submit" style="float:right;"/>&nbsp;
-</form>
+  </div>
+  <form id="contextForm" class="ContextForm" style="display:none;" action="javascript:submitContextForm();">
+    <button onclick="javascript:showContextForm(null);">close</button>
+    <img id="mePicImg" src="sexy_gui/images/blank.gif" style="float: left;"/>
+    <p><label for="meName">nick&nbsp;</label>
+      <input type="text" id="meName" value="guest" style=""></p>
+    <p><label for="mePic">pic&nbsp;</label>
+      <input type="text" id="mePic" value="" style=""></p>
+    <p><label for="meMind">mind&nbsp;</label>
+      <input type="text" id="meMind" value=""></p>
+    <p><label for="meEmblem">emblem&nbsp;</label>
+      <img id="meEmblemImg" src="sexy_gui/images/blank.gif" style="width: 32px; eight: 32px;"/>&nbsp;<input type="text" id="meEmblem" value="">
+    </p>
+    <input type="submit" value="Submit" style="float:right;"/>&nbsp;
+  </form>
 
-<form id="postArea" action="javascript:me.postMessage();">
-  <input id="messageBody"/>
-<button type="submit">submit</button>
-</form>
+  <form id="postArea" action="javascript:me.postMessage();">
+    <input id="messageBody"/>
+    <button type="submit">submit</button>
+  </form>
 
 </body>
 </html>

@@ -61,7 +61,7 @@ Object.prototype.jsonize = function() {
       return "#DOMNode";
 
   var partial = [], v;
-  for (k in this) {
+  for (var k in this) {
       if (!this.hasOwnProperty(k)) continue;
       v = jsonize(this[k]);
       if (v !== undefined) partial.push(k.jsonize() + ':' + v);
