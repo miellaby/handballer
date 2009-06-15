@@ -179,18 +179,18 @@ function onMeNickname(intendee, variable, value) {
 function onMeIcon(intendee, variable, value) {
     document.getElementById("mePic").value = value;
     document.getElementById("mePicImg").src = value;
-    settings.save(intendee.nickname, "icon", value);
+    settings.set(intendee.nickname, "icon", value);
 }
 
 function onMeMind(intendee, variable, value) {
     document.getElementById("meMind").value = value;
-    settings.save(intendee.nickname, "mind", value);
+    settings.set(intendee.nickname, "mind", value);
 }
 
 function onMeEmblem(intendee, variable, value) {
     document.getElementById("meEmblem").value = value;
     document.getElementById("meEmblemImg").src = value;
-    settings.save(intendee.nickname, "emblem", value);
+    settings.set(intendee.nickname, "emblem", value);
 }
 
 function setNickname(nickname) {
