@@ -58,7 +58,7 @@ RevolutionInAnim.prototype.onSplice = function(start, howMany /*, item, item, ..
 }
 
 RevolutionInAnim.prototype.onFinish = function() {
-    console.log("auto remove");
+    // console.log("auto remove");
     this.revolution.innerAnims.remove(this);
 };
 
@@ -122,7 +122,7 @@ RevolutionOutAnim.prototype.onSplice = function(start, howMany /*, item, item, .
 }
 
 RevolutionOutAnim.prototype.onFinish = function() {
-    console.log("auto remove");
+    // console.log("auto remove");
     this.revolution.innerAnims.remove(this);
 };
 
