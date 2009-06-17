@@ -1,20 +1,34 @@
 var contextForm  = {};
+
+function contextFormAnimIterate() {
+        writeDOM(this.form, this.current);
+        this.ratio += 0.1;
+        this.current.x = this.start.x + (this.end.x - this.start.x) * this.ratio;
+        this.current.y = this.start.y + (this.end.y - this.start.y) * this.ratio;
+        return this.ratio <= 1;
+}
+
 function showContextForm(e) {
     if (contextForm.element)
         contextForm.element.style.display = "none";
     contextForm.target = e;
     if (!e) return;
     var isMe = (e.item === me);
-    var c = contextForm.element = isMe? document.getElementById("contextForm") : null;
-    if (!c) return;
-    c.style.display = "block";
+    var form = contextForm.element = isMe? document.getElementById("contextForm") : null;
+    if (!form) return;
 
+    var a = new Anim();
+    a.form = form;
+    a.ratio = 0;
+    a.start = a.current = {x: -100, y: 400};
     var coords = readDOM(e.img);
-    var coords2 = {
+    a.end = {
         x: coords.x + coords.w * 0.33,
         y: coords.y + coords.h * 0.66
     };
-    writeDOM(c, coords2); 
+    a.iterate = contextFormAnimIterate;
+    a.resume();
+    form.style.display = "block";
 }
 
 function submitContextForm(e) {
@@ -227,6 +241,11 @@ function uiInit() {
     sound.preload("sexy_gui/sound/freesound__soaper__footsteps_1.mp3", "incoming");
     sound.preload("sexy_gui/sound/freesound__FreqMan__011_Door_opens_and_shuts.mp3", "leaving");
     sound.preload("sexy_gui/sound/freesound__acclivity__Goblet_G_Medium.mp3", "blah!");
+
+    document.body.onmouseover = function() { me.set("looking", true); };
+    document.body.onmouseout = function() { me.set("looking", false); };
+    window.onfocus = function() { me.set("typing", true); };
+    window.onblur = function() { me.set("typing", false); };
 }
 
 function puts(msg, pic) {

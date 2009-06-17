@@ -105,6 +105,7 @@ function onMessageContent(message, variable, value) {
     var intendee = autobus.tagsonomy.getOr(message.from,null);
     var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + message.from);
     //log(who + " said: " + value);
+    if (me.looking || me.typing) return; // no need to make sound if me looking
     sound.play("blah!", 5000);
 }
 
@@ -171,27 +172,42 @@ function cleanGone() {
     pingsLog = {};
 }
 
-function onMeNickname(intendee, variable, value) {
+function onMeNickname(me, variable, value) {
     document.getElementById("meName").value = value;
     cookies.set("a2ac_nickname", value);
 }
 
-function onMeIcon(intendee, variable, value) {
+function onMeIcon(me, variable, value) {
     document.getElementById("mePic").value = value;
     document.getElementById("mePicImg").src = value;
-    settings.set(intendee.nickname, "icon", value);
+    settings.set(me.nickname, "icon", value);
 }
 
-function onMeMind(intendee, variable, value) {
+function onMeMind(me, variable, value) {
     document.getElementById("meMind").value = value;
-    settings.set(intendee.nickname, "mind", value);
+    settings.set(me.nickname, "mind", value);
 }
 
-function onMeEmblem(intendee, variable, value) {
+function onMeEmblem(me, variable, value) {
     document.getElementById("meEmblem").value = value;
     document.getElementById("meEmblemImg").src = value;
-    settings.set(intendee.nickname, "emblem", value);
+    settings.set(me.nickname, "emblem", value);
 }
+
+var awayTimeout = null;
+
+function onMeWorking(me, variable, value) {
+    if (me.awayTimeout !== undefined) {
+        clearTimeout(me.awayTimeout);
+        me.awayTimeout = undefined;
+    }
+    if (value)
+        me.set("away", false);
+    else if (!me.get("looking") && !me.get("typing")) // not working any more
+        me.awayTimeout = setTimeout(function() {me.set("away" ,true);}, 60 * 1000);
+}
+
+
 
 function setNickname(nickname) {
     me.set("nickname", nickname);
@@ -253,6 +269,8 @@ function init() {
     me.subscribe("icon", onMeIcon);
     me.subscribe("mind", onMeMind);
     me.subscribe("emblem", onMeEmblem);
+    me.subscribe("looking", onMeWorking);
+    me.subscribe("typing", onMeWorking);
 
     setInterval(cleanGone, 60 * 2 * 1000);
     var nickname = cookies.get("a2ac_nickname");
@@ -266,3 +284,4 @@ function init() {
 function finish() {
     me.forget();
 }
+
