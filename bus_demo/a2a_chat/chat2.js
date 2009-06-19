@@ -80,14 +80,32 @@ var chat2 = {
         document.getElementById("meEmblem").value = value;
         document.getElementById("meEmblemImg").src = value;
     },
+
+    updateForm: function(variable, value) {
+        var t = { "nickname": "iName", "icon": "iPic", "emblem": "iEmblem", "mind": "iMind" } ;
+        var id = t[variable];
+        if (!id) return;
+        document.getElementById(id).value = value;
+        if (id == 'iPic')
+            document.getElementById("iPicImg").src = value;
+        if (id == 'iEmblem')
+            document.getElementById("iEmblemImg").src = value;
+    },
     
     showContextForm: function(e) {
         var form = chat2.contextForm = document.getElementById("contextForm");
-        chat2.context = e;
         chat2.contextForm.style.display = "none";
         if (!e || !form) return;
-        
-        //
+
+        if (chat2.context) {
+            chat2.context.unsubscribe("nickname", chat2.updateForm);
+            chat2.context.unsubscribe("icon", chat2.updateForm);
+            chat2.context.unsubscribe("mind", chat2.updateForm);
+            chat2.context.unsubscribe("emblem", chat2.updateForm);
+            chat2.context = null;
+        }
+
+        // form choice
         var isMe = (e.item === a2ac.me);
         var targetForm = (isMe ? "mePropsForm"
                           : (e.item.nickname !== undefined ? "iPropsForm"
@@ -99,6 +117,18 @@ var chat2 = {
         }
         if (targetForm) document.getElementById(targetForm).style.display = "block";
 
+        // form fill up
+        if (targetForm == "iPropsForm") {
+            e.item.subscribeSync("nickname", chat2.updateForm);
+            e.item.subscribeSync("nickname", chat2.updateForm);
+            e.item.subscribeSync("icon", chat2.updateForm);
+            e.item.subscribeSync("mind", chat2.updateForm);
+            e.item.subscribeSync("emblem", chat2.updateForm);
+            chat2.context = e.item;
+        }
+
+
+        // the incoming animation
         var a = new Anim();
         a.form = form;
         a.ratio = 0;

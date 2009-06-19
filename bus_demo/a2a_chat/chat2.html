@@ -242,8 +242,8 @@ input {
     <div class="trap" id="msgsTrap"></div>
   </div>
   <div id="contextForm" style="display:none;">
+    <button onclick="javascript:chat2.showContextForm(null);">close</button>
     <form id="mePropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
-      <button onclick="javascript:chat2.showContextForm(null);">close</button>
       <img id="mePicImg" src="sexy_gui/images/blank.gif" style="float: left;"/>
       <p><label for="meName">nick&nbsp;</label>
         <input type="text" id="meName" value="guest" style=""></p>
@@ -254,12 +254,21 @@ input {
       <p><label for="meEmblem">emblem&nbsp;</label>
         <img id="meEmblemImg" src="sexy_gui/images/blank.gif" style="width: 32px; eight: 32px;"/>&nbsp;<input type="text" id="meEmblem" value="">
       </p>
+      <button style="float:right;" onclick="javascript:chat2.submitContextForm();">Submit</button>&nbsp;
     </form>
-    <form id ="iPropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
+    <form id ="iPropsForm" class="ContextForm" action="null">
+      <img id="iPicImg" src="sexy_gui/images/blank.gif" style="float: left;"/>
+      <p><label for="iName">nick&nbsp;</label>
+        <input type="text" readonly="readonly" id="iName" value="guest" style=""></p>
+      <p><label for="iPic">pic&nbsp;</label>
+        <input type="text" readonly="readonly" id="iPic" value="" style=""></p>
+      <p><label for="iMind">mind&nbsp;</label>
+        <input type="text" readonly="readonly" id="iMind" value=""></p>
+      <p><label for="iEmblem">emblem&nbsp;</label>
+        <img id="iEmblemImg" src="sexy_gui/images/blank.gif" style="width: 32px; eight: 32px;"/>&nbsp;<input type="text" id="iEmblem" readonly="readonly" value="">
     </form>
     <form id ="mPropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
     </form>
-    <button style="float:right;" onclick="javascript:chat2.submitContextForm();">Submit</button>&nbsp;
   </div>
 
   <form id="postArea" action="javascript:chat2.onMessageSubmit();">
