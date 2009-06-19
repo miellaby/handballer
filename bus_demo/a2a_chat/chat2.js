@@ -195,8 +195,13 @@ var chat2 = {
         document.body.onmouseout = function() { a2ac.me.watchingActivity.set(false); };
         window.onfocus = function() { a2ac.me.typingActivity.set(true); a2ac.me.typingActivity.set(false); };
         window.onblur = function() { a2ac.me.typingActivity.set(false); };
-        document.getElementById("messageBody").onkeydown = function() { a2ac.me.typingActivity.set(true); };
-        document.getElementById("messageBody").onkeyup = function() { a2ac.me.typingActivity.set(false); };
+        var input = document.getElementById("messageBody");
+        input.onkeydown = function() { a2ac.me.typingActivity.set(true); };
+        input.onkeyup = function() { a2ac.me.typingActivity.set(false); };
+        var defaultValue = input.value;
+        input.style.color = "gray";
+        input.onfocus = function() { if (this.value == defaultValue) { this.value=''; this.style.color = "black"; } };
+        input.onblur = function() { if (!this.value.length) { this.value = defaultValue; this.style.color = "gray"; } };
         a2ac.init();
 
         a2ac.me.subscribeSync("nickname", chat2.onMeNickname);

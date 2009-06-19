@@ -240,7 +240,7 @@ Me.prototype.autoConfig = function() {
 var a2ac = {
     me: null,
 
-    messagesQueue: [],
+    //messagesQueue: [],
 
     pingsLog: {},
     lastPingsLog: {},
@@ -284,14 +284,15 @@ var a2ac = {
             var message = arguments[j];
             //log("new message " + message.name);
             message.subscribe("timestamp", a2ac.onMessageTimestamp);
-            a2ac.messagesQueue.unshift(message);
+            //a2ac.messagesQueue.unshift(message);
             
-            var removed = a2ac.messagesQueue.splice(10,10);
+            // var removed = a2ac.messagesQueue.splice(10,10);
             // TO BE DONE: revoir la gestion des indices lors de cette manip de liste *rééntrante*
-            for (var lst = removed, l = lst.length, i = l - 1; i >= 0; i--) {
-                //log("message " + lst[i].name + " forgotten");
-                lst[i].forget();
-            } }
+            //for (var lst = removed, l = lst.length, i = l - 1; i >= 0; i--) {
+            //    //log("message " + lst[i].name + " forgotten");
+            //    lst[i].forget();
+            // }
+        }
     },
     
     init: function() {
