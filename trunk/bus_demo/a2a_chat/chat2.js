@@ -1,287 +1,180 @@
+// ======================================================================
+// Javascript glue for chat2.html
+// ======================================================================
 
-var autobus = new Autobus();
-var me;
 
-function log(msg) {
-    return;
-    puts(msg);
+IntendeeCell.prototype.onClick = function() {
+    chat2.showContextForm(this);
+}
+
+MessageCell.prototype.onClick = function() {
+    chat2.showContextForm(this);
+}
+
+function contextFormAnimIterate() {
+    writeDOM(this.form, this.current);
+    this.ratio += 0.1;
+    this.current.x = this.start.x + (this.end.x - this.start.x) * this.ratio;
+    this.current.y = this.start.y + (this.end.y - this.start.y) * this.ratio;
+    return this.ratio <= 1;
+}
+
+function puts(msg, pic) {
+    chat2.revolutionOfMessages && chat2.revolutionOfMessages.unshift({"from": "code", "content": msg, "icon": pic});
 }
 
 
-if(0)
-    autobus.hbc.logCB = function(msg) {
-        puts("logCB: " + msg) ;
-    };
+var chat2 = {
+    context: null,
+    contextForm: null,
+    revolutionOfIntendees: new Revolution(),
+    revolutionOfMessages:  new Revolution(),
+    iTrap: new Trap(),
+    mTrap: new Trap(),
 
-var pingsLog = {};
-function onIntendeePing(intendee, variable, value) {
-    pingsLog[intendee.name] = intendee;
-    log("intendee " + intendee.name + " heard at " + new Date());
-    if (me.ping < value) me.ping = value;
-}
-
-var default_settings = {
-    red: {
-        icon: "./sexy_gui/images/red.gif",
-        mind: "happy"
-    },
-    blue: {
-        icon: "./sexy_gui/images/blue.gif",
-        mind: "cool"
-    },
-    green: {
-        icon: "./sexy_gui/images/green.gif",
-        mind: "watchful"
-    }
-};
-
-
-var settings = {
-    cookieName: null,
-    initial: null,
-    current: null,
-    saveTask: undefined,
-
-    init: function(cookieName, default_settings) {
-        this.cookieName = cookieName;
-        this.initial = this.current = default_settings || {};
-        this.load();
+    onIntendeesSplice: function(tag, index, howMany /*, intendee, intendee ... */) {
+        //console.log(arguments);
+        var args = Array.prototype.slice.call(arguments,1);
+        if (args.length > 2)
+            sound.play("incoming", 5000);
+        if (howMany)
+            sound.play("leaving", 5000);
+        chat2.revolutionOfIntendees.splice.apply(chat2.revolutionOfIntendees, args);
     },
 
-    load: function() {
-        var restored = eval("(" + (cookies.get(this.cookieName) || "null") + ")");
-        if (restored) this.current = restored;
-    },
-    
-    doSave: function() {
-        var expire = new Date();
-        expire.setTime(expire.getTime() + 3600 * 24 * 100);
-        cookies.set(this.cookieName, jsonize(this.current), expire);
-        this.saveTask = undefined;
-    },
-
-    save: function() { // actually data changes are gathered via a small delay to enhance perfs
-        if (this.saveTask !== undefined) return; // already schedulled
-        var self = this;
-        // note the delay amount hereafter is irrevelant, the idea is just to update the cookie only once by set() salve
-        this.saveTask = setTimeout(function() { self.doSave(); }, 500);
-    },
-
-    set: function(key, variable, value) {
-        if (value == this.get(key, variable)) return; // nothing new here
-
-        var c = this.current[key];
-        if (!c) c = this.current[key] = {};
-        c[variable] = value;
+    onMessagesSplice: function(tag, index, howMany /*, message, message ... */) {
         
-        this.save();
+        if (arguments.length > 2 && !a2ac.me.looking && !a2ac.me.typing) // need to make sound if no activity
+            sound.play("blah!", 5000);
+
+        for (var i = index, n = index + howMany ; i < index; i++) {
+            chat2.revolutionOfMessages.remove(chat2.revolutionOfMessages.items.indexOf(this.intendees[i]));
+        }
+
+        for (var l = arguments, i = 3 /* jump over the first args */, n = l.length; i < n; ++i) {
+            var newItem = l[i];
+            chat2.revolutionOfMessages.unshift(newItem);
+        }
     },
 
-    get: function(key, variable) {
-        var c = this.current[key];
-        return c ? c[variable] : c;
-    }
-}
+    onMessageSubmit: function() {
+        var v = document.getElementById('messageBody');
+        a2ac.me.postMessage(v.value);
+        v.value = "";
+    },
 
-function onIntendeesSplice(tag, index, howMany /*, intendee, intendee ... */) {
-                  
-    var args = Array.prototype.slice.call(arguments,1);
+    onMeNickname: function(variable, value) {
+        document.getElementById("meName").value = value;
+    },
 
-    for (var j = 2; j < args.length; j++) {
-        var intendee = args[j];
-        log("new intendee id " + intendee.name);
-        intendee.subscribe("ping", onIntendeePing);
-    }
-    if (args.length > 2)
-        sound.play("incoming", 5000);
-    if (howMany)
-        sound.play("leaving", 5000);
+    onMeIcon: function(variable, value) {
+        document.getElementById("mePic").value = value;
+        document.getElementById("mePicImg").src = value;
+    },
 
-    revolutionOfIntendees.splice.apply(revolutionOfIntendees,args);
-}
+    onMeMind: function(variable, value) {
+        document.getElementById("meMind").value = value;
+    },
 
-
-function onMessageContent(message, variable, value) {
-    var intendee = autobus.tagsonomy.getOr(message.from,null);
-    var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + message.from);
-    //log(who + " said: " + value);
-    if (me.looking || me.typing) return; // no need to make sound if me looking
-    sound.play("blah!", 5000);
-}
-
-function onMessageTimestamp(message, variable, value) {
-    if (me.ping < value) me.ping = value;
-}
-
-var messagesQueue = [];
-
-function onMessagesSplice(tag, index, howMany /*, message, message ... */) {
-    for (var j = 3; j < arguments.length; j++) { 
-        var message = arguments[j];
-        //log("new message " + message.name);
-        message.subscribe("content", onMessageContent);
-        message.subscribe("timestamp", onMessageTimestamp);
-        messagesQueue.unshift(message);
-        revolutionOfMessages.unshift(message);
-
-        var removed = messagesQueue.splice(10,10);
-        for (var lst = removed, l = lst.length, i = l - 1; i >= 0; i--) {
-            //log("message " + lst[i].name + " forgotten");
-            lst[i].forget();
-        } }
-}
-
-
-function Me() {
-    BusAgent.call(this, autobus, agentUUID("i"), BusAgent.prototype.here);
-    this.setTags("intendee");
-    this.ping = 0;
-}
-
-Me.prototype = new BusAgent();
-Me.prototype.postMessage = function() {
-    v = document.getElementById('messageBody');
-    var msg = new BusAgent(autobus, agentUUID("m"), BusAgent.prototype.here);
-    msg.sets({
-            tags: ["message"],
-                from: me.name,
-                //to: otherIntendee,
-                content: v.value,
-                timestamp: 1 + me.ping
-                });
-    v.value = "";
-};
-
-Me.prototype.doPing = function() {
-    this.set("ping", 1 + me.ping);
-}
-
-        var lastPingsLog = {};
-function cleanGone() {
-    for (var lst = autobus.tagsonomy.getOr("intendee",[]), l = lst.length, i = l - 1; i >= 0; i--) {
-        var intendee=lst[i];
-        if (intendee === me || pingsLog[intendee.name] || lastPingsLog[intendee.name])
-            continue; // intendee still here
-
-        // intendee is gone
-        log("intendee " + intendee.name + " is gone!");
-        intendee.forget();
-    }
-
-    lastPingsLog = pingsLog;
-    pingsLog = {};
-}
-
-function onMeNickname(me, variable, value) {
-    document.getElementById("meName").value = value;
-    cookies.set("a2ac_nickname", value);
-}
-
-function onMeIcon(me, variable, value) {
-    document.getElementById("mePic").value = value;
-    document.getElementById("mePicImg").src = value;
-    settings.set(me.nickname, "icon", value);
-}
-
-function onMeMind(me, variable, value) {
-    document.getElementById("meMind").value = value;
-    settings.set(me.nickname, "mind", value);
-}
-
-function onMeEmblem(me, variable, value) {
-    document.getElementById("meEmblem").value = value;
-    document.getElementById("meEmblemImg").src = value;
-    settings.set(me.nickname, "emblem", value);
-}
-
-var awayTimeout = null;
-
-function onMeWorking(me, variable, value) {
-    if (me.awayTimeout !== undefined) {
-        clearTimeout(me.awayTimeout);
-        me.awayTimeout = undefined;
-    }
-    if (value)
-        me.set("away", false);
-    else if (!me.get("looking") && !me.get("typing")) // not working any more
-        me.awayTimeout = setTimeout(function() {me.set("away" ,true);}, 60 * 1000);
-}
-
-
-
-function setNickname(nickname) {
-    me.set("nickname", nickname);
-    var icon = settings.get(nickname, "icon") || "./sexy_gui/images/guest.gif",
-        mind = settings.get(nickname, "mind") || "",
-        emblem = settings.get(nickname, "emblem");
-
-    icon && me.set("icon", icon);
-    mind && me.set("mind", mind);
-    emblem && me.set("emblem", emblem);
-}
-
-function autoConfig() {
-    var nickname = cookies.get("a2ac_nickname");
-    if (nickname) return; // already a non default settings
-
-    // list known intendees name
-    var names = [];
-    var intendees = autobus.tagsonomy.getOr("intendee",[]);
-    for (var l = intendees.length, i = l - 1; i >= 0; i--)
-        names.push(intendees[i].nickname);
+    onMeEmblem: function(variable, value) {
+        document.getElementById("meEmblem").value = value;
+        document.getElementById("meEmblemImg").src = value;
+    },
     
-    // here is a default list of nickname
-    var lst = [ "red", "blue", "green", "purple", "orange", "pink", "gray", "guest" ];
+    showContextForm: function(e) {
+        var form = chat2.contextForm = document.getElementById("contextForm");
+        chat2.context = e;
+        chat2.contextForm.style.display = "none";
+        if (!e || !form) return;
+        
+        //
+        var isMe = (e.item === a2ac.me);
+        var targetForm = (isMe ? "mePropsForm"
+                          : (e.item.nickname !== undefined ? "iPropsForm"
+                             : (e.item.content !== undefined ? "mPropsForm" : null )));
+        for (var i = 0, l = ["mePropsForm", "iPropsForm", "mPropsForm"]; i < l.length; i++) {
+            var elt = l[i];
+            if (elt == targetForm) continue;
+            try { document.getElementById(elt).style.display = "none"; } catch (e) {};
+        }
+        if (targetForm) document.getElementById(targetForm).style.display = "block";
 
-    // try to find a free nickname
-    for (var l = lst.length, i = l - 1; i >= 0; i--) {
-        if (names.indexOf(lst[i]) != -1) continue;
-        nickname = lst[i];
-    }   
+        var a = new Anim();
+        a.form = form;
+        a.ratio = 0;
+        a.start = a.current = {x: -100, y: 400};
+        var coords = readDOM(e.img);
+        a.end = {
+            x: coords.x + coords.w * 0.33,
+            y: coords.y + coords.h * 0.66
+        };
+        a.iterate = contextFormAnimIterate;
+        a.iterate();
+        a.resume();
+        a.onResume = function() { this.form.style.display = "block"; };
+    },
 
-    if (!nickname) { // no more free nickname, build a numbered one 
-        var default_prefix = "guest";
-        var i = 2;
-        while (names.indexOf(default_prefix + i) != -1) i++;
-        nickname = default_prefix + i;
+    submitContextForm: function(e) {
+        var nickname = document.getElementById('meName').value;
+        if (a2ac.me.get("nickname") != nickname)
+            a2ac.me.setNickname(nickname);
+        a2ac.me.set('emblem', document.getElementById('meEmblem').value);
+        a2ac.me.set('mind', document.getElementById('meMind').value);
+        a2ac.me.set('icon', document.getElementById('mePic').value);
+        chat2.showContextForm(null);
+    },
+
+    init: function() {
+
+        this.revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
+        this.revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, 50);
+
+        autobus.tagsonomy.subscribe("intendee", chat2.onIntendeesSplice);
+        autobus.tagsonomy.subscribe("message", chat2.onMessagesSplice);
+
+        this.iTrap.bind(document.getElementById("intendeesTrap"));
+        this.iTrap.onResume = function() { chat2.revolutionOfIntendees.resume(); }
+        this.iTrap.onPause = function() { chat2.revolutionOfIntendees.friction=null; }
+        this.iTrap.iterate = function() {
+            Trap.prototype.iterate.call(this);
+            chat2.revolutionOfIntendees.friction = this.down ? - this.dx / IntendeeCell.prototype.gap : null;
+            return this.down;
+        }
+
+        this.mTrap.bind(document.getElementById("msgsTrap"));
+        this.mTrap.onResume = function() { chat2.revolutionOfMessages.resume(); }
+        this.mTrap.onPause = function() { chat2.revolutionOfMessages.friction=null; }
+        this.mTrap.iterate = function() {
+            Trap.prototype.iterate.call(this);
+            chat2.revolutionOfMessages.friction = this.down ? this.dy / MessageCell.prototype.gap : null;
+            return this.down;
+        }
+
+        document.getElementById("intendeesBack").onmousedown = function() { chat2.revolutionOfIntendees.friction = -0.2; chat2.revolutionOfIntendees.resume(); };
+        document.getElementById("intendeesBack").onmouseup = function() { chat2.revolutionOfIntendees.friction = null; };
+        document.getElementById("intendeesForward").onmousedown = function() { chat2.revolutionOfIntendees.friction = 0.2; chat2.revolutionOfIntendees.resume(); };
+        document.getElementById("intendeesForward").onmouseup = function() { chat2.revolutionOfIntendees.friction = null; };
+ 
+        document.getElementById("meName").onblur = function() { a2ac.me.setNickname(document.getElementById('meName').value); }
+
+        sound.preload("sexy_gui/sound/freesound__soaper__footsteps_1.mp3", "incoming");
+        sound.preload("sexy_gui/sound/freesound__FreqMan__011_Door_opens_and_shuts.mp3", "leaving");
+        sound.preload("sexy_gui/sound/freesound__acclivity__Goblet_G_Medium.mp3", "blah!");
+
+        document.body.onmouseover = function() { a2ac.me.lookingActivity.set(true); };
+        document.body.onmouseout = function() { a2ac.me.lookingActivity.set(false); };
+        window.onfocus = function() { a2ac.me.typingActivity.set(true); };
+        window.onblur = function() { a2ac.me.typingActivity.set(false); };
+
+        a2ac.init();
+
+        a2ac.me.subscribeSync("nickname", chat2.onMeNickname);
+        a2ac.me.subscribeSync("icon", chat2.onMeIcon);
+        a2ac.me.subscribeSync("mind", chat2.onMeMind);
+        a2ac.me.subscribeSync("emblem", chat2.onMeEmblem);
+    },
+
+    finalize: function() {
+        a2ac.finalize();
     }
-
-    setNickname(nickname);
-}
-
-function meInit() {
-    me = new Me();
-    me.doPing();
-    setInterval(function() { me.doPing() }, 60 * 2 * 1000 - 30 * Math.random() * 1000);
-}
-
-function init() {
-    settings.init("a2ac", default_settings);
-
-    uiInit();
-
-    autobus.tagsonomy.subscribe("intendee", onIntendeesSplice);
-    autobus.tagsonomy.subscribe("message", onMessagesSplice);
-
-    autobus.init();
-    meInit();
-    me.subscribe("nickname", onMeNickname);
-    me.subscribe("icon", onMeIcon);
-    me.subscribe("mind", onMeMind);
-    me.subscribe("emblem", onMeEmblem);
-    me.subscribe("looking", onMeWorking);
-    me.subscribe("typing", onMeWorking);
-
-    setInterval(cleanGone, 60 * 2 * 1000);
-    var nickname = cookies.get("a2ac_nickname");
-
-    if (nickname)
-        setNickname(nickname);
-    else // wait for few seconds to detect remote intendees and auto-configure
-        setTimeout(autoConfig, 3 * 1000);   
-}
-
-function finish() {
-    me.forget();
-}
-
+};

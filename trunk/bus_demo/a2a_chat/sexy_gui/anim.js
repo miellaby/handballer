@@ -1,7 +1,7 @@
 // Anim very abstract object, mainly defined for its interface
 
 function Anim(animator) {
-    this.state = 0;
+    this.state = 0; // can be 0, 1, 2: paused, resuming, running
     this.animator = animator || Animator.prototype.singleton;
 };
 
@@ -21,7 +21,6 @@ Anim.prototype.resume = function() {
     if (!this.isRunning()) {
         this.state = 1;
         this.animator.add(this);
-        this.onResume();
     } 
 };
 

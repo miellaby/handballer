@@ -33,6 +33,13 @@ PubSubAgent.prototype.subscribe = function (attribut, cb) {
   return { agent: this, attribut: attribut, cb: cb };
 }
 
+PubSubAgent.prototype.subscribeSync = function (attribut, cb) {
+    var result = this.subscribe(attribut, cb);
+    var value = this[attribut];
+    if (value !== undefined) cb.call(this, attribut, value); // invoke callback once
+    return result;
+}
+
 PubSubAgent.prototype.unsubscribe = function(attribut, cb) {
   if (!attribut) {
       for (attribut in this.cbList) {
@@ -66,7 +73,7 @@ PubSubAgent.prototype.set_and_fire = function(attribut, value) {
     this.cbList[attribut] = []; // as a side effect, it marks this attribut as public
 
   for (var i = 0, lst = this.cbList[attribut], cb; cb = lst[i++];)
-      cb(this, attribut, value); // invoke callbacks
+      cb.call(this, attribut, value); // invoke callbacks
 
   value = this[attribut]; // may have changed again
 

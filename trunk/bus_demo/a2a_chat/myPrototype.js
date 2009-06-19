@@ -11,4 +11,3 @@ if (Array.prototype.remove === undefined) {
       }
    }
 }
-
