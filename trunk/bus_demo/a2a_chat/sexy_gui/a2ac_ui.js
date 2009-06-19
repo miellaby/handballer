@@ -79,8 +79,8 @@ IntendeeCell.prototype.show = function(item) {
         this.emblem.style.display = "block";
         this.desc.style.display = "block";
         this.img.style.display = "block";
-        this.desc.style.fontStyle = (item === window.me ? "italic" : "normal");
-        this.desc.style.fontWeight = (item === window.me ? "bold" : "normal");
+        this.desc.style.fontStyle = (item === a2ac.me ? "italic" : "normal");
+        this.desc.style.fontWeight = (item === a2ac.me ? "bold" : "normal");
     }
 
     this.img.src = item.icon || this.defaultImg;
@@ -162,7 +162,7 @@ MessageCell.prototype.show = function(item) {
         this.desc.style.display = "block";
     }
     var from = item.from && Autobus.singleton.tagsonomy.getOr(item.from, null);
-    this.img.src = item.icon || this.defaultImg;
+    this.img.src = item.icon || ( from && from.icon ) || this.defaultImg;
     this.desc.innerHTML = item.content || this.defaultDesc;
 
 };
