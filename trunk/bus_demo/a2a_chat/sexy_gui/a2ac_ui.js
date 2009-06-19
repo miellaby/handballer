@@ -56,7 +56,7 @@ IntendeeCell.prototype.hide = function() {
         this.item.unsubscribe("emblem", this.selfUpdate);
         this.item.unsubscribe("mind", this.selfUpdate);
         this.item.unsubscribe("typing", this.selfUpdate);
-        this.item.unsubscribe("looking", this.selfUpdate);
+        this.item.unsubscribe("watching", this.selfUpdate);
     }
     this.emblem.style.display = "none";
     this.img.style.display = "none";
@@ -73,7 +73,7 @@ IntendeeCell.prototype.show = function(item) {
             item.subscribe("emblem", this.selfUpdate);
             item.subscribe("mind", this.selfUpdate);
             item.subscribe("typing", this.selfUpdate);
-            item.subscribe("looking", this.selfUpdate);
+            item.subscribe("watching", this.selfUpdate);
         }
 
         this.emblem.style.display = "block";
@@ -87,9 +87,9 @@ IntendeeCell.prototype.show = function(item) {
     this.emblem.src = item.emblem || this.defaultEmblem;
     var desc = item.nickname  || this.defaultDesc;
     if (item.away)
-        desc += " <small>(away)</small>";
-    else if (item.looking || item.typing)
-        desc += " <small>" + ( item.typing ? " typing" : "" ) + ( item.looking ? " looking" : "") + "</small>";
+        desc += " <small><br/>(away)</small>";
+    else if (item.watching || item.typing)
+        desc += " <small><br/>" + ( item.typing ? " typing" : "" ) + ( item.watching ? " watching" : "") + "</small>";
     this.desc.style.height = item.mind ? "90px" : "60px";
     if (item.mind) desc += "<br/><quote>" + item.mind + "</quote>";
 

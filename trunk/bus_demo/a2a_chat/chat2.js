@@ -44,7 +44,7 @@ var chat2 = {
 
     onMessagesSplice: function(tag, index, howMany /*, message, message ... */) {
         
-        if (arguments.length > 2 && !a2ac.me.looking && !a2ac.me.typing) // need to make sound if no activity
+        if (arguments.length > 2 && !a2ac.me.watching && !a2ac.me.typing) // need to make sound if no activity
             sound.play("blah!", 5000);
 
         for (var i = index, n = index + howMany ; i < index; i++) {
@@ -191,11 +191,12 @@ var chat2 = {
         sound.preload("sexy_gui/sound/freesound__FreqMan__011_Door_opens_and_shuts.mp3", "leaving");
         sound.preload("sexy_gui/sound/freesound__acclivity__Goblet_G_Medium.mp3", "blah!");
 
-        document.body.onmouseover = function() { a2ac.me.lookingActivity.set(true); };
-        document.body.onmouseout = function() { a2ac.me.lookingActivity.set(false); };
-        window.onfocus = function() { a2ac.me.typingActivity.set(true); };
+        document.body.onmouseover = function() { a2ac.me.watchingActivity.set(true); };
+        document.body.onmouseout = function() { a2ac.me.watchingActivity.set(false); };
+        window.onfocus = function() { a2ac.me.typingActivity.set(true); a2ac.me.typingActivity.set(false); };
         window.onblur = function() { a2ac.me.typingActivity.set(false); };
-
+        document.getElementById("messageBody").onkeydown = function() { a2ac.me.typingActivity.set(true); };
+        document.getElementById("messageBody").onkeyup = function() { a2ac.me.typingActivity.set(false); };
         a2ac.init();
 
         a2ac.me.subscribeSync("nickname", chat2.onMeNickname);
