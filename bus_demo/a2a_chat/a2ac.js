@@ -84,17 +84,18 @@ var settings = {
         var c = this.current[key];
         return c ? c[variable] : c;
     }
-}
+};
 
 // ======================================================================
 // Activity object = agent boolean variable manager with sligh positive hysteris 
 // ======================================================================
 
-function Activity(agent, action) {
+function Activity(agent, action, delay) {
     this.agent = agent;
     this.action = action;
     this.timeout = undefined;
     this.now = false;
+    this.delay = delay || 500;
     agent.set(action, false);
     var self = this;
     this.cb = function () {
@@ -110,7 +111,7 @@ Activity.prototype.set = function(value) {
         this.timeout = undefined ;
         this.agent.set(this.action, true);
     } else
-        this.timeout = setTimeout(this.cb, 500);
+        this.timeout = setTimeout(this.cb, this.delay);
 };
 
 // ======================================================================
@@ -122,8 +123,8 @@ function Me() {
     this.setTags("intendee");
     this.ping = 0;
     this.awayTimeout = undefined;
-    this.typingActivity = new Activity(this, "typing");
-    this.lookingActivity = new Activity(this, "looking");
+    this.typingActivity = new Activity(this, "typing", 5000);
+    this.watchingActivity = new Activity(this, "watching", 5000);
 }
 
 Me.prototype = new BusAgent();
@@ -133,7 +134,7 @@ Me.prototype.init = function() {
     this.subscribe("icon", this.onIcon);
     this.subscribe("mind", this.onMind);
     this.subscribe("emblem", this.onEmblem);
-    this.subscribe("looking", this.onWorking);
+    this.subscribe("watching", this.onWorking);
     this.subscribe("typing", this.onWorking);
     this.doPing();
     var self = this;
@@ -186,7 +187,7 @@ Me.prototype.onWorking = function(variable, value) {
     }
     if (value)
         this.set("away", false);
-    else if (!this.get("looking") && !this.get("typing")) { // not working any more
+    else if (!this.get("watching") && !this.get("typing")) { // not working any more
         var self = this;
         this.awayTimeout = setTimeout(function() {self.set("away" ,true);}, 60 * 1000);
     }
