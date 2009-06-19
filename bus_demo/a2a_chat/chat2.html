@@ -173,11 +173,11 @@ input {
   height: 40px;
 }
 
-.ContextForm {
+#contextForm {
     -moz-border-radius:20px;
     -webkit-border-radius:20px;
     position:absolute;
-    width:30%;
+    width:40%;
     right:5px;
     top:100px;
     z-index:40;
@@ -214,6 +214,8 @@ input {
 <script type="text/javascript" src="indexAgent.js"></script>
 <script type="text/javascript" src="busAgent.js"></script>
 <script type="text/javascript" src="autobus.js"></script>
+<!-- A2A chat application core -->
+<script type="text/javascript" src="a2ac.js"></script>
 <!-- UI technologies -->
 <script type="text/javascript" src="sexy_gui/animator.js"></script>
 <script type="text/javascript" src="sexy_gui/anim.js"></script>
@@ -223,10 +225,11 @@ input {
 <script type="text/javascript" src="sexy_gui/revolution.js"></script>
 <script type="text/javascript" src="sexy_gui/sound.js"></script>
 <script type="text/javascript" src="sexy_gui/a2ac_ui.js"></script>
+<!-- Top UI -->
 <script type="text/javascript" src="chat2.js"></script>
 </head>
 
-<body onload="init();" onunload="finish();">
+<body onload="chat2.init();" onunload="chat2.finalize();">
 
   <!-- intendy area technologies -->
   <div id="intendeesArea">
@@ -238,22 +241,28 @@ input {
   <div id="msgsArea">
     <div class="trap" id="msgsTrap"></div>
   </div>
-  <form id="contextForm" class="ContextForm" style="display:none;" action="javascript:submitContextForm();">
-    <button onclick="javascript:showContextForm(null);">close</button>
-    <img id="mePicImg" src="sexy_gui/images/blank.gif" style="float: left;"/>
-    <p><label for="meName">nick&nbsp;</label>
-      <input type="text" id="meName" value="guest" style=""></p>
-    <p><label for="mePic">pic&nbsp;</label>
-      <input type="text" id="mePic" value="" style=""></p>
-    <p><label for="meMind">mind&nbsp;</label>
-      <input type="text" id="meMind" value=""></p>
-    <p><label for="meEmblem">emblem&nbsp;</label>
-      <img id="meEmblemImg" src="sexy_gui/images/blank.gif" style="width: 32px; eight: 32px;"/>&nbsp;<input type="text" id="meEmblem" value="">
-    </p>
-    <input type="submit" value="Submit" style="float:right;"/>&nbsp;
-  </form>
+  <div id="contextForm" style="display:none;">
+    <form id="mePropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
+      <button onclick="javascript:chat2.showContextForm(null);">close</button>
+      <img id="mePicImg" src="sexy_gui/images/blank.gif" style="float: left;"/>
+      <p><label for="meName">nick&nbsp;</label>
+        <input type="text" id="meName" value="guest" style=""></p>
+      <p><label for="mePic">pic&nbsp;</label>
+        <input type="text" id="mePic" value="" style=""></p>
+      <p><label for="meMind">mind&nbsp;</label>
+        <input type="text" id="meMind" value=""></p>
+      <p><label for="meEmblem">emblem&nbsp;</label>
+        <img id="meEmblemImg" src="sexy_gui/images/blank.gif" style="width: 32px; eight: 32px;"/>&nbsp;<input type="text" id="meEmblem" value="">
+      </p>
+    </form>
+    <form id ="iPropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
+    </form>
+    <form id ="mPropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
+    </form>
+    <button style="float:right;" onclick="javascript:chat2.submitContextForm();">Submit</button>&nbsp;
+  </div>
 
-  <form id="postArea" action="javascript:me.postMessage();">
+  <form id="postArea" action="javascript:chat2.onMessageSubmit();">
     <input id="messageBody"/>
     <button type="submit">submit</button>
   </form>

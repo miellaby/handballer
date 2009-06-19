@@ -65,29 +65,29 @@ function log(msg) {
 }
 
 var pingsLog = {};
-function onIntendeePing(intendee, variable, value) {
-    pingsLog[intendee.name] = intendee;
-    log("intendee " + intendee.name + " heard at " + new Date());
+function onIntendeePing(variable, value) {
+    pingsLog[this.name] = intendee;
+    log("intendee " + this.name + " heard at " + new Date());
     if (me.ping < value) me.ping = value;
 }
 
 var url_map = eval("(" + (cookies.get("a2ac_icons") || "null") + ")")
                   || { "red": "./img/red.gif", "blue": "./img/blue.gif", "green": "./img/green.gif" };
-function onIntendeeNickname(intendee, variable, value) {
-    puts("intendee " + intendee.name + " nickname is " + value);
-    if (intendee === me) {
+function onIntendeeNickname(variable, value) {
+    puts("intendee " + this.name + " nickname is " + value);
+    if (this === me) {
       cookies.set("a2ac_nick", value);
       var url = url_map[value] || "./img/guest.gif";
       me.set("icon", url);
     }
 }
 
-function onIntendeeIcon(intendee, variable, value) {
-    puts("intendee " + intendee.name + " icon url is " + value);
-    if (intendee === me) {
-       url_map[intendee.nickname] = value
+function onIntendeeIcon(variable, value) {
+    puts("intendee " + this.name + " icon url is " + value);
+    if (this === me) {
+       url_map[intendee.nickname] = value;
        var expire = new Date();
-       expire.setTime(expire.getTime() + 3600 * 24 * 100)
+       expire.setTime(expire.getTime() + 3600 * 24 * 100);
        cookies.set("a2ac_icons", jsonize(url_map), expire);
     }
 }
@@ -103,14 +103,14 @@ function onIntendeeSplice(tag, index, howMany) {
 }
 
 
-function onMessageContent(message, variable, value) {
-    var intendee = autobus.tagsonomy.getOr(message.intendee,null);
-    var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + message.intendee);
+function onMessageContent(variable, value) {
+    var intendee = autobus.tagsonomy.getOr(this.intendee, null);
+    var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + this.intendee);
 
     puts(who + " said: " + value);
 }
 
-function onMessageTimestamp(message, variable, value) {
+function onMessageTimestamp(variable, value) {
     if (me.ping < value) me.ping = value;
 }
 

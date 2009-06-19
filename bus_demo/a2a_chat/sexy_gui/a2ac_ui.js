@@ -1,45 +1,6 @@
-var contextForm  = {};
-
-function contextFormAnimIterate() {
-        writeDOM(this.form, this.current);
-        this.ratio += 0.1;
-        this.current.x = this.start.x + (this.end.x - this.start.x) * this.ratio;
-        this.current.y = this.start.y + (this.end.y - this.start.y) * this.ratio;
-        return this.ratio <= 1;
-}
-
-function showContextForm(e) {
-    if (contextForm.element)
-        contextForm.element.style.display = "none";
-    contextForm.target = e;
-    if (!e) return;
-    var isMe = (e.item === me);
-    var form = contextForm.element = isMe? document.getElementById("contextForm") : null;
-    if (!form) return;
-
-    var a = new Anim();
-    a.form = form;
-    a.ratio = 0;
-    a.start = a.current = {x: -100, y: 400};
-    var coords = readDOM(e.img);
-    a.end = {
-        x: coords.x + coords.w * 0.33,
-        y: coords.y + coords.h * 0.66
-    };
-    a.iterate = contextFormAnimIterate;
-    a.resume();
-    form.style.display = "block";
-}
-
-function submitContextForm(e) {
-    var nickname = document.getElementById('meName').value;
-    if (me.get("nickname") != nickname)
-        setNickname(nickname);
-    me.set('emblem', document.getElementById('meEmblem').value);
-    me.set('mind', document.getElementById('meMind').value);
-    me.set('icon', document.getElementById('mePic').value);
-    showContextForm(null);
-}
+// ======================================================================
+// Intendee cell
+// ======================================================================
 
 function IntendeeCell(area) {
     if (!area) return;
@@ -83,10 +44,6 @@ IntendeeCell.prototype.setCoords = function(inFactor, x) {
     this.desc.style.left = ((x-1) * gap) + "px";
 };
 
-IntendeeCell.prototype.onClick = function() {
-    showContextForm(this);
-}
-
 IntendeeCell.prototype.getOpeningSize = function(area) {
     return area.clientWidth / IntendeeCell.prototype.gap;
 }
@@ -98,6 +55,8 @@ IntendeeCell.prototype.hide = function() {
         this.item.unsubscribe("nickname", this.selfUpdate);
         this.item.unsubscribe("emblem", this.selfUpdate);
         this.item.unsubscribe("mind", this.selfUpdate);
+        this.item.unsubscribe("typing", this.selfUpdate);
+        this.item.unsubscribe("looking", this.selfUpdate);
     }
     this.emblem.style.display = "none";
     this.img.style.display = "none";
@@ -113,6 +72,8 @@ IntendeeCell.prototype.show = function(item) {
             item.subscribe("icon", this.selfUpdate);
             item.subscribe("emblem", this.selfUpdate);
             item.subscribe("mind", this.selfUpdate);
+            item.subscribe("typing", this.selfUpdate);
+            item.subscribe("looking", this.selfUpdate);
         }
 
         this.emblem.style.display = "block";
@@ -124,12 +85,20 @@ IntendeeCell.prototype.show = function(item) {
 
     this.img.src = item.icon || this.defaultImg;
     this.emblem.src = item.emblem || this.defaultEmblem;
-    this.desc.innerHTML = item.nickname  || this.defaultDesc;
-    this.desc.style.height = item.mind ? "60px" : "30px";
-    if (item.mind) this.desc.innerHTML += "<br/><quote>" + item.mind + "</quote>";
+    var desc = item.nickname  || this.defaultDesc;
+    if (item.away)
+        desc += " <small>(away)</small>";
+    else if (item.looking || item.typing)
+        desc += " <small>" + ( item.typing ? " typing" : "" ) + ( item.looking ? " looking" : "") + "</small>";
+    this.desc.style.height = item.mind ? "90px" : "60px";
+    if (item.mind) desc += "<br/><quote>" + item.mind + "</quote>";
+
+    this.desc.innerHTML = desc;
 };
 
-
+// ======================================================================
+// Message cell
+// ======================================================================
 
 function MessageCell(area) {
     if (!area) return;
@@ -198,56 +167,4 @@ MessageCell.prototype.show = function(item) {
 
 };
 
-MessageCell.prototype.onClick = function() {
-    showContextForm(this);
-}
-
 MessageCell.prototype.gap = 50;
-
-var revolutionOfIntendees = new Revolution();
-var revolutionOfMessages =  new Revolution();
-var iTrap = new Trap();
-var mTrap = new Trap();
-
-function uiInit() {
-    revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
-    revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, 50);
-
-    iTrap.bind(document.getElementById("intendeesTrap"));
-    iTrap.onResume = function() { revolutionOfIntendees.resume(); }
-    iTrap.onPause = function() { revolutionOfIntendees.friction=null; }
-    iTrap.iterate = function() {
-        Trap.prototype.iterate.call(this);
-        revolutionOfIntendees.friction = this.down ? - this.dx / IntendeeCell.prototype.gap : null;
-        return this.down;
-    }
-
-    mTrap.bind(document.getElementById("msgsTrap"));
-    mTrap.onResume = function() { revolutionOfMessages.resume(); }
-    mTrap.onPause = function() { revolutionOfMessages.friction=null; }
-    mTrap.iterate = function() {
-        Trap.prototype.iterate.call(this);
-        revolutionOfMessages.friction = this.down ? this.dy / MessageCell.prototype.gap : null;
-        return this.down;
-    }
-
-    document.getElementById("intendeesBack").onmousedown = function() { revolutionOfIntendees.friction = -0.2; revolutionOfIntendees.resume(); };
-    document.getElementById("intendeesBack").onmouseup = function() { revolutionOfIntendees.friction = null; };
-    document.getElementById("intendeesForward").onmousedown = function() { revolutionOfIntendees.friction = 0.2; revolutionOfIntendees.resume(); };
-    document.getElementById("intendeesForward").onmouseup = function() { revolutionOfIntendees.friction = null; };
- 
-    document.getElementById("meName").onblur = function() { setNickname(document.getElementById('meName').value); }
-
-    sound.preload("sexy_gui/sound/freesound__soaper__footsteps_1.mp3", "incoming");
-    sound.preload("sexy_gui/sound/freesound__FreqMan__011_Door_opens_and_shuts.mp3", "leaving");
-    sound.preload("sexy_gui/sound/freesound__acclivity__Goblet_G_Medium.mp3", "blah!");
-
-    document.body.onmouseover = function() { me.set("looking", true); };
-    document.body.onmouseout = function() { me.set("looking", false); };
-    window.onfocus = function() { me.set("typing", true); };
-    window.onblur = function() { me.set("typing", false); };
-}
-
-function puts(msg, pic) {
-    revolutionOfMessages && revolutionOfMessages.unshift({"from": "log", "content": msg});
-}

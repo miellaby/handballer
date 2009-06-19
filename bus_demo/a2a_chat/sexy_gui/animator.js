@@ -29,13 +29,18 @@ Animator.prototype.iterate = function() {
     var clonedArray = this.anims.slice();
     for (i = 0; i < n; i++) {
         var m = clonedArray[i];
+        if (m.state == 1) {
+            m.onResume();
+            m.state == 2;
+        }
+
         if (!m.iterate()) {
             m.pause();
             var f = m.onFinish;
             m.onFinish = new Function();
             f.call(m);
 		 
-            if (m.state == 1) // anim has been restarted by onFinish
+            if (m.state != 0) // anim has been restarted by onFinish
                 thingsToBeDone = true;
         } else {
             thingsToBeDone = true;
