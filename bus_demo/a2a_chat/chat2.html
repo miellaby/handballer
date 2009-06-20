@@ -158,14 +158,16 @@ input {
   bottom: 0px;
   height: 60px;
   z-index: 30;
-  margin: 2px;
+  margin: 0;
 }
 
 #messageBody {
-  width:80%;
+  width:100%;
+  margin:0;
   font-size:18px;
-  height:40px;
-  padding-left:50px;
+  height:42px;
+  padding-left:56px;
+  padding-top:10px;
 }
 
 .msgPic {
@@ -199,16 +201,20 @@ input {
   position: absolute;
   background-color: white;
   color: black;
-/*  text-align: left; */
   left: 44px;
-  /*width: 90%; */
   right: 0px;
-  line-height: 30px;
   height: 30px ;
   font-size:18px;
-  padding:0%;
+  padding:0 6px;
   overflow: auto;
   margin:0;
+}
+
+
+#msgPicImg {
+  background-color: white;
+  height: 40px;
+  z-index:31;
 }
 
 </style>
@@ -268,7 +274,7 @@ input {
     <form id ="iPropsForm" class="ContextForm" action="null">
       <img id="iPicImg" src="sexy_gui/images/blank.gif" style="float: left;"/>
       <p><label for="iName">nick&nbsp;</label>
-        <input type="text" readonly="readonly" id="iName" value="guest" style=""></p>
+        <input type="text" readonly="readonly" id="iName" value="" style=""></p>
       <p><label for="iPic">pic&nbsp;</label>
         <input type="text" readonly="readonly" id="iPic" value="" style=""></p>
       <p><label for="iMind">mind&nbsp;</label>
@@ -277,11 +283,20 @@ input {
         <img id="iEmblemImg" src="sexy_gui/images/blank.gif" style="width: 32px; eight: 32px;"/>&nbsp;<input type="text" id="iEmblem" readonly="readonly" value="">
     </form>
     <form id ="mPropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
+      <label for="mFrom">from&nbsp;</label>
+      <input type="text" readonly="readonly" id="mFrom" value="" style="">
+      <p><label for="mDate">date&nbsp;</label>
+        <input type="text" readonly="readonly" id="mDate" value="" style=""></p>
     </form>
   </div>
 
   <form id="postArea" action="javascript:chat2.onMessageSubmit();">
-    <input id="messageBody" autocomplete="off" value="*type a message here*"/>
+    <div style="position:absolute; right:62px; left:2px;">
+      <input id="messageBody" autocomplete="off" value="*type a message here*"/>
+      <div style=" position: absolute; top:3px; left:3px;">
+        <img id="msgPicImg" src="sexy_gui/images/blank.gif"/>
+      </div>
+    </div>
     <button type="submit" style="display:none;">submit</button>
   </form>
 
