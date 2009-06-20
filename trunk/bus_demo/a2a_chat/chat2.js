@@ -8,7 +8,7 @@ IntendeeCell.prototype.onClick = function() {
 }
 
 MessageCell.prototype.onClick = function() {
-    chat2.showContextForm(this);
+//    chat2.showContextForm(this);
 }
 
 function contextFormAnimIterate() {
@@ -31,7 +31,7 @@ var chat2 = {
     revolutionOfMessages:  new Revolution(),
     iTrap: new Trap(),
     mTrap: new Trap(),
-
+    msgPic: null,
     onIntendeesSplice: function(tag, index, howMany /*, intendee, intendee ... */) {
         //console.log(arguments);
         var args = Array.prototype.slice.call(arguments,1);
@@ -59,7 +59,7 @@ var chat2 = {
 
     onMessageSubmit: function() {
         var v = document.getElementById('messageBody');
-        a2ac.me.postMessage(v.value);
+        a2ac.me.postMessage(v.value, chat2.msgPic);
         v.value = "";
     },
 
@@ -70,6 +70,7 @@ var chat2 = {
     onMeIcon: function(variable, value) {
         document.getElementById("mePic").value = value;
         document.getElementById("mePicImg").src = value;
+        chat2.setMsgPic(null);
     },
 
     onMeMind: function(variable, value) {
@@ -79,10 +80,17 @@ var chat2 = {
     onMeEmblem: function(variable, value) {
         document.getElementById("meEmblem").value = value;
         document.getElementById("meEmblemImg").src = value;
+        chat2.setMsgPic(null);
+    },
+
+    setMsgPic: function(url) {
+        chat2.msgPic = url;
+        if (!url) url = a2ac.me.icon || "sexy_gui/images/star.gif"; 
+        document.getElementById("msgPicImg").src = url;
     },
 
     updateForm: function(variable, value) {
-        var t = { "nickname": "iName", "icon": "iPic", "emblem": "iEmblem", "mind": "iMind" } ;
+        var t = { "nickname": "iName", "icon": "iPic", "emblem": "iEmblem", "mind": "iMind", "from": "mFrom", "date": "mDate" } ;
         var id = t[variable];
         if (!id) return;
         document.getElementById(id).value = value;
@@ -98,11 +106,16 @@ var chat2 = {
         if (!e || !form) return;
 
         if (chat2.context) {
-            chat2.context.unsubscribe("nickname", chat2.updateForm);
-            chat2.context.unsubscribe("icon", chat2.updateForm);
-            chat2.context.unsubscribe("mind", chat2.updateForm);
-            chat2.context.unsubscribe("emblem", chat2.updateForm);
-            chat2.context = null;
+            if (chat2.context.nickname !== undefined) {
+                chat2.context.unsubscribe("nickname", chat2.updateForm);
+                chat2.context.unsubscribe("icon", chat2.updateForm);
+                chat2.context.unsubscribe("mind", chat2.updateForm);
+                chat2.context.unsubscribe("emblem", chat2.updateForm);
+                chat2.context = null;
+            } else if (char2.context.content !== undefined) {
+                chat2.context.unsubscribe("content", chat2.updateForm);
+                chat2.context.unsubscribe("date", chat2.updateForm);
+            }
         }
 
         // form choice
@@ -125,6 +138,9 @@ var chat2 = {
             e.item.subscribeSync("mind", chat2.updateForm);
             e.item.subscribeSync("emblem", chat2.updateForm);
             chat2.context = e.item;
+        } else if (targetForm == "mPropsForm") {
+            e.item.subscribeSync("from", chat2.updateForm);
+            e.item.subscribeSync("date", chat2.updateForm);
         }
 
 
@@ -134,14 +150,15 @@ var chat2 = {
         a.ratio = 0;
         a.start = a.current = {x: -100, y: 400};
         var coords = readDOM(e.img);
+        if (isNaN(coords.x)) coords = readDOM(e.desc);
         a.end = {
             x: coords.x + coords.w * 0.33,
             y: coords.y + coords.h * 0.66
         };
+        log(a.end);
         a.iterate = contextFormAnimIterate;
-        a.iterate();
-        a.resume();
         a.onResume = function() { this.form.style.display = "block"; };
+        a.resume();
     },
 
     submitContextForm: function(e) {

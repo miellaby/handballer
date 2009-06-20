@@ -147,15 +147,18 @@ Me.prototype.init = function() {
         setTimeout(function() { self.autoConfig(); }, 3 * 1000);   
 };
 
-Me.prototype.postMessage = function(content) {
+Me.prototype.postMessage = function(content, icon) {
     var msg = new BusAgent(autobus, agentUUID("m"), BusAgent.prototype.here);
     msg.sets({
             tags: ["message"],
                 from: this.name,
+                icon: icon,
                 //to: otherIntendee,
                 content: content,
                 timestamp: 1 + this.ping
                 });
+
+    autobus.tagsonomy.removeIn("here", msg); // to prevent advertising on /status/here
 };
 
 Me.prototype.doPing = function() {
