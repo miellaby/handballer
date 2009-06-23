@@ -11,3 +11,21 @@ if (Array.prototype.remove === undefined) {
       }
    }
 }
+
+function getURLParameters(a) {
+    a = a || window.location.href;
+    var params = {};
+    var regex = /[\?&]([^=]+)=([^&]*)/g;
+	while( ( results = regex.exec( a ) ) != null )
+		params[results[1]] = results[2];
+    return params;
+}
+
+
+(function() {
+    var urlParameters = null;
+    window.getURLParameterByName = function(name) {
+        if (!urlParameters) urlParameters = getURLParameters();
+        return urlParameters[name];
+    };
+})();
