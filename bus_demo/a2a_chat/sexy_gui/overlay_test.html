@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+   <HEAD>
+      <META http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <TITLE>A2A Chat Overlay Test</TITLE>
+      <SCRIPT type="text/javascript" src="../myPrototype.js"></SCRIPT>
+      <SCRIPT type="text/javascript">
+//<!--
+function init() {
+   var backsrc = getURLParameterByName("backsrc");
+
+   var el = document.createElement("iframe");
+   el.setAttribute('id', 'bfrm');
+   el.setAttribute('style', 'position: absolute; border: 0; margin: 0; padding: 0; width: 100%; height: 100%; z-index:0;');
+   document.body.appendChild(el);
+   el.setAttribute('src', backsrc);
+
+   var el2 = document.createElement("iframe");
+   el2.setAttribute('id', 'ffrm');
+   el2.setAttribute('style', 'position: absolute; border: 0; margin: 0; padding: 0; width: 100%; height: 100%; z-index:10;');
+   document.body.appendChild(el2);
+   el2.setAttribute('src', '../chat2.html');
+}
+//-->
+     </SCRIPT>
+   </HEAD>
+   <BODY onload="init();">
+   </BODY>
+</HTML>
