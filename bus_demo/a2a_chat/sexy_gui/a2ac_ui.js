@@ -27,11 +27,11 @@ IntendeeCell.prototype.gap = 130;
 
 IntendeeCell.prototype.height = 130;
 
-IntendeeCell.prototype.defaultImg = "./sexy_gui/images/guest.gif";
+IntendeeCell.prototype.defaultImg = "./images/guest.gif";
 
 IntendeeCell.prototype.defaultDesc = "???";
 
-IntendeeCell.prototype.defaultEmblem = "./sexy_gui/images/blank.gif";
+IntendeeCell.prototype.defaultEmblem = "./images/blank.gif";
 
 IntendeeCell.prototype.setCoords = function(inFactor, x) {
     //console.log("inFactor " + inFactor + "; x " + x);
@@ -119,7 +119,7 @@ MessageCell.prototype.constructor = MessageCell;
 
 MessageCell.prototype.gap = 40;
 
-MessageCell.prototype.defaultImg = "./sexy_gui/images/star.gif";
+MessageCell.prototype.defaultImg = "./images/star.gif";
 
 MessageCell.prototype.defaultDesc = "";
 
