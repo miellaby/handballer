@@ -22,15 +22,15 @@ if(0)
 // ======================================================================
 var default_profiles = {
     red: {
-        icon: "./sexy_gui/images/red.gif",
+        icon: "./images/red.gif",
         mind: "happy"
     },
     blue: {
-        icon: "./sexy_gui/images/blue.gif",
+        icon: "./images/blue.gif",
         mind: "cool"
     },
     green: {
-        icon: "./sexy_gui/images/green.gif",
+        icon: "./images/green.gif",
         mind: "watchful"
     }
 };
@@ -198,7 +198,7 @@ Me.prototype.onWorking = function(variable, value) {
 
 Me.prototype.setNickname = function(nickname) {
     this.set("nickname", nickname);
-    var icon = settings.get(nickname, "icon") || "./sexy_gui/images/guest.gif",
+    var icon = settings.get(nickname, "icon") || "./images/guest.gif",
         mind = settings.get(nickname, "mind") || "",
         emblem = settings.get(nickname, "emblem");
 
