@@ -51,7 +51,7 @@ function puts(msg) {
   t.innerHTML = t.innerHTML.replace(/^/, msg + "\n");
 }
 
-var autobus = new Autobus();
+var autobus = new Autobus("a2ac");
 autobus.init();
 
 if(1)
@@ -66,7 +66,7 @@ function log(msg) {
 
 var pingsLog = {};
 function onIntendeePing(variable, value) {
-    pingsLog[this.name] = intendee;
+    pingsLog[this.name] = this;
     log("intendee " + this.name + " heard at " + new Date());
     if (me.ping < value) me.ping = value;
 }
@@ -85,14 +85,14 @@ function onIntendeeNickname(variable, value) {
 function onIntendeeIcon(variable, value) {
     puts("intendee " + this.name + " icon url is " + value);
     if (this === me) {
-       url_map[intendee.nickname] = value;
+       url_map[this.nickname] = value;
        var expire = new Date();
        expire.setTime(expire.getTime() + 3600 * 24 * 100);
        cookies.set("a2ac_icons", jsonize(url_map), expire);
     }
 }
 
-function onIntendeeSplice(tag, index, howMany) {
+function onIntendeesSplice(tag, index, howMany) {
    for (var i = 3; i < arguments.length ; i++) {
       var intendee = arguments[i];
       puts("new intendee id " + intendee.name);
@@ -116,7 +116,7 @@ function onMessageTimestamp(variable, value) {
 
 var messagesQueue = [];
 
-function onMessageSplice(tag, index, howMany) {
+function onMessagesSplice(tag, index, howMany) {
    for (var i = 3; i < arguments.length ; i++) {
      var message = arguments[i];
 
@@ -132,8 +132,8 @@ function onMessageSplice(tag, index, howMany) {
    }
 }
 
-autobus.tagsonomy.subscribe("intendee", onIntendeeSplice);
-autobus.tagsonomy.subscribe("message", onMessageSplice);
+autobus.tagsonomy.subscribe("intendee", onIntendeesSplice);
+autobus.tagsonomy.subscribe("message", onMessagesSplice);
 
 var me = new BusAgent(autobus, agentUUID("i"), BusAgent.prototype.here);
 me.setTags("intendee");
