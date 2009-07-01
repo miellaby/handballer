@@ -1,8 +1,10 @@
 // =========================================================================
 // autobus
+// a layer upon HandBaller client layer to automize bus agents inter communication
 // =========================================================================
 
-function Autobus(hbc) {
+function Autobus(agora, hbc) {
+   this.agora = agora ? agora + "/" : "";
    this.tagsonomy = new PubSubAgent();
    this.hbc = (hbc ? hbc : new Hbc());
    Autobus.singleton = this;
@@ -15,6 +17,14 @@ Autobus.prototype.callback = function(label, body) {
    var variable = null ;
    var command = null ;
    var id = null ;
+
+   if (this.agora)
+       if (label.indexOf(this.agora) == 0)
+           // agora message
+           label = label.substring(this.agora.length);
+       else
+           // private message
+           label = label.substring(this.agora.indexOf("/") + 1);
 
    if (label.substring(0,6)== "freed/") {
       var agentName = label.substring(6);
@@ -83,7 +93,16 @@ Autobus.prototype.callback = function(label, body) {
 
 Autobus.prototype.init = function() {
   var a = this;
+
+  // agora is a label common root path where all public messages are sent
+  // if set, one may also send private messages to a given UA via its special "token" label
+  if (this.agora) {
+      this.hbc.pattern =  this.hbc.token + this.hbc.clientId + "/**|" + this.agora + "**";
+    } else {
+      this.hbc.pattern = "**";
+  }
+      
   this.hbc.receiveCB = function(l,b) { return a.callback(l,b); };
   this.hbc.init();
-  this.hbc.send("status/here", "");
+  this.hbc.send(this.agora + "status/here", "");
 }
