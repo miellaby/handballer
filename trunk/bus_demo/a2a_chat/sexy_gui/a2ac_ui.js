@@ -16,8 +16,9 @@ function IntendeeCell(area) {
 
     var self =this;
     this.selfUpdate = function() { self.show(self.item); };
-    this.img.onmouseover = function () { self.onClick(); } ;
-    this.desc.onmouseover = function () { self.onClick(); } ;
+    this.img.onclick = function () { self.onClick(); } ;
+    this.desc.onclick = function () { self.onClick(); } ;
+    chat2.iTrap.bindTarget(this.img);
 }
 
 IntendeeCell.prototype = new ImgDescCell();
@@ -109,8 +110,9 @@ function MessageCell(area) {
 
     var self =this;
     this.selfUpdate = function() { self.show(self.item); };
-    this.img.onmouseover = function () { self.onClick(); } ;
-    this.desc.onmouseover = function () { self.onClick(); } ;
+    this.img.onclick = function () { self.onClick(); } ;
+    this.desc.onclick = function () { self.onClick(); } ;
+    chat2.mTrap.bindTarget(this.img);
 }
 
 MessageCell.prototype = new ImgDescCell();

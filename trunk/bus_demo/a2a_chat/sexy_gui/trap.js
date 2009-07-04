@@ -7,14 +7,16 @@ function Trap(animator) {
 
 Trap.prototype = new Anim();
 
-Trap.prototype.untrap = function(delay) {
+Trap.prototype.trap = function(e) {
     var self = this;
-    self.element.style.display = "none";
-    if (this.t) cancelTimeout(this.t);
-    this.t = setTimeout(function() { self.element.style.display = "block"; self.t = null; }, delay);
+    if (this.t != null) return;
+    this.t = setTimeout(function() {
+            self.onMouseDown(e);
+            self.t = null; }, 200);
 }
 
 Trap.prototype.onMouseDown = function(e) {
+    this.element.style.display = "block";
     var self = this;
     this.down = true;
     this.element.onmousemove = function(e) { return self.onMouseMove(e); }
@@ -26,17 +28,22 @@ Trap.prototype.onMouseDown = function(e) {
 }
 
 Trap.prototype.onMouseUp = function(e) {
+    this.element.style.display = "none";
+    
     var click = Math.abs(this.s) < 4;
     this.down = false;
     this.element.onmousemove = null;
     this.dx = this.dy = this.s = 0;
     this.pause();
-    if (click)
-        this.untrap(200);
+
+    if (this.t == null) {
+        clearTimeout(this.t);
+        this.t = null;
+    }
 }
 
 Trap.prototype.onMouseOut = function(e) {
-    this.down = false;
+    this.onMouseUp();
     return false;
 }
 
@@ -54,6 +61,17 @@ Trap.prototype.bind = function(element) {
    element.onmouseout = function(e) { return self.onMouseOut(e); }
    // onmousemove setted on the fly
    element.onselectstart = function() { return false;}
+   element.unselectable = "on";
+   element.style.MozUserSelect = "none";
+   element.style.cursor = "default";
+   element.style.display = "none";
+}
+
+Trap.prototype.bindTarget = function(element) {
+   var self = this;
+   element.onmousedown = function(e) { self.trap(e); if (e.preventDefault) e.preventDefault(); else e.returnValue = false; };
+   element.onmouseup = function(e) { return self.onMouseUp(e);};
+   element.onselectstart = function() { return false;};
    element.unselectable = "on";
    element.style.MozUserSelect = "none";
    element.style.cursor = "default";
