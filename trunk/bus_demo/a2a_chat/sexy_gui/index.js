@@ -176,6 +176,15 @@ var chat2 = {
 
     init: function() {
 
+        var back = getURLParameterByName("back");
+        if (back) {
+            var el = document.createElement("iframe");
+            el.setAttribute('id', 'bfrm');
+            el.setAttribute('style', 'position: absolute; border: 0; margin: 0; padding: 0; width: 100%; height: 100%; z-index:0;');
+            document.body.appendChild(el);
+            el.setAttribute('src', back);
+        }
+   
         this.revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
         this.revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, 50);
 
