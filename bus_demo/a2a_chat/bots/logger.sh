@@ -3,17 +3,17 @@
 export HANDBALLER=localhost:81/bus/
 bot=logger
 nickname=Logger
-icon=sexy_gui/images/bot.gif
+icon=images/bot.gif
 mind="is logging"
-trap "hbcpost freed/$bot" SIGHUP SIGINT SIGTERM
+trap "hbcpost a2ac/freed/$bot" SIGHUP SIGINT SIGTERM
 
 function advertise {
-   hbcpost model/$bot "{name:'"$bot$$"',tags:['bot', 'intendee'],nickname:'"$nickname"',icon:'"$icon"',mind:'$mind'}"
+   hbcpost a2ac/model/$bot "{name:'"$bot$$"',tags:['bot', 'intendee'],nickname:'"$nickname"',icon:'"$icon"',mind:'$mind'}"
 }
 
 advertise
 
-hbcget 'model/m*|model/i*|status/here' |\
+hbcget 'a2ac/model/m*|a2ac/model/i*|a2ac/status/here' |\
      while read l; do
  if [ "$l" == "status/here :" ] ; then
      advertise
