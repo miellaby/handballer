@@ -10,6 +10,7 @@ body {
     padding: 0;
     font-family: 'Bitstream Vera Sans','sans';
     background-color: transparent;
+    overflow: hidden;
 }
 
 button{
@@ -40,28 +41,26 @@ input {
     padding: 2px 1px 3px 1px;
     margin: 0 0 3px 1px;
     -moz-border-radius:4px;
+    -webkit-border-radius:4px;
+    border-radius:4px;
     background-color:#FFF;
 }
 
 .trap {
- position:absolute;
- left:0;
- top:0;
- width:100%;
- height:100%;
+ position: absolute;
+ left: 0;
+ top: 0;
+ width: 100%;
+ height: 100%;
+ z-index: 100;
 }
 
 #intendeesArea {
   position: absolute;
-/*  background-color: #FFF; */
   background-color: transparent;
-/*  left: 0%; */
-/*  top: 0%; */
   width: 100%;
-  height: 180px;
-  overflow: hidden;
-/* display:block; */
- z-index:10;
+  height: 0px;
+  z-index:10;
 }
 
 
@@ -71,16 +70,13 @@ input {
   left: 0%;
   top: 0%;
   width: 3%;
-  height: 100%;
+height: 100%;
   overflow: hidden;
   z-index:15;
 }
 
 #intendeesTrap {
-  z-index: 30;
-  left:3%;
-  right:3%;
-  width:94%;
+  height:180px;
 }
 
 #intendeesForward {
@@ -107,22 +103,19 @@ input {
 }
 
 .intendeePic:hover {
-  position: absolute;
-  width: 99px;
-  height: 133px;
+  margin-top:-4px;
 }
 
 .intendeeDesc {
-/* background: white; */
+  -moz-border-radius:4px;
+  -webkit-border-radius:4px;
+  border-radius:4px;
   background: transparent;
+  background-image:url('images/lines.gif');
   position: absolute;
   text-align: center;
   overflow: hidden;
-/*  left: 0px; */
-/*  top: 0px; */
   width: 99px;
-  height: 30px;
-/*  line-height:1.5em; */
   font-size:16px;
   margin: 0;
 }
@@ -135,55 +128,37 @@ input {
   font-size:7px;
 }
 
-#msgsArea {
-  position: absolute;
-/* background-color: #EEE; */
-  top: 180px;
-  left: 1%;
-  width: 98%;
-  bottom:60px;
-  overflow: hidden;
-/* padding:1%; */
-  z-index:5;
-}
-
-
-#msgsTrap {
-  z-index: 20;
-}
-
-#postArea {
-  position: absolute;
-/*  background-color: #EEE; */
-  width: 100%;
-  bottom: 0px;
-  height: 60px;
-  z-index: 30;
-  margin: 0;
-}
-
-#messageBody {
-  width:100%;
-  margin:0;
-  font-size:18px;
-  height:42px;
-  padding-left:56px;
-  padding-top:10px;
-}
-
 .msgPic {
   position: absolute;
-  background-color: white;
+  background-color: transparent;
 /*  width: 25px; */
   height: 40px;
+  margin-bottom:62px;
+  z-index: 8;
 }
 
 .msgPic:hover {
-  position: absolute;
-  background-color: white;
-/*  width: 25px; */
-  height: 40px;
+  padding-left:4px;
 }
+
+.msgDesc {
+  position: absolute;
+  background-color: transparent;
+  color: black;
+  left:0;
+  padding: 10px 6px 0 56px;
+  height: 36px ;
+  font-size:18px;
+  overflow: auto;
+  margin:0;
+  margin-bottom:60px;
+  background-image:url('images/lines.gif');
+  max-width:99%:
+  -moz-border-radius:4px;
+  -webkit-border-radius:4px;
+  border-radius:4px;
+}
+
 
 #contextForm {
     -moz-border-radius:20px;
@@ -197,23 +172,30 @@ input {
     opacity: 0.90;
 }
 
-
-.msgDesc {
+#postArea {
   position: absolute;
-  background-color: white;
-  color: black;
-  left: 44px;
-  right: 0px;
-  height: 30px ;
-  font-size:18px;
-  padding:0 6px;
-  overflow: auto;
-  margin:0;
+/*  background-color: #EEE; */
+  width: 100%;
+  bottom: 0px;
+  height: 60px;
+  z-index: 30;
+  margin: 0;
 }
 
+#messageBody {
+  width:99%;
+  left:0;
+  margin:0;
+  padding:0;
+  font-size:18px;
+  height:42px;
+  padding-left:56px;
+  padding-top:10px;
+  background-color: transparent;
+  background-image:url('images/lines.gif');
+}
 
 #msgPicImg {
-  background-color: white;
   height: 40px;
   z-index:31;
 }
@@ -253,10 +235,8 @@ input {
     <div id="intendeesBack"></div>
     <div id="intendeesForward"></div>
   </div>
+  <div class="trap" id="msgsTrap"></div>
 
-  <div id="msgsArea">
-    <div class="trap" id="msgsTrap"></div>
-  </div>
   <div id="contextForm" style="display:none;">
     <button onclick="javascript:chat2.showContextForm(null);">close</button>
     <form id="mePropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">

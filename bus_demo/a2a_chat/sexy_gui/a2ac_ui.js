@@ -91,7 +91,7 @@ IntendeeCell.prototype.show = function(item) {
         desc += " <small><br/>(away)</small>";
     else if (item.watching || item.typing)
         desc += " <small><br/>" + ( item.typing ? " typing" : "" ) + ( item.watching ? " watching" : "") + "</small>";
-    this.desc.style.height = item.mind ? "90px" : "60px";
+    // this.desc.style.height = item.mind ? "90px" : "60px";
     if (item.mind) desc += "<br/><quote>" + item.mind + "</quote>";
 
     this.desc.innerHTML = desc;
@@ -138,7 +138,7 @@ MessageCell.prototype.setCoords = function(inFactor, x) {
 };
 
 MessageCell.prototype.getOpeningSize = function(area) {
-    return area.clientHeight / MessageCell.prototype.gap;
+    return (area === document.body ? window.innerHeight : area.clientHeight) / MessageCell.prototype.gap;
 }
 
 MessageCell.prototype.hide = function() {
