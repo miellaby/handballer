@@ -186,7 +186,7 @@ var chat2 = {
         }
    
         this.revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
-        this.revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, 50);
+        this.revolutionOfMessages.init(document.body, MessageCell, 50);
 
         autobus.tagsonomy.subscribe("intendee", chat2.onIntendeesSplice);
         autobus.tagsonomy.subscribe("message", chat2.onMessagesSplice);
