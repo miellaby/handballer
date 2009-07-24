@@ -10,6 +10,7 @@
 #include "libhttpd.h"
 #include "_libhttpd.h"
 #include "match.h"
+#include "matchc.h"
 #include "timers.h"
 #include "handballer.h"
 
