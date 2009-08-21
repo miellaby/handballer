@@ -184,7 +184,7 @@ var chat2 = {
             document.body.appendChild(el);
             el.setAttribute('src', back);
         }
-   
+
         this.revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
         this.revolutionOfMessages.init(document.body, MessageCell, 50);
 

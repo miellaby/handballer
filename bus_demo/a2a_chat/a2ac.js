@@ -1,8 +1,9 @@
 // ======================================================================
 // A2A Chat application core
 // ======================================================================
-
-var autobus = new Autobus("a2ac");
+var agora = getURLParameterByName("agora") ;
+if (!agora) agora = "a2ac";
+var autobus = new Autobus(agora);
 
 // ======================================================================
 // helpers
