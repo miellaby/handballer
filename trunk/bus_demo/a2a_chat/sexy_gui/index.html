@@ -164,7 +164,7 @@ height: 100%;
     -moz-border-radius:20px;
     -webkit-border-radius:20px;
     position:absolute;
-    width:40%;
+    width:50%;
     right:5px;
     top:100px;
     z-index:40;
@@ -229,7 +229,9 @@ height: 100%;
 
 <body onload="chat2.init();" onunload="chat2.finalize();">
 
-  <!-- intendy area technologies -->
+  <!-- close button -->
+
+  <!-- intendy area -->
   <div id="intendeesArea">
     <div class="trap" id="intendeesTrap"></div>
     <div id="intendeesBack"></div>
@@ -281,5 +283,6 @@ height: 100%;
     <button type="submit" style="display:none;">submit</button>
   </form>
 
+  <img id="closeButton" src="images/cross.png" style="position:absolute; z-index:1; right:40px;"/>
 </body>
 </html>

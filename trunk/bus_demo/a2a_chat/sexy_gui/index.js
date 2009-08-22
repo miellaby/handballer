@@ -187,8 +187,10 @@ var chat2 = {
             el.setAttribute('style', 'position: absolute; border: 0; margin: 0; padding: 0; width: 100%; height: 100%; z-index:0;');
             document.body.appendChild(el);
             el.setAttribute('src', back);
+            document.getElementById("closeButton").onclick = function() {window.location = back;};
+        } else {
+            document.getElementById("closeButton").style.display = "none";
         }
-
 
         this.revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
         this.revolutionOfMessages.init(document.body, MessageCell, 50);
