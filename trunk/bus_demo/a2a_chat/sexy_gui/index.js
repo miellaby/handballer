@@ -176,6 +176,10 @@ var chat2 = {
 
     init: function() {
 
+        var a2acAgora = getURLParameterByName("agora"),
+            back = getURLParameterByName("back");
+
+
         var back = getURLParameterByName("back");
         if (back) {
             var el = document.createElement("iframe");
@@ -185,8 +189,13 @@ var chat2 = {
             el.setAttribute('src', back);
         }
 
+
         this.revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
         this.revolutionOfMessages.init(document.body, MessageCell, 50);
+
+        if (!a2acAgora)
+            a2acAgora = (back ? back.b64() : 'a2ac') ;
+        autobus.agora = a2acAgora + '/';
 
         autobus.tagsonomy.subscribe("intendee", chat2.onIntendeesSplice);
         autobus.tagsonomy.subscribe("message", chat2.onMessagesSplice);
