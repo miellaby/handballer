@@ -167,7 +167,7 @@ Me.prototype.doPing = function() {
 Me.prototype.onNickname = function(variable, value) {
     var expire = new Date();
     expire.setTime(expire.getTime() + 3600 * 24 * 1000 * 30);
-    cookies.set("a2ac_nickname", value);
+    cookies.set("a2ac_nickname", value, expire);
 };
 
 Me.prototype.onIcon = function(variable, value) {
