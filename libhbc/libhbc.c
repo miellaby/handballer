@@ -219,6 +219,21 @@ int write_now( int fd, const void* buf, size_t nbytes ) {
   return nwritten;
 }
 
+
+unsigned long hbc_bodySize(int hbcGetSocket) {
+  int i;
+  for (i = 0 ; i < 5 ; i++)
+    if (socketTab[i].pid && socketTab[i].socket == hbcGetSocket) break ;
+
+  if (i >= 5)
+    {
+      ERROR("UNRECORDED CONNECTION") ;
+      return 0 ;
+    }
+
+  return socketTab[i].body_size ;
+}
+
 void hbc_close(int hbcGetSocket) {
   int i = 0 ;
   close(hbcGetSocket);

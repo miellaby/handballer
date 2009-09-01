@@ -1,6 +1,6 @@
 #!/bin/bash
 #export HANDBALLER=localhost:81/bus/
-export HANDBALLER=localhost:81/bus/
+export HANDBALLER=192.168.1.77:81/bus/
 bot=logger
 nickname=Logger
 icon=images/bot.gif

@@ -62,7 +62,7 @@ INSTALL =	@INSTALL@
 	@rm -f $@
 	$(CC) $(CFLAGS) -c $*.c
 
-SRC =		thttpd.c libhttpd.c handballer.c fdwatch.c mmc.c timers.c match.c matchc.c tdate_parse.c
+SRC =		thttpd.c libhttpd.c handballer.c fdwatch.c mmc.c timers.c match.c matchc.c mymemmem.c tdate_parse.c
 
 OBJ =		$(SRC:.c=.o) @LIBOBJS@
 
@@ -170,4 +170,7 @@ fdwatch.o:	fdwatch.h
 mmc.o:		mmc.h libhttpd.h
 timers.o:	timers.h
 match.o:	match.h
+matchc.o:	matchc.h
+mymemmem.o:	mymemmem.h
 tdate_parse.o:	tdate_parse.h
+handballer.o:   config.h libhttpd.h _libhttpd.h match.h matchc.h timers.h mymemmem.h handballer.h
