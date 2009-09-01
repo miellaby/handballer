@@ -8,4 +8,8 @@
 */
 extern int matchc( const char* pattern, const char* subpattern );
 
+/* Look for /subbin/ -a sequence of /sublen/ bytes- into /bin/ -a sequence of /len/ bytes- */
+  
+extern void *mymemmem( const void* bin, size_t len, const void* subbin, size_t sublen);
+
 #endif /* _MATCH_H_ */

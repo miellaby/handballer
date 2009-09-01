@@ -42,6 +42,9 @@ int hbc_get(char* labelPattern, hbc_callback_t callback, void* context) ;
 // Memory management Warning: string data upon the pointers will be freed at next hbc_wait() call. Please copy these data to store them permanently.
 int hbc_wait(int hbcGetSocket, char **label, char **body) ;
 
+// returns the last received message body size, can be used in hbc_get() callback or following a successful hbc_wait() previous call
+unsigned long hbc_bodySize(int hbcGetSocket);
+
 // this function may be called before hbc_wait() to design a timeout based pooling
 // it returns when a new message is available or timeout raised.
 int hbc_poll(int hbcGetSocket, struct timeval *timeval_p) ;

@@ -29,7 +29,7 @@ struct s_socketTab {
   int   label_size ;
   char *label ; // will point to somewhere in the read buffer
   char *body ; // will point to somewhere in the read buffer
-  int   body_size ;
+  unsigned long body_size ;
   int   read_offset ;
   int   header_offset ;
   int   labelSize_offset ;

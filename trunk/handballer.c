@@ -12,6 +12,7 @@
 #include "match.h"
 #include "matchc.h"
 #include "timers.h"
+#include "mymemmem.h"
 #include "handballer.h"
 
 static int   BOX_KEEP_TIME = 3;
@@ -665,7 +666,7 @@ bus( httpd_conn* hc )
             else if (hc->bus_flags & BUS_NETSCAPEPUSH_MODE)
               {
                 char *btype ;
-                hc->type = "multipart/x-mixed-replace;boundary=" ;
+                hc->type = "multipart/x-mixed-replace; boundary=" ;
                 btype = NEW(char, (strlen(hc->type) + strlen(hc->bus_getparam))) ;
 
                 if (btype)
@@ -770,6 +771,7 @@ bus( httpd_conn* hc )
         int i;
         char *body = (char *)0;
         size_t body_len ;
+        char *contenttype = hc->contenttype;
 
         postdataSize = hc->read_idx - hc->checked_idx; // may be zero
 
@@ -799,11 +801,57 @@ bus( httpd_conn* hc )
         // final \0 for string search hereafter
         postdata[postdataSize] = '\0' ;
 
-        TRACE( hc->hs->logfp, "BUS POST pathinfo='%.200s' (truncated_)data='%.200s' contenttype =%.200s'", hc->pathinfo, postdata, hc->contenttype);
+        TRACE( hc->hs->logfp, "BUS POST pathinfo='%.200s' (truncated_)data='%.200s' datasize=%d contenttype=%.200s'", hc->pathinfo, postdata, postdataSize, hc->contenttype);
 
 
-        /* for Form based POST request, one jumps over the field name */
-        if (!strcmp(hc->contenttype, "text/plain") && !strncmp(postdata, "body=", 5)) { /* TO DO: more universal criteria */
+        if (!strncmp(hc->contenttype, "multipart/", 10)) {
+          char* b = strstr(hc->contenttype, "boundary=");
+          int   step = 0;
+          body = postdata ;
+          body_len = postdataSize ;
+          if (b) {
+            b+= 9;
+            step++;
+            {
+              char* c = strstr(body, "filename=");
+              if (c) {
+                char* f = c + 10;
+                char* fen = strstr(f, "\r\n");
+                fen--;
+                *fen='\0';
+                fen += 3;
+                step++;
+                {
+                  char* conte = strstr(fen, "Content-Type: ");
+                  if (conte) {
+                    conte += 14;
+                    step++;
+                    {
+                      char* contend = strstr(conte, "\r\n\r\n");
+                      if (contend) {
+                        *contend = '\0';
+                        contend += 4;
+                        step++;
+                        {
+                          char* bodend = mymemmem(contend, body_len - (contend - body),  b, strlen(b) - 2) ;
+                          if (bodend) {
+                            body = contend ;
+                            body_len = bodend - contend;
+                            contenttype = conte;
+                            step++;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          TRACE( hc->hs->logfp, "multipart parsing succeed step : %d", step);
+          
+        } else if (!strcmp(hc->contenttype, "text/plain") && !strncmp(postdata, "body=", 5)) { /* TO DO: more universal criteria */
+          /* for Form based POST request, one jumps over the field name */
           body = postdata + 5 ;
           body_len = postdataSize - 5 - 2 ;
         } else {
@@ -812,7 +860,7 @@ bus( httpd_conn* hc )
           body_len = postdataSize ;
         }
         
-        r = bus_forward_post(hc, hc->pathinfo, body, body_len, hc->contenttype) ;
+        r = bus_forward_post(hc, hc->pathinfo, body, body_len, contenttype) ;
           
         free( postdata ) ;
 

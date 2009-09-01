@@ -40,7 +40,7 @@ LIBS =		@LIBS@
 NETLIBS =	@V_NETLIBS@
 INSTALL =	@INSTALL@
 
-CLEANFILES =	*.o libhbc.so libhbcg.so hbcget hbcpost
+CLEANFILES =	*.o libhbc.so libhbcg.so hbcget hbcbget hbcpost
 
 @SET_MAKE@
 
@@ -52,7 +52,7 @@ endif
 	@rm -f $@
 	$(CC) $(CFLAGS) -c $*.c
 
-all:		libhbc.so libhbcg.so hbcget hbcpost
+all:		libhbc.so libhbcg.so hbcget hbcbget hbcpost
 
 libhbc.so:	libhbc.o
 	$(CC) $(LDFLAGS) -pthread libhbc.o $(LIBS) -shared -o libhbc.so
@@ -63,19 +63,24 @@ libhbcg.so:	getter.o ../match.o libhbc.so
 hbcget:		hbcget.o libhbc.so
 	$(CC) $(LDFLAGS) -L. -lhbc hbcget.o $(LIBS) -o hbcget
 
+hbcbget:		hbcbget.o libhbc.so
+	$(CC) $(LDFLAGS) -L. -lhbc hbcbget.o $(LIBS) -o hbcbget
+
 hbcpost:	hbcpost.o libhbc.so
 	$(CC) $(LDFLAGS) -L. -lhbc hbcpost.o $(LIBS) -o hbcpost
 
 libhbc.o:		_hbc.h hbc.h
 hbcget.o:		hbc.h
+hbcbget.o:		hbc.h
 hbcpost.o:		hbc.h
 getter.o:		hbc.h getter.h _getter.h ../match.h
 
 install:	all
-	rm -f $(LIBDIR)/libhbcg.so $(LIBDIR)/libhbc.so $(BINDIR)/hbcget $(BINDIR)/hbcpost
+	rm -f $(LIBDIR)/libhbcg.so $(LIBDIR)/libhbc.so $(BINDIR)/hbcget $(BINDIR)/hbcbget $(BINDIR)/hbcpost
 	cp libhbc.so $(LIBDIR)/libhbc.so
 	cp libhbcg.so $(LIBDIR)/libhbcg.so
 	cp hbcget $(BINDIR)/hbcget
+	cp hbcbget $(BINDIR)/hbcbget
 	cp hbcpost $(BINDIR)/hbcpost
 
 
