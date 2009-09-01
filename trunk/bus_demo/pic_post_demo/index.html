@@ -1,14 +1,10 @@
 <HTML>
-<HEAD><TITLE>thttpd is running</TITLE></HEAD>
+<HEAD><TITLE>Pictures transfert via handballer demo</TITLE></HEAD>
 <BODY BGCOLOR="#99cc99" TEXT="#000000" LINK="#2020ff" VLINK="#4040cc">
 <IFRAME ID="postResult" NAME="postResult" STYLE="display:none;visibility:hidden;"></IFRAME>
-<IMG SRC="/bus/post_pic_demo?flush&null" WIDTH=400 HEIGHT=400\>
-<FORM METHOD="POST" ENCTYPE="multipart/form-data" TARGET="postResult" ACTION="/bus/post_pic_demo"> 
-File to upload: <INPUT TYPE="file" NAME="upfile"><BR> 
-<!--Notes about the file: <input type=text name=note><br> -->
-<BR> 
-<INPUT TYPE=submit VALUE=Press> to upload the file!
-</FORM> 
- 
+<FORM METHOD="POST" ENCTYPE="multipart/form-data" ID="postForm" NAME="postForm" TARGET="postResult" ACTION="/bus/pic/"> 
+File to upload: <INPUT TYPE="file" NAME="upfile" ONCHANGE="document.forms.postForm.action = '/bus/pic/' + this.value">
+ <INPUT TYPE=submit VALUE=Upload></FORM> 
+<IMG SRC="/bus/pic/*?push=ITSASERIOUSTTHINGFINDAGOODSEPARATOR" WIDTH=400 HEIGHT=400\>
 </BODY>
 </HTML>
