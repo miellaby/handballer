@@ -267,10 +267,11 @@ static int box_remove_head(box_t* box) {
 
 int get_message_from_box(httpd_conn* get_hc) {
 
-  box_t* box;
-  char *label;
-  char *body;
+  box_t *box;
+  char  *label;
+  char  *body;
   size_t body_len;
+  int    label_needed = (get_hc->bus_flags & BUS_LABEL_MODE);
 
   box = get_hc->msg_box;
 
@@ -294,7 +295,7 @@ int get_message_from_box(httpd_conn* get_hc) {
       add_response_buffer(get_hc, "<SCRIPT>") ;
       add_response_buffer(get_hc, get_hc->bus_getparam) ;
       add_response_buffer(get_hc, "(\'") ;
-      if (get_hc->bus_flags & BUS_LABEL_MODE)
+      if (label_needed)
         {
           add_response_buffer(get_hc, label) ;
           add_response_buffer(get_hc, "\',\'") ;
@@ -305,46 +306,47 @@ int get_message_from_box(httpd_conn* get_hc) {
       char strvalue[22] ;
       if (get_hc->one_one)
         {
-          if (!(get_hc->bus_flags & BUS_ONE_SHOOT_DONE))
+          if (0 && /* USELESS */ !(get_hc->bus_flags & BUS_ONE_SHOOT_DONE))
             {
-              snprintf(strvalue, sizeof(strvalue), "%p", (void *)(29 + 2 * strlen(get_hc->bus_getparam) + strlen(msg->contenttype) + strlen(label) + body_len)) ;
+              snprintf(strvalue, sizeof(strvalue), "%p", (void *)(48 + 2 * strlen(get_hc->bus_getparam) + strlen(msg->contenttype) + strlen(label) + body_len)) ;
               add_response_buffer(get_hc, strvalue + 2) ; // avoid 0x
-              add_response_buffer(get_hc, "\r\n--") ;
+              add_response_buffer(get_hc, "\015\012--") ;
               add_response_buffer(get_hc, get_hc->bus_getparam) ;
             }
           else
             {
-              snprintf(strvalue, sizeof(strvalue), "%p", (void *)(25 + strlen(get_hc->bus_getparam) + strlen(msg->contenttype) + strlen(label) + body_len)) ;
+              snprintf(strvalue, sizeof(strvalue), "%p", (void *)(44 + strlen(get_hc->bus_getparam) + strlen(msg->contenttype) + strlen(label) + body_len)) ;
               add_response_buffer(get_hc, strvalue + 2) ; // avoid 0x
             }
-          add_response_buffer(get_hc, "\r\nContent-Type: ") ;
+          add_response_buffer(get_hc, "\015\012Content-Type: ") ;
           add_response_buffer(get_hc, msg->contenttype) ;
-          add_response_buffer(get_hc, "\r\n\r\n") ;
+          add_response_buffer(get_hc, "\015\012Content-Location: ") ;
           add_response_buffer(get_hc, label) ;
-          add_response_buffer(get_hc, "\n") ;
+          add_response_buffer(get_hc, "\015\012\015\012") ;
         }
       else
         {
-          if (!(get_hc->bus_flags & BUS_ONE_SHOOT_DONE))
+          if (0 && /* USELESS */ !(get_hc->bus_flags & BUS_ONE_SHOOT_DONE))
             {
               add_response_buffer(get_hc, "--") ;
               add_response_buffer(get_hc, get_hc->bus_getparam) ;
-              add_response_buffer(get_hc, "\r\n") ;
+              add_response_buffer(get_hc, "\015\012") ;
             }
           add_response_buffer(get_hc, "Content-Type: ") ;
           add_response_buffer(get_hc, msg->contenttype) ;
-          add_response_buffer(get_hc, "\r\nContent-Length: ") ;
-          snprintf(strvalue, sizeof(strvalue), "%d\r\n", body_len + strlen(label) + 1) ;
+          add_response_buffer(get_hc, "\015\012Content-Length: ") ;
+          snprintf(strvalue, sizeof(strvalue), "%d", body_len) ;
           add_response_buffer(get_hc, strvalue) ;
+          add_response_buffer(get_hc, "\015\012Content-Location: ") ;
           add_response_buffer(get_hc, label) ;
-          add_response_buffer(get_hc, "\n") ;
+          add_response_buffer(get_hc, "\015\012\015\012") ;
         }
     }
   else if (get_hc->bus_flags & BUS_INDEXED_MODE)
     { // INDEXED MODE
       char hexa[10] ;
       
-      if (get_hc->bus_flags & BUS_LABEL_MODE)
+      if (label_needed)
         {
           char hexaC[10] ;
           snprintf(hexaC, 10, "%.8X\n", 0xFFFFFFFF & strlen(label)) ;
@@ -357,7 +359,7 @@ int get_message_from_box(httpd_conn* get_hc) {
     }
   else if (get_hc->bus_flags & BUS_NULL_MODE)
     { // NULL MODE
-      if (get_hc->bus_flags & BUS_LABEL_MODE)
+      if (label_needed)
         {
           add_response_buffer(get_hc, label) ;
           add_response_buffer(get_hc, " ") ; // little trick to add a null byte without effort
@@ -367,7 +369,7 @@ int get_message_from_box(httpd_conn* get_hc) {
   else if (get_hc->bus_flags & BUS_EVENTSTREAM_MODE)
     {
       add_response_buffer(get_hc, "Event: message\n") ;
-      if (get_hc->bus_flags & BUS_LABEL_MODE)
+      if (label_needed)
         {
           add_response_buffer(get_hc, "data: ") ;
           add_response_buffer(get_hc, label) ;
@@ -383,7 +385,7 @@ int get_message_from_box(httpd_conn* get_hc) {
   /* 			{ // DEFAULT MODE  */
   /* 			  char strvalue[22] ; */
   
-  /*               if (get_hc->bus_flags & BUS_LABEL_MODE) */
+  /*               if (label_needed) */
   /*                 { */
   /* 				  add_response_buffer(get_hc, label) ; */
   /* 				  add_response_buffer(get_hc, "\n") ; */
@@ -436,7 +438,7 @@ int get_message_from_box(httpd_conn* get_hc) {
       msg->escaped   = escaped;
       msg->escaped_len    = escaped_len;
  
-      TRACE(get_hc->hs->logfp, "BUS ESCAPED POST '%.*s'", escaped_len, escaped);
+      TRACE(get_hc->hs->logfp, "<BUS><ESCAPED>%.*s</ESCAPED></BUS>", escaped_len, escaped);
     }
   
   
@@ -458,19 +460,19 @@ int get_message_from_box(httpd_conn* get_hc) {
   /**********************************/
   if (get_hc->bus_flags & BUS_SCRIPT_MODE)
     { // SCRIPT MODE : script sequence end
-      add_response_buffer( get_hc, "\');</SCRIPT>\r\n" ) ;
+      add_response_buffer( get_hc, "\');</SCRIPT>\015\012" ) ;
       if (get_hc->bus_flags & BUS_FLUSH_MODE && get_hc->bus_flags & BUS_SCRIPT_RELOAD)
         {
-          add_response_buffer( get_hc, "<SCRIPT>window.location.reload();</SCRIPT>\r\n" ) ;
+          add_response_buffer( get_hc, "<SCRIPT>window.location.reload();</SCRIPT>\015\012" ) ;
         }
     }
   else if (get_hc->bus_flags & BUS_NETSCAPEPUSH_MODE)
     { // PUSH MODE : DELIMITER AFTER EACH MESSAGE
-      add_response_buffer(get_hc, "\r\n--") ;
+      add_response_buffer(get_hc, "\015\012--") ;
       add_response_buffer(get_hc, get_hc->bus_getparam) ;
-      add_response_buffer( get_hc, "\r\n" ) ;
+      add_response_buffer( get_hc, "\015\012" ) ;
       if (get_hc->one_one)
-        add_response_buffer(get_hc, "\r\n") ;
+        add_response_buffer(get_hc, "\015\012") ;
     }
   else if (get_hc->bus_flags & BUS_INDEXED_MODE)
     { // INDEXED MODE : \n after message
@@ -548,7 +550,7 @@ bus( httpd_conn* hc )
         char  extraheaders_with_setcookie[1024] ;
         int   dyn_extraheaders = 0;
 
-        TRACE( hc->hs->logfp, "BUS GET pathinfo='%.200s' query='%.200s'", hc->pathinfo, hc->query );
+        TRACE( hc->hs->logfp, "<BUS REQUEST=%.200s><QUERY>%.200s</QUERY></BUS>", hc->pathinfo, hc->query );
 
         while (parameter)
           {
@@ -580,7 +582,7 @@ bus( httpd_conn* hc )
         
         if (script_cb)
           {
-            TRACE( hc->hs->logfp, "BUS SCRIPT MODE callback = '%.200s'", script_cb);
+            TRACE( hc->hs->logfp, "<BUS><MODE NAME=SCRIPT PARAM=%.200s/></BUS>", script_cb);
             hc->bus_flags |= BUS_SCRIPT_MODE;
             httpd_realloc_str(&hc->bus_getparam, &hc->bus_maxgetparam, strlen(script_cb)) ;
             strcpy(hc->bus_getparam, script_cb) ;
@@ -592,30 +594,30 @@ bus( httpd_conn* hc )
           }
         else if (push_delimiter)
           {
-            TRACE( hc->hs->logfp, "BUS PUSH MODE delimiter = '%.200s'", push_delimiter);
+            TRACE( hc->hs->logfp, "<BUS><MODE NAME=PUSH PARAM=%.200s/></BUS>'", push_delimiter);
             hc->bus_flags |= BUS_NETSCAPEPUSH_MODE;
             httpd_realloc_str(&hc->bus_getparam, &hc->bus_maxgetparam, strlen(push_delimiter)) ;
             strcpy(hc->bus_getparam, push_delimiter) ;
           }
         else if (event)
           {
-            TRACE( hc->hs->logfp, "BUS EVENT MODE");
+            TRACE( hc->hs->logfp, "<BUS><MODE NAME=EVENT/></BUS>");
             hc->bus_flags |= BUS_EVENTSTREAM_MODE;
           }
         else if (null)
           {
-            TRACE( hc->hs->logfp, "NULL TERMINATED MODE");
+            TRACE( hc->hs->logfp, "<BUS><MODE NAME=NULL/></BUS>");
             hc->bus_flags |= BUS_NULL_MODE;
           }
         else /* if (indexed) */
           {
-            TRACE( hc->hs->logfp, "BUS INDEXED MODE");
+            TRACE( hc->hs->logfp, "<BUS><MODE name=INDEXED</BUS>");
             hc->bus_flags |= BUS_INDEXED_MODE;
           }
         
         if (box)
           {
-            TRACE( hc->hs->logfp, "MSG BOX MODE");
+            TRACE( hc->hs->logfp, "<BUS><OPTION NAME=MSG_BOX/></BUS>");
             hc->bus_flags |= BUS_BOX_MODE;
           }
 
@@ -632,7 +634,7 @@ bus( httpd_conn* hc )
         if (post_in_get)
           {
             strdecode(post_in_get, post_in_get) ;
-            TRACE( hc->hs->logfp, "BUS POST IN GET : '%.200s'", post_in_get);
+            TRACE( hc->hs->logfp, "<BUS><POST_IN_GET>%.200s</POST_IN_GET></BUS>", post_in_get);
           }
 
         if (strlen(hc->pathinfo))
@@ -668,7 +670,8 @@ bus( httpd_conn* hc )
                 char *btype ;
                 hc->type = "multipart/x-mixed-replace; boundary=" ;
                 btype = NEW(char, (strlen(hc->type) + strlen(hc->bus_getparam))) ;
-
+                // hc->one_one = 0 ;
+                // hc->protocol = "HTTP/1.0";
                 if (btype)
                   {
                     strcpy(btype, hc->type) ;
@@ -700,14 +703,14 @@ bus( httpd_conn* hc )
                 char strvalue[22] ;
                 if (hc->one_one)
                   {
-                    snprintf(strvalue, sizeof(strvalue), "%p\r\n", (void *)(4 + strlen(hc->bus_getparam))) ;
+                    snprintf(strvalue, sizeof(strvalue), "%p\015\012", (void *)(4 + strlen(hc->bus_getparam))) ;
                     add_response_buffer(hc, 2 + strvalue) ;
                   }
                 add_response_buffer(hc, "--") ;
                 add_response_buffer(hc, hc->bus_getparam) ;
-                add_response_buffer(hc, "\r\n") ;
+                add_response_buffer(hc, "\015\012") ;
                 if (hc->one_one)
-                   add_response_buffer(hc, "\r\n") ;
+                   add_response_buffer(hc, "\015\012") ;
                 free(hc->type) ;
                 hc->type = "";
               }
@@ -772,7 +775,7 @@ bus( httpd_conn* hc )
         char *body = (char *)0;
         size_t body_len ;
         char *contenttype = hc->contenttype;
-
+        
         postdataSize = hc->read_idx - hc->checked_idx; // may be zero
 
         httpd_realloc_str(&postdata, &maxpostdata, postdataSize );
@@ -801,7 +804,7 @@ bus( httpd_conn* hc )
         // final \0 for string search hereafter
         postdata[postdataSize] = '\0' ;
 
-        TRACE( hc->hs->logfp, "BUS POST pathinfo='%.200s' (truncated_)data='%.200s' datasize=%d contenttype=%.200s'", hc->pathinfo, postdata, postdataSize, hc->contenttype);
+        TRACE( hc->hs->logfp, "<BUS TYPE=POST REQUEST=%.200s CONTENTTYPE=%.200s DATASIZE=%d><EXTRACT>%.200s</EXTRACT></BUS>'", hc->pathinfo, hc->contenttype, postdataSize, postdata);
 
 
         if (!strncmp(hc->contenttype, "multipart/", 10)) {
@@ -816,7 +819,7 @@ bus( httpd_conn* hc )
               char* c = strstr(body, "filename=");
               if (c) {
                 char* f = c + 10;
-                char* fen = strstr(f, "\r\n");
+                char* fen = strstr(f, "\015\012");
                 fen--;
                 *fen='\0';
                 fen += 3;
@@ -827,7 +830,7 @@ bus( httpd_conn* hc )
                     conte += 14;
                     step++;
                     {
-                      char* contend = strstr(conte, "\r\n\r\n");
+                      char* contend = strstr(conte, "\015\012\015\012");
                       if (contend) {
                         *contend = '\0';
                         contend += 4;
@@ -836,7 +839,7 @@ bus( httpd_conn* hc )
                           char* bodend = mymemmem(contend, body_len - (contend - body),  b, strlen(b) - 2) ;
                           if (bodend) {
                             body = contend ;
-                            body_len = bodend - contend;
+                            body_len = bodend - contend - 4;
                             contenttype = conte;
                             step++;
                           }
@@ -859,6 +862,9 @@ bus( httpd_conn* hc )
           body = postdata ;
           body_len = postdataSize ;
         }
+
+        if (!contenttype[0]) // default ContentType
+          contenttype = "application/octet-stream";
         
         r = bus_forward_post(hc, hc->pathinfo, body, body_len, contenttype) ;
           
@@ -904,16 +910,16 @@ int proxy( httpd_conn* hc )
       return -1;
   }
   add_client_buffer(cc, hc->proxy_remotepath);
-  add_client_buffer(cc, " HTTP/1.0\r\n");
+  add_client_buffer(cc, " HTTP/1.0\015\012");
 
   /* copy build headers */
   add_client_buffer(cc, "Host: ") ;
   add_client_buffer(cc, hc->proxy_remotehost) ;
-  add_client_buffer(cc, "\r\n");
+  add_client_buffer(cc, "\015\012");
   add_client_buffer(cc, hc->proxy_header) ;
   add_client_buffer(cc, "X-Forwarded-For: ");
   add_client_buffer(cc, httpd_ntoa( &hc->client_addr ));
-  add_client_buffer(cc, "\r\n\r\n");
+  add_client_buffer(cc, "\015\012\015\012");
 	
   if ( hc->method == METHOD_POST )
     {

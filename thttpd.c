@@ -1692,7 +1692,7 @@ handle_client_read( connecttab* c, struct timeval* tvP )
 
       /* swap between CLIENT_READING and SENDING rather than buffering */
       fdwatch_del_fd( cc->conn_fd );
-      TRACE( c->hc->hs->logfp, "PROXY UNSTACKING '%.200s'", c->hc->decodedurl );
+      TRACE( c->hc->hs->logfp, "<PROXY URL=%.200s>FLUSHING</PROXY>", c->hc->decodedurl );
       c->next_byte_index = 0;
       c->end_byte_index = cc->read_idx;
       c->conn_state = CNST_SENDING ;
@@ -1704,7 +1704,7 @@ handle_client_read( connecttab* c, struct timeval* tvP )
 
   sz = read(cc->conn_fd, &(cc->read_buf[cc->read_idx]),
             cc->read_size - cc->read_idx );
-  TRACE( c->hc->hs->logfp, "PROXY CLIENT READING %d", sz );
+  TRACE( c->hc->hs->logfp, "<PROXY>CLIENT READING SOCKET %d</PROXY>", sz );
   
   if ( sz < 0 )
 	{
@@ -1717,7 +1717,7 @@ handle_client_read( connecttab* c, struct timeval* tvP )
 	    return;
 
         /* other case : silently transmit what we've read */
-        TRACE( c->hc->hs->logfp, "PROXY CLIENT READING ERROR %s for '%.200s'", hstrerror( h_errno ), c->hc->decodedurl );
+        TRACE( c->hc->hs->logfp, "<PROXY URL=%.200s>CLIENT READING ERROR %s</PROXY>", c->hc->decodedurl, hstrerror( h_errno ) );
         
         sz = 0 ;
         }
@@ -1725,7 +1725,7 @@ handle_client_read( connecttab* c, struct timeval* tvP )
   if ( sz == 0 )
     {
     fdwatch_del_fd( cc->conn_fd );
-    TRACE( c->hc->hs->logfp, "PROXY CLIENT READING DONE. '%.200s'", c->hc->decodedurl );
+    TRACE( c->hc->hs->logfp, "<PROXY URL=%.200s>CLIENT READING DONE.</PROXY>", c->hc->decodedurl );
     c->next_byte_index = 0;
     c->end_byte_index = cc->read_idx;
     if ( c->next_byte_index >= c->end_byte_index )
@@ -1839,7 +1839,7 @@ handle_read( connecttab* c, struct timeval* tvP )
         httpd_sockaddr sa6;
         int gotv4, gotv6;
         
-        TRACE(hc->hs->logfp, "PROXY GET %.200s <-> http://%.200s:%d%.200s", hc->encodedurl, hc->proxy_remotehost,
+        TRACE(hc->hs->logfp, "<PROXY URL=%.200s><REMOTE>http://%.200s:%d%.200s</REMOTE></PROXY>", hc->encodedurl, hc->proxy_remotehost,
               (int)hc->proxy_remoteport, hc->proxy_remotepath);
 
         lookup_hostname( hc->proxy_remotehost, hc->proxy_remoteport, &sa4, sizeof(sa4), &gotv4, &sa6, sizeof(sa6), &gotv6 );
@@ -1870,7 +1870,7 @@ handle_read( connecttab* c, struct timeval* tvP )
     /* Proxy related connection waits for proxified server response */
     if (hc->proxy_related)
       {
-        TRACE(hc->hs->logfp, "PROXY CLIENT CONNECTING %.200s" , hc->proxy_remotehost);
+        TRACE(hc->hs->logfp, "<PROXY>CLIENT CONNECTING %.200s</PROXY>" , hc->proxy_remotehost);
         
         c->started_at = tvP->tv_sec;
         c->wouldblock_delay = 0;
@@ -1886,12 +1886,12 @@ handle_read( connecttab* c, struct timeval* tvP )
             }
           else if (rc == GC_OK)
             {
-              TRACE( c->hc->hs->logfp, "PROXY CLIENT SENDING %.200s" , c->hc->proxy_remotehost );
+              TRACE( c->hc->hs->logfp, "<PROXY>CLIENT SENDING %.200s</PROXY>" , c->hc->proxy_remotehost );
               c->conn_state = CNST_CLIENT_SENDING;
             }
           else /* rc == GC_NO_MORE */
             {
-              TRACE( c->hc->hs->logfp, "PROXY CLIENT STILL CONNECTING '%.200s'", c->hc->proxy_remotehost );
+              TRACE( c->hc->hs->logfp, "<PROXY>CLIENT STILL CONNECTING %.200s</PROXY>", c->hc->proxy_remotehost );
               c->conn_state = CNST_CLIENT_CONNECTING;
             }
         }
@@ -1989,7 +1989,7 @@ handle_client_send( connecttab* c, struct timeval* tvP )
          ( sz < 0 && ( errno == EWOULDBLOCK || errno == EAGAIN ) ) )
       { // On old Unix
       c->wouldblock_delay += MIN_WOULDBLOCK_DELAY;
-      TRACE( hc->hs->logfp, "PROXY CLIENT PAUSING '%.200s'", hc->decodedurl );
+      TRACE( hc->hs->logfp, "<PROXY URL= %.200s>CLIENT PAUSING</PROXY>", hc->decodedurl );
       c->conn_state = CNST_CLIENT_PAUSING;
       fdwatch_del_fd( cc->conn_fd );
       client_data.p = c;
@@ -2020,7 +2020,7 @@ handle_client_send( connecttab* c, struct timeval* tvP )
   /* Are we done? */
   if (c->next_byte_index >= c->end_byte_index)
     {
-    TRACE( hc->hs->logfp, "PROXY CLIENT READING '%.200s'", c->hc->decodedurl );
+    TRACE( hc->hs->logfp, "<PROXY URL=%.200s>CLIENT READING</PROXY>", c->hc->decodedurl );
     c->conn_state = CNST_CLIENT_READING;
     c->next_byte_index = 0;
 
@@ -2044,7 +2044,7 @@ handle_client_connecting( connecttab* c, struct timeval* tvP )
     int err = getsockopt(cc->conn_fd, SOL_SOCKET, SO_ERROR, (char *)&sockerror, &size) ;
     if (err == 0 && sockerror == 0)
       { /* connecting done */
-        TRACE(c->hc->hs->logfp, "PROXY CLIENT SENDING %.200s" , c->hc->proxy_remotehost);
+        TRACE(c->hc->hs->logfp, "<PROXY REMOTEHOST=%.200s>CLIENT SENDING</PROXY>" , c->hc->proxy_remotehost);
         c->conn_state = CNST_CLIENT_SENDING ;
       }
     else
@@ -2087,7 +2087,7 @@ handle_send( connecttab* c, struct timeval* tvP )
     else if ( hc->responselen > 0 && hc->file_address == NULL )
 	{ /* Are we writing a request response without related file ?*/
         /* just write the buffered response. */
-        TRACE(hc->hs->logfp, "BUS REQUEST %.200s - RESPONSE BUFFER :\n%.*s", hc->pathinfo, hc->responselen, hc->response);
+        TRACE(hc->hs->logfp, "<BUS REQUEST=%.200s><RESPONSE>%.*s</RESPONSE></BUS>", hc->pathinfo, hc->responselen, hc->response);
         sz = write( hc->conn_fd, hc->response, hc->responselen);
         }
     else
@@ -2200,7 +2200,7 @@ handle_send( connecttab* c, struct timeval* tvP )
               { /* UNSTACKING case */
                 /* Go back to CLIENT_READING state */
                 fdwatch_del_fd( hc->conn_fd );
-                TRACE( c->hc->hs->logfp, "RE-PROXY REQUEST %.200s - RESPONSE BUFFER FLUSHED", c->hc->decodedurl );
+                TRACE( c->hc->hs->logfp, "<PROXY URL=%.200s>RESPONSE BUFFER FLUSHED</PROXY>", c->hc->decodedurl );
                 c->next_byte_index = 0;
                 c->conn_state = CNST_CLIENT_READING ;
                 c->started_at = tvP->tv_sec;
@@ -2219,21 +2219,21 @@ handle_send( connecttab* c, struct timeval* tvP )
         {
         if (hc->method == METHOD_POST || !strlen(hc->pathinfo) || hc->msg_box == NULL)
           { // TPOST, no pattern, stollen Message Box => connection to finish
-            TRACE(hc->hs->logfp, "BUS REQUEST %.200s - END", hc->pathinfo);
+            TRACE(hc->hs->logfp, "<BUS REQUEST=%.200s/>END</BUS>", hc->pathinfo);
             finish_connection( c, tvP) ;
           }
         else if (get_message_from_box(hc) == 0 /* SUCCESS */)
           { // message to be sent again
-            TRACE(hc->hs->logfp, "BUS REQUEST %.200s - NEXT MESSAGE PUT IN RESPONSE BUFFER", hc->pathinfo);
+            TRACE(hc->hs->logfp, "<BUS REQUEST=%.200s>NEXT MESSAGE PUT IN RESPONSE BUFFER</BUS>", hc->pathinfo);
           }
         else if (hc->bus_flags & BUS_FLUSH_MODE && hc->bus_flags & BUS_ONE_SHOOT_DONE)
           { // no more message to send + at least one message sent + FLUSH mode => connection to finish
-            TRACE(hc->hs->logfp, "BUS REQUEST %.200s - FLUSH MODE END", hc->pathinfo);
+            TRACE(hc->hs->logfp, "<BUS REQUEST=%.200s>FLUSH MODE END</BUS>", hc->pathinfo);
             finish_connection( c, tvP) ;
           }
         else
           { // We let the connection opened: that's the secret of a regular BUS GET request
-            TRACE(hc->hs->logfp, "BUS REQUEST %.200s - RESPONSE BUFFER FLUSHED", hc->pathinfo);
+            TRACE(hc->hs->logfp, "<BUS REQUEST=%.200s>RESPONSE BUFFER FLUSHED</BUS>", hc->pathinfo);
             /* don't wait for writing availabity any more */
             c->conn_state = CNST_PAUSING;
             fdwatch_del_fd( hc->conn_fd );
@@ -2566,7 +2566,7 @@ wakeup_client_connection( ClientData client_data, struct timeval* nowP )
     c->wakeup_timer = (Timer*) 0;
     if ( c->conn_state == CNST_CLIENT_PAUSING )
 	{
-        TRACE( c->hc->hs->logfp, "PROXY CLIENT DE-PAUSING '%.200s'", c->hc->decodedurl );
+        TRACE( c->hc->hs->logfp, "<PROXY URL=%.200s>CLIENT RESUMING</PROXY>", c->hc->decodedurl );
 	c->conn_state = CNST_CLIENT_SENDING;
 	fdwatch_add_fd( c->cc->conn_fd, c, FDW_WRITE );
 	}
