@@ -111,13 +111,14 @@ height: 100%;
   -webkit-border-radius:4px;
   border-radius:4px;
   background: transparent;
-  background-image:url('images/lines.gif');
+/*  background-image:url('images/lines.gif');*/
   position: absolute;
   text-align: center;
   overflow: hidden;
   width: 99px;
   font-size:16px;
   margin: 0;
+  text-shadow: 0 1px 0.05em #FFF, 0 -1px 0.05em #FFF;
 }
 
 .intendeeDesc quote {
@@ -133,12 +134,14 @@ height: 100%;
   background-color: transparent;
 /*  width: 25px; */
   height: 40px;
-  margin-bottom:62px;
+  margin-bottom:10px;
   z-index: 8;
+  left: 4px;
+   
 }
 
 .msgPic:hover {
-  padding-left:4px;
+  left:8px;
 }
 
 .msgDesc {
@@ -147,16 +150,16 @@ height: 100%;
   color: black;
   left:0;
   padding: 10px 6px 0 56px;
-  height: 36px ;
+  height: 42px ;
   font-size:18px;
   overflow: auto;
   margin:0;
-  margin-bottom:60px;
-  background-image:url('images/lines.gif');
+/*  background-image:url('images/lines.gif');*/
   max-width:99%:
   -moz-border-radius:4px;
   -webkit-border-radius:4px;
   border-radius:4px;
+  text-shadow: 0 1px 0.05em #FFF, 0 -1px 0.05em #FFF;
 }
 
 
@@ -170,6 +173,18 @@ height: 100%;
     z-index:40;
     background-color:white;
     opacity: 0.90;
+}
+
+#msgsTrap {
+}
+
+#msgsArea {
+   position: absolute;
+   top: 180px;
+   bottom: 60px;
+   width: 100%;
+   overflow: hidden;
+   z-index:31;
 }
 
 #postArea {
@@ -192,12 +207,28 @@ height: 100%;
   padding-left:56px;
   padding-top:10px;
   background-color: transparent;
-  background-image:url('images/lines.gif');
+/*  background-image:url('images/lines.gif');*/
+  text-shadow:  0 1px 0.05em #FFF, 0 -1px 0.05em #FFF;
 }
 
 #msgPicImg {
+  position: absolute;
+  left: 3px;
+  right: 3px;
   height: 40px;
   z-index:31;
+}
+
+#hideButton {
+  font-size:40px;
+  text-shadow:  0 1px 0.05em #FFF, 0 -1px 0.05em #FFF;
+  text-decoration:none; 
+}
+
+#closeButton {
+  font-size:40px;
+  text-shadow:  0 1px 0.05em #FFF, 0 -1px 0.05em #FFF;
+  text-decoration:none; 
 }
 
 </style>
@@ -229,15 +260,14 @@ height: 100%;
 
 <body onload="chat2.init();" onunload="chat2.finalize();">
 
-  <!-- close button -->
-
   <!-- intendy area -->
   <div id="intendeesArea">
     <div class="trap" id="intendeesTrap"></div>
     <div id="intendeesBack"></div>
     <div id="intendeesForward"></div>
   </div>
-  <div class="trap" id="msgsTrap"></div>
+  <div id="msgsArea"><div class="trap" id="msgsTrap"></div></div>
+  
 
   <div id="contextForm" style="display:none;">
     <button onclick="javascript:chat2.showContextForm(null);">close</button>
@@ -274,15 +304,15 @@ height: 100%;
   </div>
 
   <form id="postArea" action="javascript:chat2.onMessageSubmit();">
-    <div style="position:absolute; right:62px; left:2px;">
+    <div style="position:absolute; right:68px; left:2px;">
       <input id="messageBody" autocomplete="off" value="*type a message here*"/>
-      <div style=" position: absolute; top:3px; left:3px;">
-        <img id="msgPicImg" src="images/blank.gif"/>
-      </div>
     </div>
+        <img id="msgPicImg" src="images/blank.gif"/>
     <button type="submit" style="display:none;">submit</button>
   </form>
 
-  <img id="closeButton" src="images/cross.png" style="position:absolute; z-index:1; right:40px;"/>
+  <!-- close button -->
+  <a id="hideButton" style="position:absolute; z-index:1; right:80px;" href="#">()</a>
+  <a id="closeButton" style="position:absolute; z-index:1; right:40px;" href="#">X</a>
 </body>
 </html>

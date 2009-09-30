@@ -193,7 +193,7 @@ var chat2 = {
         }
 
         this.revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
-        this.revolutionOfMessages.init(document.body, MessageCell, 50);
+        this.revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, 50);
 
         if (!a2acAgora)
             a2acAgora = (back ? back.b64() : 'a2ac') ;

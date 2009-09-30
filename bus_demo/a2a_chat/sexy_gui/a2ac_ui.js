@@ -119,7 +119,7 @@ MessageCell.prototype = new ImgDescCell();
 MessageCell.prototype.constructor = MessageCell;
 
 
-MessageCell.prototype.gap = 40;
+MessageCell.prototype.gap = 43;
 
 MessageCell.prototype.defaultImg = "./images/star.gif";
 
