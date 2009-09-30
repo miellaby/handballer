@@ -4,8 +4,8 @@ function ImgDescCell(areaElement) {
     this.desc = document.createElement('p');
     this.img.style.display = "none";
     this.desc.style.display = "none";
-    areaElement.appendChild(this.img);
     areaElement.appendChild(this.desc);
+    areaElement.appendChild(this.img);
 }
 
 ImgDescCell.prototype.visible = function(area, x) {
