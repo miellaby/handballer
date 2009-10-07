@@ -3,13 +3,13 @@
 <html>
 <head>
 <title>Bus Sniffer</title>
-<meta http-equiv="Content-Type" content="text/html; charset=8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 
 <body>
 <h2>Label matching demo</h2>
 <form action="javascript:postMessage()">
-<ul><li>sélectionner un type pré-défini&nbsp;:
+<ul><li>Select a label&nbsp;:
 <select id="typeList" onclick="document.getElementById('messageType').value=''">
 <option>*custom*</option>
 <option>demo/chat/</option>
@@ -19,7 +19,7 @@
 <option>demo/chat</option>
 <option>demo2/chat/nicolas</option>
 </select>
-<li>Select a type&nbsp;: <input type="text" id="messageType" value="" onclick="document.getElementById('typeList').selectedIndex=0">
+<li>Select a label&nbsp;: <input type="text" id="messageType" value="" onclick="document.getElementById('typeList').selectedIndex=0">
 <li>Message body&nbsp;: <input type="text" id="messageBody" value="Hello world!">
 <input type="submit" value="POST">
 </ul></form>
@@ -32,7 +32,7 @@
 <pre id='trace' style="border:2px solid black;background:#EFE;"></pre>
 
 <div style="width:50%;position:absolute;right:10px;top:10px;background:#FEE;border:2px groove black;">
- <h5>Last action: <i id="actionText">None.</i></p>
+ <h5>Last action: <i id="actionText">None.</i></br>
  <h3>Last POST result <button onclick="showHide(document.getElementById('postResult'));">show/hide</button></h3>
  <iframe id="postResult" name="postResult" style="border:2px solid black;display:none;visibility:hidden;"></iframe>
  <h3>Current GET response <button onclick="showHide(document.getElementById('getResult'));">show/hide</button></h3>
@@ -41,7 +41,7 @@
 
 <div id="divInvisible" style="visibility:hidden;display:none">
  <iframe id="iframeNotif" name="iframeNotif"></iframe>
- <form name="postForm" action="/bus/" method="post" target="postResult" enctype="text/plain">
+ <form name="postForm" action="/bus/" method="post" target="postResult">
  <input name="body" value="" />
  </form>
 </div>
@@ -59,7 +59,7 @@ function onBusMessage(label,body) {
 }
 
 function handballerPost(label,body) {
-  document.forms.postForm.action = "/bus/" + label ;
+  document.forms.postForm.action = "/bus/" + label + "?form=body";
   document.forms.postForm.body.value = body ;
   document.forms.postForm.submit();
   document.getElementById('actionText').innerHTML = "POST /bus/" + label + " &quot;" + body + "&quot;" ;
@@ -77,7 +77,7 @@ function postMessage(){
 }
 
 function subscribeToMessages() {
-  document.getElementById('iframeNotif').src = "/bus/" + document.getElementById('labelId').value + "?label&flush&box=demo&reload&script=window.parent.onBusMessage" ;
+  document.getElementById('iframeNotif').src = "/bus/" + document.getElementById('labelId').value + "?label&script=window.parent.onBusMessage" ;
   document.getElementById('actionText').innerHTML = "GET " + document.getElementById('iframeNotif').src ;
   document.getElementById('getResult').innerHTML = "" ;
 }

@@ -528,14 +528,13 @@ int
 bus( httpd_conn* hc )
     {
     int r;
-    
+    char *parameter = ( hc->query && *hc->query != '\0' ? hc->query : NULL) ;
+
+    // default response MIME type
     hc->type = "text/plain; charset=%s";
 
     if ( hc->method == METHOD_GET )
       { // METHOD GET
-
-        int i ;
-        char *parameter = ( hc->query && *hc->query != '\0' ? hc->query : NULL) ;
         char *script_cb = NULL ;
         char *push_delimiter = NULL ;
         char *indexed = NULL ;
@@ -718,9 +717,9 @@ bus( httpd_conn* hc )
             if (hc->bus_flags & BUS_SCRIPT_MODE)
               {
                 add_response_buffer(hc, "<HTML><BODY>\n") ;
-#if 0 // useless:
+#if 1 // needed
                 {
-                  char buffer[1024 * 8 + 1] ;
+                  char buffer[512] ;
                   // Padding with spaces to go through most buffering proxy
                   memset(buffer,' ', sizeof(buffer)) ;
                   buffer[sizeof(buffer)-1] = '\0' ;
@@ -766,6 +765,8 @@ bus( httpd_conn* hc )
       } // METHOD GET
     else if ( hc->method == METHOD_POST)
       {
+        char *form = NULL ;
+
         char buf[1024];
         char *postdata = (char *)0 ;
         size_t maxpostdata = 0;
@@ -773,9 +774,19 @@ bus( httpd_conn* hc )
         ssize_t chunkSize;
         int i;
         char *body = (char *)0;
-        size_t body_len ;
+        size_t body_len = 0 ;
         char *contenttype = hc->contenttype;
-        
+
+        while (parameter)
+          {
+            if (0 == strncmp(parameter, "form=", 5))
+              form = parameter + 5 ;
+
+            parameter = strchr(parameter + 1, '&') ;
+            if (parameter)
+              *parameter++ = '\0' ;
+          }
+
         postdataSize = hc->read_idx - hc->checked_idx; // may be zero
 
         httpd_realloc_str(&postdata, &maxpostdata, postdataSize );
@@ -807,11 +818,12 @@ bus( httpd_conn* hc )
         TRACE( hc->hs->logfp, "<BUS TYPE=POST REQUEST=%.200s CONTENTTYPE=%.200s DATASIZE=%d><EXTRACT>%.200s</EXTRACT></BUS>'", hc->pathinfo, hc->contenttype, postdataSize, postdata);
 
 
-        if (!strncmp(hc->contenttype, "multipart/", 10)) {
-          char* b = strstr(hc->contenttype, "boundary=");
+        if (!strncmp(contenttype, "multipart/", 10)) {
+          char* b = strstr(contenttype, "boundary=");
           int   step = 0;
           body = postdata ;
           body_len = postdataSize ;
+
           if (b) {
             b+= 9;
             step++;
@@ -853,18 +865,62 @@ bus( httpd_conn* hc )
           }
           TRACE( hc->hs->logfp, "multipart parsing succeed step : %d", step);
           
-        } else if (!strcmp(hc->contenttype, "text/plain") && !strncmp(postdata, "body=", 5)) { /* TO DO: more universal criteria */
-          /* for Form based POST request, one jumps over the field name */
-          body = postdata + 5 ;
-          body_len = postdataSize - 5 - 2 ;
+        } else if (!strcmp(contenttype, "application/x-www-form-urlencoded")) {
+          // Forms POST
+ 
+          if (form)
+            { // url encoded data decoding adapter
+              int forml = strlen(form);
+              
+              char *formparameter = ( *postdata != '\0' ? postdata : NULL) ;
+              char *match = NULL;
+              while (formparameter)
+                {
+                  if (!strncmp(formparameter, form, forml)
+                      && formparameter[forml] == '=')
+                    match = formparameter + forml + 1;
+                  
+                  formparameter = strchr(formparameter + 1, '&') ;
+                  if (formparameter)
+                    *formparameter++ = '\0' ;
+                }
+
+              if (match) {
+                // annoying + to space decoding
+                char *p;
+                for (p = match; *p ; p++) { if (*p == '+') *p = ' '; }
+
+                // %xx decoding
+                strdecode(match, match);
+
+                body = match;
+                body_len = strlen(match);
+              } else { // No matching POST parameter
+             
+                /* no message */
+                body = NULL;
+                body_len = 0;
+              }
+            }
+          else
+            { // Won't do url decoding
+              /* the whole data is a message */
+              body = postdata ;
+              body_len = postdataSize ;
+            }
+
+        } else if (!strcmp(contenttype, "text/plain")) { // XHR
+          body = postdata ;
+          body_len = postdataSize ;
         } else {
+          // unhandled POST MIME type (raw)
           /* the whole data is a message */
           body = postdata ;
           body_len = postdataSize ;
         }
 
-        if (!contenttype[0]) // default ContentType
-          contenttype = "application/octet-stream";
+        if (!contenttype[0]) // no contentType
+          contenttype = "application/octet-stream"; // default ContentType
         
         r = bus_forward_post(hc, hc->pathinfo, body, body_len, contenttype) ;
           

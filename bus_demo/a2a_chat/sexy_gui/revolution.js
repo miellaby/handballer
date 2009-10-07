@@ -174,10 +174,14 @@ Revolution.prototype.redraw = function() {
         }
 
         if (nothing && nbItem) {
-            if (toRight) // every cell are far to the right
-                this.pos += this.cellConstructor.prototype.getOpeningSize(this.areaElement) + nbItem;
-            else // every cell are far to the left
-                this.pos -= this.cellConstructor.prototype.getOpeningSize(this.areaElement) + nbItem;
+            if (this.donuts) {
+                if (toRight) // every cell are far to the right
+                    this.pos += this.cellConstructor.prototype.getOpeningSize(this.areaElement) + nbItem;
+                else // every cell are far to the left
+                    this.pos -= this.cellConstructor.prototype.getOpeningSize(this.areaElement) + nbItem;
+            } else {
+                this.speed = (toRight ? 0.2 : -0.2);
+            }
         }
 
         for (var lst = this.visibleCells, i = 0, cell; cell = lst[i]; ++i) {
