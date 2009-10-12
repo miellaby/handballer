@@ -27,7 +27,7 @@ hbcget "$agora/model/m*|$agora/model/i*|$agora/status/here" |\
      beep
  fi
  echo $l
- echo $l >> /tmp/bot_logger.txt
+ echo $(date +%F/%R) $l >> /tmp/bot_logger.txt
  play ~/bin/chhh.aif &> /dev/null
 done
 
