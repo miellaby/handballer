@@ -21,14 +21,17 @@ if(0)
 // ======================================================================
 var default_profiles = {
     red: {
+        nickname: "red",
         icon: "./images/red.gif",
         mind: "happy"
     },
     blue: {
+        nickname: "blue",
         icon: "./images/blue.gif",
         mind: "cool"
     },
     green: {
+        nickname: "green",
         icon: "./images/green.gif",
         mind: "watchful"
     }
@@ -124,11 +127,13 @@ function Me() {
     this.awayTimeout = undefined;
     this.typingActivity = new Activity(this, "typing", 5000);
     this.watchingActivity = new Activity(this, "watching", 5000);
+    this.profileId = undefined;
 }
 
 Me.prototype = new BusAgent();
 
 Me.prototype.init = function() {
+    this.subscribe("profileId", this.onProfileId);
     this.subscribe("nickname", this.onNickname);
     this.subscribe("icon", this.onIcon);
     this.subscribe("mind", this.onMind);
@@ -139,9 +144,9 @@ Me.prototype.init = function() {
     var self = this;
     setInterval(function() { self.doPing() }, 60 * 2 * 1000 - 30 * Math.random() * 1000);
 
-    var nickname = cookies.get("a2ac_nickname");
-    if (nickname)
-        this.setNickname(nickname);
+    var profileId = cookies.get("a2ac_profileId");
+    if (profileId)
+        this.setProfileId(profileId);
     else // wait for few seconds to detect remote intendees and auto-configure
         setTimeout(function() { self.autoConfig(); }, 3 * 1000);   
 };
@@ -164,22 +169,26 @@ Me.prototype.doPing = function() {
     this.set("ping", 1 + this.ping);
 };
 
-Me.prototype.onNickname = function(variable, value) {
+Me.prototype.onProfileId = function(variable, value) {
     var expire = new Date();
     expire.setTime(expire.getTime() + 3600 * 24 * 1000 * 30);
-    cookies.set("a2ac_nickname", value, expire);
+    cookies.set("a2ac_profileId", value, expire);
+}
+
+Me.prototype.onNickname = function(variable, value) {
+    settings.set(this.profileId, "nickname", value);
 };
 
 Me.prototype.onIcon = function(variable, value) {
-    settings.set(this.nickname, "icon", value);
+    settings.set(this.profileId, "icon", value);
 };
 
 Me.prototype.onMind = function(variable, value) {
-    settings.set(this.nickname, "mind", value);
+    settings.set(this.profileId, "mind", value);
 };
 
 Me.prototype.onEmblem = function(variable, value) {
-    settings.set(this.nickname, "emblem", value);
+    settings.set(this.profileId, "emblem", value);
 };
 
 Me.prototype.onWorking = function(variable, value) {
@@ -195,22 +204,24 @@ Me.prototype.onWorking = function(variable, value) {
     }
 };
 
-Me.prototype.setNickname = function(nickname) {
-    this.set("nickname", nickname);
-    var icon = settings.get(nickname, "icon") || "./images/guest.gif",
-        mind = settings.get(nickname, "mind") || "",
-        emblem = settings.get(nickname, "emblem");
+Me.prototype.setProfileId = function(profileId) {
+    this.set("profileId", profileId);
+    var nickname = settings.get(profileId, "nickname") || profileId;
+        icon = settings.get(profileId, "icon") || "./images/guest.gif",
+        mind = settings.get(profileId, "mind") || "what's the?",
+        emblem = settings.get(profileId, "emblem");
 
+    nickname &&  this.set("nickname", nickname);
     icon && this.set("icon", icon);
     mind && this.set("mind", mind);
     emblem && this.set("emblem", emblem);
 };
 
 Me.prototype.autoConfig = function() {
-    var nickname = cookies.get("a2ac_nickname");
-    if (nickname) return; // already a non default settings
+    var profileId = cookies.get("a2ac_profileId");
+    if (profileId) return; // already a non default settings
 
-    // list known intendees name
+    // list known intendees names
     var names = [];
     var intendees = autobus.tagsonomy.getOr("intendee",[]);
     for (var l = intendees.length, i = l - 1; i >= 0; i--)
@@ -232,7 +243,7 @@ Me.prototype.autoConfig = function() {
         nickname = default_prefix + i;
     }
 
-    this.setNickname(nickname);
+    this.setProfileId(nickname);
 };
 
 // ======================================================================
