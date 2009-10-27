@@ -66,8 +66,13 @@ var chat2 = {
         v.value = "";
     },
 
+    onMeProfileId: function(variable, value) {
+        document.getElementById("meProfileId").value = value;
+    },
+
+
     onMeNickname: function(variable, value) {
-        document.getElementById("meName").value = value;
+        document.getElementById("meNickname").value = value;
     },
 
     onMeIcon: function(variable, value) {
@@ -109,7 +114,7 @@ var chat2 = {
         if (!e || !form) return;
 
         if (chat2.context) {
-            if (chat2.context.nickname !== undefined) {
+            if (chat2.context.profileId !== undefined) {
                 chat2.context.unsubscribe("nickname", chat2.updateForm);
                 chat2.context.unsubscribe("icon", chat2.updateForm);
                 chat2.context.unsubscribe("mind", chat2.updateForm);
@@ -124,7 +129,7 @@ var chat2 = {
         // form choice
         var isMe = (e.item === a2ac.me);
         var targetForm = (isMe ? "mePropsForm"
-                          : (e.item.nickname !== undefined ? "iPropsForm"
+                          : (e.item.profileId !== undefined ? "iPropsForm"
                              : (e.item.content !== undefined ? "mPropsForm" : null )));
         for (var i = 0, l = ["mePropsForm", "iPropsForm", "mPropsForm"]; i < l.length; i++) {
             var elt = l[i];
@@ -135,7 +140,6 @@ var chat2 = {
 
         // form fill up
         if (targetForm == "iPropsForm") {
-            e.item.subscribeSync("nickname", chat2.updateForm);
             e.item.subscribeSync("nickname", chat2.updateForm);
             e.item.subscribeSync("icon", chat2.updateForm);
             e.item.subscribeSync("mind", chat2.updateForm);
@@ -165,9 +169,12 @@ var chat2 = {
     },
 
     submitContextForm: function(e) {
-        var nickname = document.getElementById('meName').value;
-        if (a2ac.me.get("nickname") != nickname)
-            a2ac.me.setNickname(nickname);
+        var profileId = document.getElementById('meProfileId').value;
+        if (a2ac.me.get("profileId") != profileId) {
+            a2ac.me.setProfileId(profileId);
+            return;
+        }
+        a2ac.me.set('nickname', document.getElementById('meNickname').value);
         a2ac.me.set('emblem', document.getElementById('meEmblem').value);
         a2ac.me.set('mind', document.getElementById('meMind').value);
         a2ac.me.set('icon', document.getElementById('mePic').value);
@@ -225,7 +232,7 @@ var chat2 = {
         document.getElementById("intendeesForward").onmousedown = function() { chat2.revolutionOfIntendees.friction = 0.2; chat2.revolutionOfIntendees.resume(); };
         document.getElementById("intendeesForward").onmouseup = function() { chat2.revolutionOfIntendees.friction = null; };
  
-        document.getElementById("meName").onblur = function() { a2ac.me.setNickname(document.getElementById('meName').value); }
+        document.getElementById("meProfileId").onblur = function() { a2ac.me.setProfileId(this.value); }
  
         document.body.onmouseover = function() { a2ac.me.watchingActivity.set(true); };
         document.body.onmouseout = function() { a2ac.me.watchingActivity.set(false); };
@@ -240,6 +247,7 @@ var chat2 = {
         input.onblur = function() { if (!this.value.length) { this.value = defaultValue; this.style.color = "gray"; } };
         a2ac.init();
 
+        a2ac.me.subscribeSync("profileId", chat2.onMeProfileId);
         a2ac.me.subscribeSync("nickname", chat2.onMeNickname);
         a2ac.me.subscribeSync("icon", chat2.onMeIcon);
         a2ac.me.subscribeSync("mind", chat2.onMeMind);

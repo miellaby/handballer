@@ -240,7 +240,6 @@ height: 100%;
 <script type="text/javascript" src="/hbc/hbc.js"></script>
 <!-- pub/sub framework -->
 <script type="text/javascript" src="/hbc/pubsubAgent.js"></script>
-<script type="text/javascript" src="/hbc/indexAgent.js"></script>
 <script type="text/javascript" src="/hbc/busAgent.js"></script>
 <script type="text/javascript" src="/hbc/autobus.js"></script>
 <!-- A2A chat application core -->
@@ -273,8 +272,10 @@ height: 100%;
     <button onclick="javascript:chat2.showContextForm(null);">close</button>
     <form id="mePropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
       <img id="mePicImg" src="images/blank.gif" style="float: left;"/>
-      <p><label for="meName">nick&nbsp;</label>
-        <input type="text" id="meName" value="guest" style=""></p>
+      <p><label for="meProfileId">profile&nbsp;ID&nbsp;</label>
+        <input type="text" id="meProfileId" value="" style=""></p>
+      <p><label for="meNickname">nick&nbsp;</label>
+        <input type="text" id="meNickname" value="" style=""></p>
       <p><label for="mePic">pic&nbsp;</label>
         <input type="text" id="mePic" value="" style=""></p>
       <p><label for="meMind">mind&nbsp;</label>
