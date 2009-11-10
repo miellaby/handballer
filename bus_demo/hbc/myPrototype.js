@@ -50,10 +50,11 @@ String.prototype.b64 = function() {
 }
 
 //
-//  getPageSize()
+//  getWindowDimensions()
 //
-window.getPageSize = function() {
+window.getWindowDimensions = function(window) {
    var xScroll, yScroll;
+   var document = window.document;
 
    if (window.innerHeight && window.scrollMaxY) {	
       xScroll = window.innerWidth + window.scrollMaxX;
@@ -98,5 +99,19 @@ window.getPageSize = function() {
    }
 
    return [pageWidth, pageHeight];
+}
+
+window.getEltDimensions = function(elt) {
+ var d = elt.style.display;
+ if (d && d != 'none')
+    return [elt.offsetWidth, elt.offsetHeight];
+
+ var v = elt.style.visibility;
+ elt.style.visibility = 'hidden';
+ elt.style.display='block';
+ var w = elt.clientWidth, h = elt.clientHeight;
+ elt.style.display = d;
+ elt.style.visibility = v;
+ return [w, h];
 }
 
