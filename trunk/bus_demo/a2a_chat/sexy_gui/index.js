@@ -16,6 +16,8 @@ function contextFormAnimIterate() {
     this.ratio += 0.1;
     this.current.x = this.start.x + (this.end.x - this.start.x) * this.ratio;
     this.current.y = this.start.y + (this.end.y - this.start.y) * this.ratio;
+    this.current.w = this.start.w + (this.end.w - this.start.w) * this.ratio;
+    this.current.h = this.start.h + (this.end.h - this.start.h) * this.ratio;
     return this.ratio <= 1;
 }
 
@@ -155,12 +157,16 @@ var chat2 = {
         var a = new Anim();
         a.form = form;
         a.ratio = 0;
-        a.start = a.current = {x: -100, y: 400};
         var coords = readDOM(e.img);
         if (isNaN(coords.x)) coords = readDOM(e.desc);
+        var ed = getEltDimensions(form);
+        var wd = getWindowDimensions(window);
+        a.start = a.current = {x: coords.x, y: coords.y, w: coords.w, h: coords.h};        
         a.end = {
-            x: coords.x + coords.w * 0.33,
-            y: coords.y + coords.h * 0.66
+            x: (wd[0]-ed[0]) / 2,
+            y: (wd[1]-ed[1]) / 2,
+            w: ed[0],
+            h: ed[1]
         };
         log(a.end);
         a.iterate = contextFormAnimIterate;

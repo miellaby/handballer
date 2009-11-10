@@ -150,7 +150,7 @@ height: 100%;
   color: black;
   left:0;
   padding: 10px 6px 0 56px;
-  height: 42px ;
+  height: 38px ;
   font-size:18px;
   overflow: auto;
   margin:0;
@@ -167,12 +167,14 @@ height: 100%;
     -moz-border-radius:20px;
     -webkit-border-radius:20px;
     position:absolute;
-    width:50%;
+    width:400px;
     right:5px;
     top:100px;
     z-index:40;
     background-color:white;
     opacity: 0.90;
+    overflow: hidden;
+    border: 1px solid #000;
 }
 
 #msgsTrap {
@@ -269,7 +271,7 @@ height: 100%;
   
 
   <div id="contextForm" style="display:none;">
-    <button onclick="javascript:chat2.showContextForm(null);">close</button>
+    <button style="float: right; margin-right: 10px;" onclick="javascript:chat2.showContextForm(null);">close</button>
     <form id="mePropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
       <img id="mePicImg" src="images/blank.gif" style="float: left;"/>
       <p><label for="meProfileId">profile&nbsp;ID&nbsp;</label>
@@ -283,7 +285,7 @@ height: 100%;
       <p><label for="meEmblem">emblem&nbsp;</label>
         <img id="meEmblemImg" src="images/blank.gif" style="width: 32px; eight: 32px;"/>&nbsp;<input type="text" id="meEmblem" value="">
       </p>
-      <button style="float:right;" onclick="javascript:chat2.submitContextForm();">Submit</button>&nbsp;
+      <button style="float: right; margin-right: 10px;" onclick="javascript:chat2.submitContextForm();">Submit</button>&nbsp;
     </form>
     <form id ="iPropsForm" class="ContextForm" action="null">
       <img id="iPicImg" src="images/blank.gif" style="float: left;"/>
