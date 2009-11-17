@@ -10,7 +10,7 @@
 #define mymemmem(B,L,SB,SL) memmem(B,S,SB,SL)
 #else
 void *mymemmem( const void* bin, size_t len, const void* subbin, size_t sublen) {
-  if (!sublen) return bin;
+  if (!sublen) return (void *)bin;
   if (len < sublen) return NULL;
 
   {

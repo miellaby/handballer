@@ -79,7 +79,7 @@ var chat2 = {
 
     onMeIcon: function(variable, value) {
         document.getElementById("mePic").value = value;
-        document.getElementById("mePicImg").src = value;
+        imgBoxURL(document.getElementById("mePicImg"), value, 100, 150);
         chat2.setMsgPic(null);
     },
 
@@ -105,14 +105,16 @@ var chat2 = {
         if (!id) return;
         document.getElementById(id).value = value;
         if (id == 'iPic')
-            document.getElementById("iPicImg").src = value;
+            imgBoxURL(document.getElementById("iPicImg"), value, 100, 150);
         if (id == 'iEmblem')
             document.getElementById("iEmblemImg").src = value;
     },
     
     showContextForm: function(e) {
         var form = chat2.contextForm = document.getElementById("contextForm");
-        chat2.contextForm.style.display = "none";
+        form.style.display = "none";
+        form.style.width = "";
+        form.style.height = "";
         if (!e || !form) return;
 
         if (chat2.context) {

@@ -4,4 +4,4 @@ PORT=7777
 [ -z "$1" ] || PORT="$1"
 
 killall handballer
-./handballer -l - -b 'bus/**' -D -p $PORT &
+handballer -l - -b 'bus/**' -D -p $PORT &
