@@ -37,8 +37,8 @@ IntendeeCell.prototype.defaultEmblem = "./images/blank.gif";
 IntendeeCell.prototype.setCoords = function(inFactor, x) {
     //console.log("inFactor " + inFactor + "; x " + x);
     var gap = this.gap, height = this.height;
-    this.img.style.top = ((inFactor - 1.0) * height) + "px";
-    this.img.style.left = ((x-1) * gap) + "px";
+    this.img.style.top = ((inFactor - 0.5) * height) + "px";
+    this.img.style.left = ((x-1) * gap + 49.5) + "px";
     this.emblem.style.top = ((inFactor - 1.0) * height) + "px";
     this.emblem.style.left = ((x-1) * gap) + "px";
     this.desc.style.top = (inFactor * height) + "px";
@@ -65,6 +65,12 @@ IntendeeCell.prototype.hide = function() {
     this.item = null;
 };
 
+function centerByMargin(img) {
+    var s = img.style;
+    s.marginLeft = (- parseInt(s.width) / 2) + "px";
+    s.marginTop =  (- parseInt(s.height) / 2) + "px";
+}
+
 IntendeeCell.prototype.show = function(item) {
     if (item !== this.item) {
         this.item = item;
@@ -84,7 +90,7 @@ IntendeeCell.prototype.show = function(item) {
         this.desc.style.fontWeight = (item === a2ac.me ? "bold" : "normal");
     }
 
-    this.img.src = item.icon || this.defaultImg;
+    imgBoxURL(this.img, item.icon || this.defaultImg, 99, 133, centerByMargin);
     this.emblem.src = item.emblem || this.defaultEmblem;
     var desc = item.nickname  || this.defaultDesc;
     if (item.away)
@@ -144,8 +150,11 @@ MessageCell.prototype.getOpeningSize = function(area) {
 MessageCell.prototype.hide = function() {
     if (!this.item) return;
     if (this.item.unsubscribe) {
-        this.item.unsubscribe("intendee", this.selfUpdate);
+        this.item.unsubscribe("from", this.selfUpdate);
         this.item.unsubscribe("content", this.selfUpdate);
+        this.item.unsubscribe("icon", this.selfUpdate);
+
+        if (this.item.intendee) this.item.intendee.unsubscribe("icon", this.selfUpdate);
     }
     this.item = null;
     this.img.style.display = "none";
@@ -153,18 +162,23 @@ MessageCell.prototype.hide = function() {
 };
 
 MessageCell.prototype.show = function(item) {
+    // if not yet done, find the intendee object corresponding to this message
+    if (!item.intendee)
+        item.intendee = item.from && Autobus.singleton.tagsonomy.getOr(item.from, null);
+
     if (item !== this.item) {
         this.item = item;
         if (item.subscribe) {
             item.subscribe("content", this.selfUpdate);
-            item.subscribe("intendee", this.selfUpdate);
+            item.subscribe("from", this.selfUpdate);
+            item.subscribe("icon", this.selfUpdate);
         }
+        if (item.intendee) item.intendee.subscribe("icon", this.selfUpdate);
 
         this.img.style.display = "block";
         this.desc.style.display = "block";
     }
-    var from = item.from && Autobus.singleton.tagsonomy.getOr(item.from, null);
-    this.img.src = item.icon || ( from && from.icon ) || this.defaultImg;
+    this.img.src = item.icon || ( item.intendee && item.intendee.icon ) || this.defaultImg;
     this.desc.innerHTML = item.content || this.defaultDesc;
 
 };

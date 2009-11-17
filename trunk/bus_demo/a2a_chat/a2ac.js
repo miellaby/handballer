@@ -154,7 +154,7 @@ Me.prototype.init = function() {
 Me.prototype.postMessage = function(content, icon) {
     var msg = new BusAgent(autobus, agentUUID("m"), BusAgent.prototype.here);
     msg.sets({
-            tags: ["message"],
+            tags: ["message", "messageOf" + this.name],
                 from: this.name,
                 icon: icon,
                 //to: otherIntendee,
