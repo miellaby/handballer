@@ -196,15 +196,15 @@ var chat2 = {
 
 
         var back = getURLParameterByName("back");
-        if (back) {
+        if (!back) {
+            document.getElementById("closeButton").style.display = "none";
+        } else {
             var el = document.createElement("iframe");
             el.setAttribute('id', 'bfrm');
             el.setAttribute('style', 'position: absolute; border: 0; margin: 0; padding: 0; width: 100%; height: 100%; z-index:0;');
             document.body.appendChild(el);
             el.setAttribute('src', back);
             document.getElementById("closeButton").onclick = function() {window.location = back;};
-        } else {
-            document.getElementById("closeButton").style.display = "none";
         }
 
         this.revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
@@ -251,8 +251,8 @@ var chat2 = {
         input.onkeyup = function() { a2ac.me.typingActivity.set(false); };
         var defaultValue = input.value;
         input.style.color = "gray";
-        input.onfocus = function() { if (this.value == defaultValue) { this.value=''; this.style.color = "black"; } };
-        input.onblur = function() { if (!this.value.length) { this.value = defaultValue; this.style.color = "gray"; } };
+        input.onfocus = function() { if (this.value == defaultValue) { this.value=''; this.style.color = "#AAA"; this.style.textShadow = "0 1px 0.05em #000, 0 -1px 0.05em #000"} };
+        input.onblur = function() { if (!this.value.length) { this.value = defaultValue; this.style.color = "gray"; this.style.textShadow = ""; } };
         a2ac.init();
 
         a2ac.me.subscribeSync("profileId", chat2.onMeProfileId);
