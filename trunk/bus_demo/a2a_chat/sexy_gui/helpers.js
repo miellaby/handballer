@@ -8,11 +8,16 @@ function imgCopyGeometry(target, source, zoneWidth, zoneHeight) {
 }
 
 function imgBoxURL(img, url, zoneWidth, zoneHeight, onloadCB) {
+
+     // hide image as long as we don't know its geometry
+    img.style.display = "none";
+    img.src = null; // unload existing image if any
+    if (!url) return; // no target url, stop here. 
+
     var offscreenImg = new Image();
     var intervalMax = 24;
     var interval = undefined;
-    img.src = null;
- 
+
     var clearIntervalIfAny = function() {
         if (interval !== undefined)  {
             clearInterval(interval);
@@ -23,16 +28,14 @@ function imgBoxURL(img, url, zoneWidth, zoneHeight, onloadCB) {
 
     var intervalCB = function(issue) {
         if ((--intervalMax) < 0 || offscreenImg.width > 0 || issue) {
-            imgCopyGeometry(img, offscreenImg, zoneWidth, zoneHeight);
+            try { imgCopyGeometry(img, offscreenImg, zoneWidth, zoneHeight);
+            } catch (err) {}
             img.style.display = "inline";
-            if (onloadCB) onloadCB(img);
             clearIntervalIfAny();
+            if (onloadCB) onloadCB(img);
         }
-    }
+    };
     
-    // hide image as long as we don't know its geometry
-    img.style.display = "none";
-
     // load image off screen
     offscreenImg.onload = intervalCB;
     offscreenImg.onerror = clearIntervalIfAny;

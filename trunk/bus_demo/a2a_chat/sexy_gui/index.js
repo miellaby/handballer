@@ -198,6 +198,7 @@ var chat2 = {
         var back = getURLParameterByName("back");
         if (!back) {
             document.getElementById("closeButton").style.display = "none";
+            document.getElementById("hideButton").style.display = "none";
         } else {
             var el = document.createElement("iframe");
             el.setAttribute('id', 'bfrm');
