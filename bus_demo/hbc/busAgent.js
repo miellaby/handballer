@@ -22,8 +22,6 @@ function BusAgent(autobus, name, location, recipient) {
   if (this.here()) {
       if (this.tagsonomy && name)
           this.tagsonomy.pushIn("here", this);
-      
-      this.status();
   }
 };
 
@@ -35,76 +33,79 @@ BusAgent.prototype.both = 3;
 
 BusAgent.prototype.here = function() {
    return this.location !== undefined && this.location !== BusAgent.prototype.there;
-}
+};
 
 BusAgent.prototype.there = function() {
    return this.location !== BusAgent.prototype.here;
-}
+};
 
-BusAgent.prototype.setted = function(variable, newValue) {
-  var currentValue = this[variable]; 
-
-  if (newValue == currentValue)
-    return newValue;
-
-  newValue = this.set_and_fire(variable, newValue);
-  // note value may have changed twice
-
-  if (this.here()) {
-    if (variable == "name") {
-      if (currentValue) {
-        if (!newValue) {
-          this.autobus.hbc.send(this.recipient + "freed/" + currentValue);
-        } else {
-          this.autobus.hbc.send(this.recipient + "model/" + currentValue + "/name", jsonize(newValue));
-        }
-      }
-    } else {
-      this.autobus.hbc.send(this.recipient + "model/" + this.name + "/" + variable, jsonize(newValue));
-    }
-  }
-
-  return newValue;
-}
+BusAgent.prototype.setted = function(variable, newValue) { 
+    if (newValue != this[variable])
+        this.set_and_fire(variable, newValue);
+};
 
 BusAgent.prototype.setteds = function(deltaObj) {
-  var name = this.name;
-
-  var deltaObj2 = {};
-  for (variable in deltaObj) {
-    var newValue = deltaObj[variable];
-    var currentValue = this[variable]; 
-
-    if (newValue == currentValue) continue;
-
-    newValue = this.set_and_fire(variable, newValue);
-
-    if (newValue != currentValue)
-     deltaObj2[variable] = newValue;
-  }
-
-  if (!name) name = this.name;
-
-  if (this.here() && name)
-    this.autobus.hbc.send(this.recipient + "model/" + name, jsonize(deltaObj2));
-}
+    for (variable in deltaObj) {
+        var newValue = deltaObj[variable];
+        if (newValue != this[variable])
+            this.set_and_fire(variable, newValue);
+    }
+};
 
 BusAgent.prototype.set = function(variable, value) {
-   if (this.here()) {
-       this.setted(variable, value);
-   } else {
-       
-       this.autobus.hbc.send((this.abcli ? this.abcli : this.autobus.agora) + "control/" + this.name + "/set/" + variable, jsonize(value));
+   if (this.here() && value == this[variable])
+           return value;
+
+    if (this != this.autobus.toTell) {
+        if (this.autobus.toTell !== undefined)
+            this.tell();
+        else
+            this.autobus.delta = {};
+        this.autobus.toTell = this;
+        this.autobus.toTellName = this.name;
+    }
+
+    if (this.autobus.toTellTimeout === undefined) {
+        var self = this;
+        this.autobus.toTellTimeout = setTimeout(function() { self.autobus.toTellTimeout = undefined; self.tell(); }, 0);
+    }
+
+   if (this.here()) { // do
+       value = this.set_and_fire(variable, value);
+       // note value may have changed a second time here
    }
-}
+   this.autobus.delta[variable] = value;
+
+   return value;
+};
 
 BusAgent.prototype.sets = function(deltaObj) {
-   if (this.here()) {
-       this.setteds(deltaObj);
-   } else {
-       this.autobus.hbc.send((this.abcli ? this.abcli : this.autobus.agora) + "control/" + this.name + "/set", jsonize(deltaObj));
-   }
-}
+    for (variable in deltaObj) {
+        this.set(variable, deltaObj[variable]);
+    }
+};
+
+BusAgent.prototype.tell = function() {
+    var toTell = this.autobus.toTell;
+    if (!toTell) return;
+
+    if (toTell.here()) {
+      this.autobus.hbc.send(toTell.recipient + "model/" + this.autobus.toTellName, jsonize(this.autobus.delta));
+
+      if (!toTell.name)
+          this.autobus.hbc.send(toTell.recipient + "freed/" + this.autobus.toTellName);
+    }
+    if (toTell.there()) {
+        this.autobus.hbc.send((toTell.abcli ? toTell.abcli : this.autobus.agora) + "control/" + this.autobus.toTellName + "/set", jsonize(this.autobus.delta));
+
+    }
+    this.autobus.delta = {};
+    if (this.autobus.toTellTimeout !== undefined)
+        clearTimeout(this.autobus.toTellTimeout);
+    this.autobus.toTellTimeout = undefined;
+    this.autobus.toTell = undefined;
+    this.autobus.toTellName = undefined;
+};
 
 BusAgent.prototype.call = function(fnName) {
    if (this.here()) {
@@ -112,7 +113,7 @@ BusAgent.prototype.call = function(fnName) {
    } else {
        this.autobus.hbc.send((this.abcli ? this.abcli : this.autobus.agora) + "control/" + this.name + "/" + fnName, jsonize(arguments.splice(1)));
    }
-}
+};
 
 BusAgent.prototype.getStatus = function() {
     var pic = {};  
@@ -121,7 +122,7 @@ BusAgent.prototype.getStatus = function() {
         pic[p] = this[p];
     }
     return pic;
-}
+};
 
 BusAgent.prototype.status = function() {
     if (this.here()) {
@@ -129,4 +130,4 @@ BusAgent.prototype.status = function() {
         this.autobus.hbc.send(this.recipient + "model/" + this.name, jsonize(pic));
     } else
         this.autobus.hbc.send((this.abcli ? this.abcli : this.autobus.agora) + "control/" + this.name + "/status", jsonize(value));
-}
+};

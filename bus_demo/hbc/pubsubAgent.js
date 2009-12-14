@@ -109,9 +109,7 @@ PubSubAgent.prototype.get = function(attribut) { return this[attribut]; };
 PubSubAgent.prototype.getOr = function(attribut, defaultValue) { return (this[attribut] == undefined ? defaultValue : this[attribut]); };
 
 PubSubAgent.prototype.setted = function(attribut, newValue) {
-  var currentValue = this[attribut]; 
-
-  if (newValue == currentValue)
+  if (newValue == this[attribut])
     return newValue;
 
   return this.set_and_fire(attribut, newValue);
