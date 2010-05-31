@@ -72,12 +72,12 @@ function onIntendeePing(variable, value) {
 }
 
 var url_map = eval("(" + (cookies.get("a2ac_icons") || "null") + ")")
-                  || { "red": "./img/red.gif", "blue": "./img/blue.gif", "green": "./img/green.gif" };
+                  || { "red": "./images/red.gif", "blue": "./images/blue.gif", "green": "./images/green.gif" };
 function onIntendeeNickname(variable, value) {
     puts("intendee " + this.name + " nickname is " + value);
     if (this === me) {
       cookies.set("a2ac_nick", value);
-      var url = url_map[value] || "./img/guest.gif";
+      var url = url_map[value] || "./images/guest.gif";
       me.set("icon", url);
     }
 }
