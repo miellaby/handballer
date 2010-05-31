@@ -1,7 +1,7 @@
 #!/bin/bash
 export HANDBALLER=localhost:81/bus/
 #export HANDBALLER=192.168.1.77:81/bus/
-bot=logger
+bot=ilogger
 nickname=Logger
 icon=images/bot.gif
 mind="is logging"
@@ -11,7 +11,7 @@ if [ -n "$1" ] ; then agora=$1 ; fi
 trap "hbcpost $agora/freed/$bot" SIGHUP SIGINT SIGTERM
 
 function advertise {
-   hbcpost $agora/model/$bot "{name:'"$bot$$"',tags:['bot', 'intendee'],nickname:'"$nickname"',icon:'"$icon"',mind:'$mind'}"
+   hbcpost $agora/model/$bot$$ "{name:'"$bot$$"',tags:['bot', 'intendee'],nickname:'"$nickname"',icon:'"$icon"',mind:'$mind'}"
 }
 
 function beep {
