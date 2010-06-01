@@ -25,27 +25,8 @@ You say:&nbsp;&nbsp;&nbsp;<input type="text" id="messageBody" value="Hello world
 <script type="text/javascript" src='/hbc/pubsubAgent.js'></script>
 <script type="text/javascript" src='/hbc/busAgent.js'></script>
 <script type="text/javascript" src='/hbc/autobus.js'></script>
-
+<script type="text/javascript" src='/hbc/cookies.js'></script>
 <script type="text/javascript">
-
-var cookies = {
-   get:  function(name) {
-      var start = document.cookie.indexOf(name + "=");
-      if (start == -1) return null;
-      var len = start + name.length + 1;
-      var end = document.cookie.indexOf(";", len);
-      if (end == -1) end = document.cookie.length;
-      return unescape(document.cookie.substring(len, end));
-   },
-   set: function(name, value, expires, path, domain, secure) {
-      document.cookie = name + "=" + escape(value) +
-          ( expires ? ";expires=" + expires.toGMTString() : "") +
-          ( path ? ";path=" + path : "") + 
-          ( domain ? ";domain=" + domain : "") +
-          ( secure ? ";secure" : "");
-   }
-};
-
 function puts(msg) {
   var t = document.getElementById("trace");
   t.innerHTML = t.innerHTML.replace(/^/, msg + "\n");
