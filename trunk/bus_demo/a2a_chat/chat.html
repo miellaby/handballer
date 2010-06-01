@@ -6,17 +6,17 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 
-<body>
+<body onload="setTimeout(init,500);">
 <h2>A2A Chat</h2>
-<form action="javascript:me.set('nickname',document.getElementById('meNickname').value)">
+<form action="javascript:nameMe(document.getElementById('meNickname').value)">
 <h3>You are:&nbsp;&nbsp;&nbsp;<input type="text" id="meNickname" value="guest">
 <input type="submit" value="Set nickname!">
 </h3></form>
-<h3><form action="javascript:me.postMessage()">
+<h3><form action="javascript:postMessage()">
 You say:&nbsp;&nbsp;&nbsp;<input type="text" id="messageBody" value="Hello world!">
 <input type="submit" value="Shout!">
 </h3></form>
-<h3>You ear:&nbsp;&nbsp;&nbsp;<button onclick="document.getElementById('trace').innerHTML='';">clear</button></h3>
+<h3>You hear:&nbsp;&nbsp;&nbsp;<button onclick="document.getElementById('trace').innerHTML='';">clear</button></h3>
 <pre id='trace' style="border:2px solid black;background:#EFE;"></pre>
 
 <script type="text/javascript" src='/hbc/myPrototype.js'></script>
@@ -33,7 +33,6 @@ function puts(msg) {
 }
 
 var autobus = new Autobus("a2ac");
-autobus.init();
 
 if(1)
 autobus.hbc.logCB = function(msg) {
@@ -52,24 +51,11 @@ function onIntendeePing(variable, value) {
     if (me.ping < value) me.ping = value;
 }
 
-var url_map = eval("(" + (cookies.get("a2ac_icons") || "null") + ")")
-                  || { "red": "./images/red.gif", "blue": "./images/blue.gif", "green": "./images/green.gif" };
 function onIntendeeNickname(variable, value) {
     puts("intendee " + this.name + " nickname is " + value);
     if (this === me) {
       cookies.set("a2ac_nick", value);
-      var url = url_map[value] || "./images/guest.gif";
-      me.set("icon", url);
-    }
-}
-
-function onIntendeeIcon(variable, value) {
-    puts("intendee " + this.name + " icon url is " + value);
-    if (this === me) {
-       url_map[this.nickname] = value;
-       var expire = new Date();
-       expire.setTime(expire.getTime() + 3600 * 24 * 100);
-       cookies.set("a2ac_icons", jsonize(url_map), expire);
+      document.getElementById('meNickname').value = value;
     }
 }
 
@@ -79,13 +65,12 @@ function onIntendeesSplice(tag, index, howMany) {
       puts("new intendee id " + intendee.name);
       intendee.subscribe("ping", onIntendeePing);
       intendee.subscribe("nickname", onIntendeeNickname);
-      intendee.subscribe("icon", onIntendeeIcon);
    }
 }
 
 
 function onMessageContent(variable, value) {
-    var intendee = autobus.tagsonomy.getOr(this.intendee, null);
+    var intendee = autobus.tagsonomy.getOr(this.from, null);
     var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + this.intendee);
 
     puts(who + " said: " + value);
@@ -112,19 +97,14 @@ function onMessagesSplice(tag, index, howMany) {
      }
    }
 }
+var me;
 
-autobus.tagsonomy.subscribe("intendee", onIntendeesSplice);
-autobus.tagsonomy.subscribe("message", onMessagesSplice);
-
-var me = new BusAgent(autobus, agentUUID("i"), BusAgent.prototype.here);
-me.setTags("intendee");
-
-me.postMessage = function() {
+function postMessage() {
   var v = document.getElementById('messageBody');
   var msg = new BusAgent(autobus, agentUUID("m"), BusAgent.prototype.here);
   msg.sets({
     tags: ["message"],
-    intendee: me.name,
+    from: me.name,
     //to: otherIntendee,
     content: v.value,
     timestamp: 1 + me.ping
@@ -132,11 +112,13 @@ me.postMessage = function() {
   v.value = "";
 }
 
-me.ping = 0;
-me.doPing = function() {
-   this.set("ping", 1 + me.ping);
+function nameMe(name) {
+   me.set("nickname", name);
 }
 
+function pingMe() {
+   me.set("ping", 1 + me.ping);
+}
 
 var lastPingsLog = {};
 function cleanGone() {
@@ -153,11 +135,6 @@ function cleanGone() {
    lastPingsLog = pingsLog;
    pingsLog = {};
 }
-
-me.doPing();
-setInterval(function() { me.doPing() }, 60 * 2 * 1000 - 30 * Math.random() * 1000);
-setInterval(cleanGone, 60 * 2 * 1000);
-
 
 function autoConfig() {
   var nick = cookies.get("a2ac_nick");
@@ -182,11 +159,24 @@ function autoConfig() {
   me.set("nickname", nick);
 }
 
-setTimeout(autoConfig, 3 * 1000);
+function init() {
+   autobus.init();
+   autobus.tagsonomy.subscribe("intendee", onIntendeesSplice);
+   autobus.tagsonomy.subscribe("message", onMessagesSplice);
 
+   me = new BusAgent(autobus, agentUUID("i"), BusAgent.prototype.here);
+   me.setTags("intendee");
+   me.ping = 0;
+   pingMe();
+   setTimeout(autoConfig, 3 * 1000);
+   setInterval(function() { pingMe() }, 60 * 2 * 1000 - 30 * Math.random() * 100);
+   setInterval(cleanGone, 60 * 2 * 1000);
+   window.onunload = finalize;
+}
 
+function finalize(e) {
+   me.forget();
+}
 </script>
-
-
 </body>
 </html>
