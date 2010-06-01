@@ -286,7 +286,7 @@ height: 100%;
 <script type="text/javascript" src="index.js"></script>
 </head>
 
-<body onload="chat2.init();" onunload="chat2.finalize();">
+<body onload="setTimeout(function(){chat2.init();},500);" onunload="chat2.finalize();">
 
   <!-- intendy area -->
   <div id="intendeesArea">
