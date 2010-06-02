@@ -90,14 +90,14 @@ BusAgent.prototype.tell = function() {
     if (!toTell) return;
 
     if (toTell.here()) {
-      this.autobus.hbc.send(toTell.recipient + "model/" + this.autobus.toTellName, jsonize(this.autobus.delta));
+       this.autobus.hbc.send(toTell.recipient + "model/" + this.autobus.toTellName, jsonize(this.autobus.delta));
 
-      if (!toTell.name)
+       if (!toTell.name)
           this.autobus.hbc.sendNow(toTell.recipient + "freed/" + this.autobus.toTellName);
     }
+    
     if (toTell.there()) {
-        this.autobus.hbc.send((toTell.abcli ? toTell.abcli : this.autobus.agora) + "control/" + this.autobus.toTellName + "/set", jsonize(this.autobus.delta));
-
+       this.autobus.hbc.send((toTell.abcli ? toTell.abcli : this.autobus.agora) + "control/" + this.autobus.toTellName + "/set", jsonize(this.autobus.delta));
     }
     this.autobus.delta = {};
     if (this.autobus.toTellTimeout !== undefined)
