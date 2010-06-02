@@ -315,14 +315,15 @@ var a2ac = {
         autobus.tagsonomy.subscribe("message", a2ac.onMessagesSplice);
         autobus.init();
 
-        this.me = new Me();
-        this.me.init();
+        a2ac.me = new Me();
+        a2ac.me.init();
 
         setInterval(a2ac.cleanGone, 60 * 2 * 1000);
     },
 
     finalize: function() {
-        this.me.forget();
+        a2ac.me.forget();
+        a2ac.me.tell();
     }
 };
 

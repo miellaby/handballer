@@ -22,10 +22,8 @@ function Hbc() {
   // default client ID
   this.clientId = "top";
   this.token = String(Number(new Date()) % (Math.random() * 0xAFF00000)).substr(0,9);
-  Hbc.singleton = this;
 }
 
-Hbc.singleton = null;
 Hbc.prototype.logCB = null;
 
 
@@ -62,6 +60,14 @@ Hbc.prototype.send = function(label, body) {
   if (this.isSending) return;
   this.sendNext();
 };
+
+// send a message immediatly and synchronously
+Hbc.prototype.sendNow = function(label, body) {
+   var one = new XMLHttpRequest();
+   one.open("POST", this.baseURL + label, false);
+   one.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+   one.send(body == null ? "" : "" + body);
+}
 
 // bus message receiving section
 // =========================================================================
