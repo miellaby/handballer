@@ -82,7 +82,10 @@ PubSubAgent.prototype.set_and_fire = function(attribut, value) {
   // special attributs related to tagsonomy
 
   if (attribut == "name" && oldValue != value) {
-    if (oldValue) this.tagsonomy.set(oldValue, undefined);
+    if (oldValue) {
+       this.tagsonomy.set(oldValue, undefined);
+       this.setTags();
+    }
     if (value)    this.tagsonomy.set(value, this);
   }
 
@@ -177,8 +180,10 @@ PubSubAgent.prototype.setTags = function() {
 }
 
 PubSubAgent.prototype.forget = function() {
-   this.setTags();
-   this.setted("name", undefined);
+   if (this.here())
+      this.set("name", undefined);
+   else
+      this.setted("name", undefined);
    this.unsubscribe();
 }
 
