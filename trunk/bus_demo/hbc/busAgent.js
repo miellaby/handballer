@@ -75,7 +75,7 @@ BusAgent.prototype.set = function(variable, value) {
        // note value may have changed a second time here
    }
    this.autobus.delta[variable] = value;
-
+   if (variable == "name" && value) this.autobus.toTellName = value ;
    return value;
 };
 
@@ -93,7 +93,7 @@ BusAgent.prototype.tell = function() {
       this.autobus.hbc.send(toTell.recipient + "model/" + this.autobus.toTellName, jsonize(this.autobus.delta));
 
       if (!toTell.name)
-          this.autobus.hbc.send(toTell.recipient + "freed/" + this.autobus.toTellName);
+          this.autobus.hbc.sendNow(toTell.recipient + "freed/" + this.autobus.toTellName);
     }
     if (toTell.there()) {
         this.autobus.hbc.send((toTell.abcli ? toTell.abcli : this.autobus.agora) + "control/" + this.autobus.toTellName + "/set", jsonize(this.autobus.delta));
