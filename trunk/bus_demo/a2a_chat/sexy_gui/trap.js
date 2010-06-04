@@ -36,13 +36,14 @@ Trap.prototype.onMouseUp = function(e) {
     this.dx = this.dy = this.s = 0;
     this.pause();
 
-    if (this.t == null) {
+    if (this.t != null) {
         clearTimeout(this.t);
         this.t = null;
     }
 }
 
 Trap.prototype.onMouseOut = function(e) {
+    if (e.target != this.element) return;
     this.onMouseUp();
     return false;
 }
@@ -71,15 +72,18 @@ Trap.prototype.bindTarget = function(element) {
    var self = this;
    element.onmousedown = function(e) { self.trap(e); if (e.preventDefault) e.preventDefault(); else e.returnValue = false; };
    element.onmouseup = function(e) { return self.onMouseUp(e);};
+   element.onmouseout = function(e) { return self.onMouseOut(e); }
    element.onselectstart = function() { return false;};
    element.unselectable = "on";
    element.style.MozUserSelect = "none";
    element.style.cursor = "default";
 }
 
-Trap.prototype.iterate = function() {
-   this.dx = this.x - this.x0;
-   this.dy = this.y - this.y0;
+Trap.prototype.iterate = function(factor) {
+    // if (!factor) return this.down;
+   var i = 1;
+   this.dx = (this.x - this.x0) * i;
+   this.dy = (this.y - this.y0) * i;
    this.s += Math.abs(this.dx) + Math.abs(this.dy);
    this.x0 = this.x;
    this.y0 = this.y;
