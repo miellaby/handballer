@@ -1,9 +1,3 @@
-function RevolutionItem(pos, inFactor) {
-    this.revolutionPos = pos;
-    this.inFactor = inFactor;
-    this.cell = null;
-}
-
 function Revolution() {
   Anim.call(this);
 }
@@ -31,7 +25,7 @@ Revolution.prototype.init = function (areaElement, cellConstructor, nbSeens) {
     this.n = undefined; // don't use for your own
     this.nbItem = undefined;
 
-    this.iterate();
+    this.iterate(0);
 };
 
 Revolution.prototype.getItem = function(i) {
@@ -55,7 +49,9 @@ Revolution.prototype.splice = function(index, howMany) {
 
     for (var l = arguments, i = 2 /* jump over 2 first args */, n = l.length; i < n; ++i) {
         var newItem = l[i];
-        RevolutionItem.call(newItem, newItemPos, 0);
+        newItem.revolutionPos = newItemPos;
+        newItem.inFactor = 0;
+        newItem.cell = null;
         newItems.push(newItem);
         newItemPos += 1.0;
     }
@@ -107,31 +103,34 @@ Revolution.prototype.isMoving = function() {
 Revolution.prototype.computeSpeed = function() {
     
     if (this.friction != null) { // external friction
-        
-        var speed = (this.friction + 1.0 * this.speed) / 2.0;
-        speed = Math.max(speed, -0.8);
-        this.speed = Math.min(speed, 0.8);
+        if (Math.abs(this.friction - this.speed) < 0.4) {
+            this.speed = this.friction;
+        } else {
+            this.speed += this.friction > this.speed ? 0.4 : -0.4;
+        }
     } else { // no external friction
-
-        if (Math.abs(this.speed) > 0.05)
-            this.speed *= 0.9; // slowing down
-
-        else { // notch motion
+        var a = Math.abs(this.speed); 
+        if (a > 0.1) {
+            this.speed *= 0.8; // slowing quick
+        }else if (a > 0.05) {
+            this.speed *= 0.93; // slowing down
+        } else { // notch motion
             var offset = this.pos % 1.0;
             if (offset > 0.5) offset = 1 - offset; 
             if (offset < - 0.5) offset = 1 + offset;
             this.offset = offset;
-            this.speed = ( offset % 1.0 ) * -0.04;
+            var speed = this.speed - ( offset % 1.0 ) * 0.01;
+            this.speed = Math.min(Math.max(speed * 0.93, -0.05), 0.05);
         }
     }
 };
 
-Revolution.prototype.iterate = function() {
+Revolution.prototype.iterate = function(factor) {
     // compute speed from acceleration/strengths
     this.computeSpeed();
     
     // apply speed
-    this.pos += this.speed;
+    this.pos += this.speed * factor;
 
     // redraw
     this.redraw();

@@ -1,10 +1,12 @@
-function Animator(freq) {
+function Animator(fps) {
     this.anims = [];
-    this.freq = freq || 14;
+    this.fps = fps || 14;
+    this.period = 1000.0 / this.fps;
     this.interval = null;
     this.TraceDiv = null;
     this.TT = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
     this.TTi = 0;
+    this.last = 0;
 }
 
 Animator.prototype.singleton = new Animator();
@@ -20,13 +22,16 @@ Animator.prototype.add = function(anim) {
    this.anims.push(anim);
    if (!this.interval) { // start refresh cycle
         var self = this;
-        this.interval = setInterval(function() { self.iterate(); }, 1000 / this.freq);
+        this.interval = setInterval(function() { self.iterate(); }, this.period);
     }
 }
 
 Animator.prototype.iterate = function() {
     var i, n = this.anims.length, thingsToBeDone = false;
     var clonedArray = this.anims.slice();
+    var now = Number(new Date());
+    var factor = (this.last ? (now - this.last) / this.period : 1.0);
+    this.last = now;
     for (i = 0; i < n; i++) {
         var m = clonedArray[i];
         if (m.state == 1) {
@@ -34,7 +39,7 @@ Animator.prototype.iterate = function() {
             m.state == 2;
         }
 
-        if (!m.iterate()) {
+        if (!m.iterate(factor)) {
             m.pause();
             var f = m.onFinish;
             m.onFinish = new Function();
@@ -53,7 +58,7 @@ Animator.prototype.iterate = function() {
     }
 
     if (this.logCB) {
-        var t0 = this.TT.shift(), t9 = new Date.getTime();
+        var t0 = this.TT.shift(), t9 = new Date().getTime();
         this.TT.push(t9);
         if ((this.TTi++) % 10 == 0)
             this.logCB(parseInt(10000 / (t9 - t0)));
