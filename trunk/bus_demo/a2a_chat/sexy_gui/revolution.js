@@ -118,9 +118,15 @@ Revolution.prototype.computeSpeed = function() {
             var offset = this.pos % 1.0;
             if (offset > 0.5) offset = 1 - offset; 
             if (offset < - 0.5) offset = 1 + offset;
-            this.offset = offset;
-            var speed = this.speed - ( offset % 1.0 ) * 0.01;
-            this.speed = Math.min(Math.max(speed * 0.93, -0.05), 0.05);
+            var speed = this.speed - offset * 0.01;
+            if (offset * (speed + offset) < 0) {
+                this.offset = 0;
+                this.speed = 0;
+            } else {
+                this.offset = offset;
+                this.speed = Math.min(Math.max(speed * 0.95, -0.05), 0.05);
+            }
+                
         }
     }
 };
