@@ -31,6 +31,7 @@ Animator.prototype.iterate = function() {
     var clonedArray = this.anims.slice();
     var now = Number(new Date());
     var factor = (this.last ? (now - this.last) / this.period : 1.0);
+    if (factor > 10) factor = 10;
     this.last = now;
     for (i = 0; i < n; i++) {
         var m = clonedArray[i];
