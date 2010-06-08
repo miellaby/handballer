@@ -110,15 +110,15 @@ Revolution.prototype.computeSpeed = function() {
         }
         this.motion = true;
     } else if (!this.donuts && this.pos < -0.5) {
-        if (this.speed < 0.3) {
+        if (this.speed < 0.2) {
             this.speed -= this.pos * 0.1;
-            if (this.speed > 0.3) this.speed = 0.3;
+            if (this.speed > 0.2) this.speed = 0.2;
         }
         this.motion = true;
     } else if (!this.donuts && this.nbItem && this.n > this.nbItem - 2) {
-        if (this.speed > -0.3) {
+        if (this.speed > -0.2) {
             this.speed -= (this.n - this.nbItem) * 0.1;
-            if (this.speed < -0.3) this.speed = -0.3;
+            if (this.speed < -0.2) this.speed = -0.2;
         }
         this.motion = true;
     } else {
