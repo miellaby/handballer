@@ -24,7 +24,7 @@ Revolution.prototype.init = function (areaElement, cellConstructor, nbSeens) {
     this.offset = 0;
     this.n = undefined; // don't use for your own
     this.nbItem = undefined;
-
+    this.motion = false;
     this.iterate(0);
 };
 
@@ -97,34 +97,47 @@ Revolution.prototype.splice = function(index, howMany) {
 
 
 Revolution.prototype.isMoving = function() {
-    return this.innerAnims.length > 0 || this.friction != null || Math.abs(this.speed) > 0.006 || Math.abs(this.offset) > 0.005;
+    return this.innerAnims.length > 0 || this.motion;
 };
 
 Revolution.prototype.computeSpeed = function() {
-    
+    this.motion = false;
     if (this.friction != null) { // external friction
         if (Math.abs(this.friction - this.speed) < 0.4) {
             this.speed = this.friction;
         } else {
             this.speed += this.friction > this.speed ? 0.4 : -0.4;
         }
-    } else { // no external friction
+        this.motion = true;
+    } else if (!this.donuts && this.pos < -0.5) {
+        if (this.speed < 0.3) {
+            this.speed -= this.pos * 0.1;
+            if (this.speed > 0.3) this.speed = 0.3;
+        }
+        this.motion = true;
+    } else if (!this.donuts && this.nbItem && this.n > this.nbItem - 2) {
+        if (this.speed > -0.3) {
+            this.speed -= (this.n - this.nbItem) * 0.1;
+            if (this.speed < -0.3) this.speed = -0.3;
+        }
+        this.motion = true;
+    } else {
         var a = Math.abs(this.speed); 
         if (a > 0.1) {
             this.speed *= 0.8; // slowing quick
-        }else if (a > 0.05) {
-            this.speed *= 0.93; // slowing down
+            this.motion = true;
         } else { // notch motion
             var offset = this.pos % 1.0;
             if (offset > 0.5) offset = 1 - offset; 
             if (offset < - 0.5) offset = 1 + offset;
-            var speed = this.speed - offset * 0.01;
+            var speed = this.speed - offset * 0.2;
             if (offset * (speed + offset) < 0) {
                 this.offset = 0;
                 this.speed = 0;
             } else {
                 this.offset = offset;
                 this.speed = Math.min(Math.max(speed * 0.95, -0.05), 0.05);
+                this.motion = true;
             }
                 
         }
@@ -159,7 +172,7 @@ Revolution.prototype.redraw = function() {
 
         var toGet = [];
 
-        var i, nothing=true,toRight=false;
+        var i, nothing = true,toRight = false;
         for (i = 0; i < nbItem; ++i) {
             var j = (i + n) %nbItem;
             if (j < 0) j += nbItem;
@@ -178,14 +191,12 @@ Revolution.prototype.redraw = function() {
                 toGet.push(this.items[j]);
         }
 
-        if (nothing && nbItem) {
-            if (this.donuts) {
+        if (this.donuts) {
+            if (nothing && nbItem) {
                 if (toRight) // every cell are far to the right
                     this.pos += this.cellConstructor.prototype.getOpeningSize(this.areaElement) + nbItem;
                 else // every cell are far to the left
                     this.pos -= this.cellConstructor.prototype.getOpeningSize(this.areaElement) + nbItem;
-            } else {
-                this.speed = (toRight ? 0.2 : -0.2);
             }
         }
 
