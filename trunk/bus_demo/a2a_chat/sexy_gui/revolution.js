@@ -4,12 +4,12 @@ function Revolution() {
 
 Revolution.prototype = new Anim();
 
-Revolution.prototype.init = function (areaElement, cellConstructor, nbSeens) {
+Revolution.prototype.init = function (areaElement, cellConstructor, glider) {
 
     //Parameters
     this.areaElement = areaElement;
     this.cellConstructor = cellConstructor;
-    this.nbSeens = nbSeens;
+    this.glider = glider;
 
     // Initial states 
     this.items = []; // data model = list
@@ -131,7 +131,7 @@ Revolution.prototype.computeSpeed = function() {
             if (offset > 0.5) offset = 1 - offset; 
             if (offset < - 0.5) offset = 1 + offset;
             var speed = this.speed - offset * 0.2;
-            if (offset * (speed + offset) < 0) {
+            if (offset * (speed + offset) <= 0) {
                 this.offset = 0;
                 this.speed = 0;
             } else {
@@ -242,4 +242,5 @@ Revolution.prototype.redraw = function() {
             item.cell.setCoords(item.inFactor, item.revolutionPos - pos);
         }
     }
+    if (this.glider) this.glider.update(nbItem ? pos / nbItem : 0, nbItem ? (pos + this.visibleCells.length) / nbItem : 1, this.isMoving());
 };
