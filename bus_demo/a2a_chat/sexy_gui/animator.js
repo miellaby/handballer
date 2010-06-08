@@ -7,6 +7,7 @@ function Animator(fps) {
     this.TT = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
     this.TTi = 0;
     this.last = 0;
+    this.thingsToBeDone = false;
 }
 
 Animator.prototype.singleton = new Animator();
@@ -20,19 +21,21 @@ Animator.prototype.add = function(anim) {
    var i = this.anims.indexOf(anim);
    if (i != -1) return;
    this.anims.push(anim);
-   if (!this.interval) { // start refresh cycle
+   if (this.interval == null) { // start refresh cycle
         var self = this;
         this.interval = setInterval(function() { self.iterate(); }, this.period);
     }
+   this.thingsToBeDone = true;
 }
 
 Animator.prototype.iterate = function() {
-    var i, n = this.anims.length, thingsToBeDone = false;
+    var i, n = this.anims.length;
     var clonedArray = this.anims.slice();
     var now = Number(new Date());
     var factor = (this.last ? (now - this.last) / this.period : 1.0);
     if (factor > 10) factor = 10;
     this.last = now;
+    this.thingsToBeDone = false;
     for (i = 0; i < n; i++) {
         var m = clonedArray[i];
         if (m.state == 1) {
@@ -46,14 +49,12 @@ Animator.prototype.iterate = function() {
             m.onFinish = new Function();
             f.call(m);
 		 
-            if (m.state != 0) // anim has been restarted by onFinish
-                thingsToBeDone = true;
         } else {
-            thingsToBeDone = true;
+            this.thingsToBeDone = true;
         }
     }
 
-    if (!thingsToBeDone) { // stop refresh cycle
+    if (!this.thingsToBeDone) { // stop refresh cycle
         clearInterval(this.interval);
         this.interval = null;
     }

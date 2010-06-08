@@ -210,7 +210,7 @@ var chat2 = {
             document.getElementById("closeButton").onclick = function() {window.location = back;};
         }
         this.intendeesGlider.init(document.getElementById("intendeesGlider"), "left", "width");
-        this.messagesGlider.init(document.getElementById("messagesGlider"), "top", "height");
+        this.messagesGlider.init(document.getElementById("messagesGlider"), "bottom", "height");
         this.revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, this.intendeesGlider);
         this.revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, this.messagesGlider);
 

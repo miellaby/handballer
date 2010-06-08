@@ -162,6 +162,7 @@ Revolution.prototype.redraw = function() {
     var nbItem = this.items.length;
     var pos    = this.pos;
     var n      = pos > 0 ? parseInt(pos) : parseInt(pos) - 1 ;
+    var o      = this.cellConstructor.prototype.getOpeningSize(this.areaElement) || 1;
 
     this.generation ^= true;
 
@@ -194,9 +195,10 @@ Revolution.prototype.redraw = function() {
         if (this.donuts) {
             if (nothing && nbItem) {
                 if (toRight) // every cell are far to the right
-                    this.pos += this.cellConstructor.prototype.getOpeningSize(this.areaElement) + nbItem;
+                    this.pos += o + nbItem;
+
                 else // every cell are far to the left
-                    this.pos -= this.cellConstructor.prototype.getOpeningSize(this.areaElement) + nbItem;
+                    this.pos -= o + nbItem;
             }
         }
 
@@ -242,5 +244,5 @@ Revolution.prototype.redraw = function() {
             item.cell.setCoords(item.inFactor, item.revolutionPos - pos);
         }
     }
-    if (this.glider) this.glider.update(nbItem ? pos / nbItem : 0, nbItem ? (pos + this.visibleCells.length) / nbItem : 1, this.isMoving());
+    if (this.glider) this.glider.update( (pos + o) / (Math.max(o, nbItem) + 2 * o), (pos + 2 * o) / (Math.max(o, nbItem) + 2 * o), this.isMoving());
 };
