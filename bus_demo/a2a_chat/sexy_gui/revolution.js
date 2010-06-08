@@ -115,7 +115,7 @@ Revolution.prototype.computeSpeed = function() {
             if (this.speed > 0.2) this.speed = 0.2;
         }
         this.motion = true;
-    } else if (!this.donuts && this.nbItem && this.n > this.nbItem - 2) {
+    } else if (!this.donuts && this.nbItem && this.n > this.nbItem - 1) {
         if (this.speed > -0.2) {
             this.speed -= (this.n - this.nbItem) * 0.1;
             if (this.speed < -0.2) this.speed = -0.2;
