@@ -70,7 +70,7 @@ input {
   left: 0%;
   top: 0%;
   width: 3%;
-height: 100%;
+  height: 100%;
   overflow: hidden;
   z-index:15;
 }
@@ -89,6 +89,17 @@ height: 100%;
   overflow: hidden;
   z-index:15;
 }
+
+#intendeesGlider {
+  background-color:red;
+  position: absolute;
+  left:0%;
+  width:0%;
+  height:3px;
+  bottom:0%;
+  z-index:16;
+}
+
 
 .intendeePic {
   position: absolute;
@@ -190,6 +201,16 @@ height: 100%;
    overflow: hidden;
    z-index:31;
 }
+                                                              
+#messagesGlider {                                    
+  background-color: red;                               
+  position: absolute;                                                           
+  right:1%;                                                                      
+  width:3px;                                                                     
+  height:0%;                                                                    
+  top:0%;                                                                      
+  z-index:16;                                                                   
+}
 
 #postLayer {
    -moz-border-radius:20px;
@@ -280,6 +301,7 @@ height: 100%;
 <script type="text/javascript" src="cell.js"></script>
 <script type="text/javascript" src="revolutionAnims.js"></script>
 <script type="text/javascript" src="revolution.js"></script>
+<script type="text/javascript" src="glider.js"></script>
 <script type="text/javascript" src="sound/soundmanager2-nodebug-jsmin.js"></script>
 <script type="text/javascript" src="a2ac_ui.js"></script>
 <!-- Top UI -->
@@ -293,8 +315,12 @@ height: 100%;
     <div class="trap" id="intendeesTrap"></div>
     <div id="intendeesBack"></div>
     <div id="intendeesForward"></div>
+    <div id="intendeesGlider"></div>
   </div>
-  <div id="msgsArea"><div class="trap" id="msgsTrap"></div></div>
+  <div id="msgsArea">
+    <div class="trap" id="msgsTrap"></div>
+    <div id="messagesGlider"></div>
+  </div>
   
 
   <div id="contextForm" style="display:none;">

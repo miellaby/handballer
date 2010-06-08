@@ -31,6 +31,8 @@ var chat2 = {
     contextForm: null,
     revolutionOfIntendees: new Revolution(),
     revolutionOfMessages:  new Revolution(),
+    intendeesGlider: new Glider(),
+    messagesGlider: new Glider(),
     iTrap: new Trap(),
     mTrap: new Trap(),
     msgPic: null,
@@ -207,9 +209,10 @@ var chat2 = {
             el.setAttribute('src', back);
             document.getElementById("closeButton").onclick = function() {window.location = back;};
         }
-
-        this.revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
-        this.revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, 50);
+        this.intendeesGlider.init(document.getElementById("intendeesGlider"), "left", "width");
+        this.messagesGlider.init(document.getElementById("messagesGlider"), "top", "height");
+        this.revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, this.intendeesGlider);
+        this.revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, this.messagesGlider);
 
         if (!a2acAgora)
             a2acAgora = (back ? back.b64() : 'a2ac') ;
