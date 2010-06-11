@@ -208,6 +208,7 @@ var chat2 = {
             document.body.appendChild(el);
             el.setAttribute('src', back);
             document.getElementById("closeButton").onclick = function() {window.location = back;};
+            document.getElementById("hideButton").onclick = function() {chat2.hide(true);};
         }
         this.intendeesGlider.init(document.getElementById("intendeesGlider"), "left", "width");
         this.messagesGlider.init(document.getElementById("messagesGlider"), "bottom", "height");
@@ -268,6 +269,26 @@ var chat2 = {
 
     finalize: function() {
         a2ac.finalize();
+    },
+
+    hide: function(value) {
+        var a = new Anim();
+        a.ia = document.getElementById("intendeesArea");
+        a.ma = document.getElementById("msgsArea");
+        a.ratio = 0;
+        var ed = getEltDimensions(a.ia);
+        a.start = a.current = {y: 0};        
+        a.end = { y: -ed[1] };
+        log(a.end);
+        a.iterate = function() {
+            this.current.y = this.start.y + (this.end.y - this.start.y) * this.ratio;
+            writeDOM(this.ia, this.current);
+            this.ratio += 0.1;
+            if (this.ratio > 1) this.ia.style.display = (this.current.y < 0 ? "none" : "block");
+            return this.ratio <= 1;
+        }
+        a.resume();
+
     }
 };
 soundManager.url = "./sound";
