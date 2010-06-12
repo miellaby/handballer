@@ -37,7 +37,7 @@ var default_profiles = {
         icon: "./images/green.gif",
         mind: "watchful",
         color: "green"
-    }
+    },
     pink: {
         nickname: "pink",
         icon: "./images/pink.gif",
