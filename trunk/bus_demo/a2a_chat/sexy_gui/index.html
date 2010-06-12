@@ -190,6 +190,10 @@ input {
  float: left;
 }
 
+#iPicDiv {
+ float: left;
+}
+
 #msgsTrap {
 }
 
@@ -347,11 +351,13 @@ input {
       <p><label for="meEmblem">emblem&nbsp;</label>
         <img id="meEmblemImg" src="images/blank.gif" style="width: 32px; height: 32px;"/>&nbsp;<input type="text" id="meEmblem" value="">
       </p>
+      <p><label for="meColor">color&nbsp;</label>
+        <input type="text" id="meColor" value="" style=""></p>
       <button style="float: right; margin-right: 10px;" onclick="javascript:chat2.submitContextForm();">Submit</button>&nbsp;
     </form>
     <form id ="iPropsForm" class="ContextForm" action="null">
       <!-- the div / table hereafter aims to facilate conservative ratio re-dimensionning -->
-      <div id="iPicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="iPicImg" src="images/blank.gif" style="float: left;"/></td></tr></table></div>
+      <div id="iPicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="iPicImg" src="images/blank.gif"/></td></tr></table></div>
       <p><label for="iName">nick&nbsp;</label>
         <input type="text" readonly="readonly" id="iName" value="" style=""></p>
       <p><label for="iPic">pic&nbsp;</label>
@@ -360,6 +366,8 @@ input {
         <input type="text" readonly="readonly" id="iMind" value=""></p>
       <p><label for="iEmblem">emblem&nbsp;</label>
         <img id="iEmblemImg" src="images/blank.gif" style="width: 32px; height: 32px;"/>&nbsp;<input type="text" id="iEmblem" readonly="readonly" value="">
+      <p><label for="iColor">color&nbsp;</label>
+        <input type="text" readonly="readonly" id="iColor" value=""></p>
     </form>
     <form id ="mPropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
       <label for="mFrom">from&nbsp;</label>
