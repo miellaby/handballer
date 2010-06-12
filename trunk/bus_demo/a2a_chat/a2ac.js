@@ -23,17 +23,26 @@ var default_profiles = {
     red: {
         nickname: "red",
         icon: "./images/red.gif",
-        mind: "happy"
+        mind: "happy",
+        color: "red"
     },
     blue: {
         nickname: "blue",
         icon: "./images/blue.gif",
-        mind: "cool"
+        mind: "cool",
+        color: "blue"
     },
     green: {
         nickname: "green",
         icon: "./images/green.gif",
-        mind: "watchful"
+        mind: "watchful",
+        color: "green"
+    }
+    pink: {
+        nickname: "pink",
+        icon: "./images/pink.gif",
+        mind: "groovy",
+        color: "pink"
     }
 };
 
@@ -206,7 +215,7 @@ Me.prototype.onWorking = function(variable, value) {
 
 Me.prototype.setProfileId = function(profileId) {
     this.set("profileId", profileId);
-    var nickname = settings.get(profileId, "nickname") || profileId;
+    var nickname = settings.get(profileId, "nickname") || profileId,
         icon = settings.get(profileId, "icon") || "./images/guest.gif",
         mind = settings.get(profileId, "mind") || "what's the?",
         emblem = settings.get(profileId, "emblem");

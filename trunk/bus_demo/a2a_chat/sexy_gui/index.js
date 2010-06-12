@@ -208,7 +208,7 @@ var chat2 = {
             document.body.appendChild(el);
             el.setAttribute('src', back);
             document.getElementById("closeButton").onclick = function() {window.location = back;};
-            document.getElementById("hideButton").onclick = function() {chat2.hide(true);};
+            document.getElementById("hideButton").onclick = function() {chat2.hide();};
         }
         this.intendeesGlider.init(document.getElementById("intendeesGlider"), "left", "width");
         this.messagesGlider.init(document.getElementById("messagesGlider"), "bottom", "height");
@@ -275,16 +275,39 @@ var chat2 = {
         var a = new Anim();
         a.ia = document.getElementById("intendeesArea");
         a.ma = document.getElementById("msgsArea");
+        a.pf = document.getElementById("postForm");
+        a.pl = document.getElementById("postLayer");
         a.ratio = 0;
-        var ed = getEltDimensions(a.ia);
-        a.start = a.current = {y: 0};        
-        a.end = { y: -ed[1] };
-        log(a.end);
+        var edi = getEltDimensions(a.ia);
+        var edp = getEltDimensions(a.pf);
+        if (value === undefined)
+            value = (a.ma.style.display != "none");
+        a.start = a.current = {y: value ? 0 : -edi[1]};        
+        a.start2 = a.current2 = {y: value ? 0 : -edp[1]};        
+        a.end = { y: value ? -edi[1] : 0 };
+        a.end2 = { y: value ? -edp[1] : 0 };
+        if (!value) {
+               a.ia.style.display =
+                    a.pf.style.display =
+                    a.pl.style.display = "block";
+        }
         a.iterate = function() {
             this.current.y = this.start.y + (this.end.y - this.start.y) * this.ratio;
+            this.current2.y = this.start2.y + (this.end2.y - this.start2.y) * this.ratio;
             writeDOM(this.ia, this.current);
+            writeDOM(this.pf, this.current2, "left", "bottom");
+            writeDOM(this.pl, this.current2, "left", "bottom");
             this.ratio += 0.1;
-            if (this.ratio > 1) this.ia.style.display = (this.current.y < 0 ? "none" : "block");
+            if (this.ratio > 1) {
+                if (this.end.y < 0) {
+                    this.ia.style.display =
+                        this.pf.style.display =
+                        this.pl.style.display =
+                        this.ma.style.display = "none";
+                } else {
+                    this.ma.style.display = "block";
+                }
+            }
             return this.ratio <= 1;
         }
         a.resume();
