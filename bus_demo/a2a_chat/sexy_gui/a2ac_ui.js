@@ -56,6 +56,7 @@ IntendeeCell.prototype.hide = function() {
         this.item.unsubscribe("nickname", this.selfUpdate);
         this.item.unsubscribe("emblem", this.selfUpdate);
         this.item.unsubscribe("mind", this.selfUpdate);
+        this.item.unsubscribe("color", this.selfUpdate);
         this.item.unsubscribe("typing", this.selfUpdate);
         this.item.unsubscribe("watching", this.selfUpdate);
     }
@@ -73,12 +74,14 @@ function centerByMargin(img) {
 
 IntendeeCell.prototype.show = function(item) {
     if (item !== this.item) {
+        if (this.item) this.hide();
         this.item = item;
         if (item.subscribe) {
             item.subscribe("nickname", this.selfUpdate);
             item.subscribe("icon", this.selfUpdate);
             item.subscribe("emblem", this.selfUpdate);
             item.subscribe("mind", this.selfUpdate);
+            item.subscribe("color", this.selfUpdate);
             item.subscribe("typing", this.selfUpdate);
             item.subscribe("watching", this.selfUpdate);
         }
@@ -92,13 +95,13 @@ IntendeeCell.prototype.show = function(item) {
 
     imgBoxURL(this.img, item.icon || this.defaultImg, 99, 133, centerByMargin);
     this.emblem.src = item.emblem || this.defaultEmblem;
-    var desc = item.nickname  || this.defaultDesc;
+    var desc = item.nickname || this.defaultDesc;
     if (item.away)
         desc += " <small><br/>(away)</small>";
     else if (item.watching || item.typing)
-        desc += " <small><br/>" + ( item.typing ? " typing" : "" ) + ( item.watching ? " watching" : "") + "</small>";
+        desc += " <small><br/>" + ( item.typing ? " typing" : ( item.watching ? " watching" : "") ) + "</small>";
     // this.desc.style.height = item.mind ? "90px" : "60px";
-    if (item.mind) desc += "<br/><quote>" + item.mind + "</quote>";
+    if (item.mind) desc += "<br/><quote style='color: " + item.color + "'>" + item.mind + "</quote>";
 
     this.desc.innerHTML = desc;
 };
@@ -153,8 +156,10 @@ MessageCell.prototype.hide = function() {
         this.item.unsubscribe("from", this.selfUpdate);
         this.item.unsubscribe("content", this.selfUpdate);
         this.item.unsubscribe("icon", this.selfUpdate);
+        this.item.unsubscribe("color", this.selfUpdate);
 
         if (this.item.intendee) this.item.intendee.unsubscribe("icon", this.selfUpdate);
+        if (this.item.intendee) this.item.intendee.unsubscribe("color", this.selfUpdate);
     }
     this.item = null;
     this.img.style.display = "none";
@@ -167,18 +172,24 @@ MessageCell.prototype.show = function(item) {
         item.intendee = item.from && Autobus.singleton.tagsonomy.getOr(item.from, null);
 
     if (item !== this.item) {
+        if (this.item) this.hide();
         this.item = item;
         if (item.subscribe) {
             item.subscribe("content", this.selfUpdate);
             item.subscribe("from", this.selfUpdate);
             item.subscribe("icon", this.selfUpdate);
+            item.subscribe("color", this.selfUpdate);
         }
-        if (item.intendee) item.intendee.subscribe("icon", this.selfUpdate);
+        if (item.intendee) {
+            item.intendee.subscribe("icon", this.selfUpdate);
+            item.intendee.subscribe("color", this.selfUpdate);
+        }
 
         this.img.style.display = "block";
         this.desc.style.display = "block";
     }
     this.img.src = item.icon || ( item.intendee && item.intendee.icon ) || this.defaultImg;
+    this.desc.style.color = item.color || ( item.intendee && item.intendee.color );
     this.desc.innerHTML = item.content || this.defaultDesc;
 
 };

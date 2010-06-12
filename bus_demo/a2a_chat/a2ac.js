@@ -94,6 +94,11 @@ var settings = {
     get: function(key, variable) {
         var c = this.current[key];
         return c ? c[variable] : c;
+    },
+
+    reset: function() {
+        this.current = {};
+        this.save();
     }
 };
 
@@ -147,6 +152,7 @@ Me.prototype.init = function() {
     this.subscribe("icon", this.onIcon);
     this.subscribe("mind", this.onMind);
     this.subscribe("emblem", this.onEmblem);
+    this.subscribe("color", this.onColor);
     this.subscribe("watching", this.onWorking);
     this.subscribe("typing", this.onWorking);
     this.doPing();
@@ -160,12 +166,13 @@ Me.prototype.init = function() {
         setTimeout(function() { self.autoConfig(); }, 3 * 1000);   
 };
 
-Me.prototype.postMessage = function(content, icon) {
+Me.prototype.postMessage = function(content, icon, color) {
     var msg = new BusAgent(autobus, agentUUID("m"), BusAgent.prototype.here);
     msg.sets({
             tags: ["message", "messageOf" + this.name],
                 from: this.name,
                 icon: icon,
+                color: color,
                 //to: otherIntendee,
                 content: content,
                 timestamp: 1 + this.ping
@@ -200,6 +207,10 @@ Me.prototype.onEmblem = function(variable, value) {
     settings.set(this.profileId, "emblem", value);
 };
 
+Me.prototype.onColor = function(variable, value) {
+    settings.set(this.profileId, "color", value);
+};
+
 Me.prototype.onWorking = function(variable, value) {
     if (this.awayTimeout !== undefined) {
         clearTimeout(this.awayTimeout);
@@ -218,12 +229,14 @@ Me.prototype.setProfileId = function(profileId) {
     var nickname = settings.get(profileId, "nickname") || profileId,
         icon = settings.get(profileId, "icon") || "./images/guest.gif",
         mind = settings.get(profileId, "mind") || "what's the?",
-        emblem = settings.get(profileId, "emblem");
+        emblem = settings.get(profileId, "emblem"),
+        color = settings.get(profileId, "color") || "black";
 
     nickname &&  this.set("nickname", nickname);
     icon && this.set("icon", icon);
     mind && this.set("mind", mind);
     emblem && this.set("emblem", emblem);
+    color && this.set("color", color);
 };
 
 Me.prototype.autoConfig = function() {
@@ -237,7 +250,7 @@ Me.prototype.autoConfig = function() {
         names.push(intendees[i].nickname);
     
     // here is a default list of nickname
-    var lst = [ "red", "blue", "green", "purple", "orange", "pink", "gray", "guest" ];
+    var lst = [ "red", "blue", "green", "pink", "gray", "purple", "orange", "guest" ];
 
     // try to find a free nickname
     for (var l = lst.length, i = l - 1; i >= 0; i--) {

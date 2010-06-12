@@ -21,8 +21,8 @@ function contextFormAnimIterate() {
     return this.ratio <= 1;
 }
 
-function puts(msg, pic) {
-    chat2.revolutionOfMessages && chat2.revolutionOfMessages.unshift({"from": "code", "content": msg, "icon": pic});
+function puts(msg, pic, color) {
+    chat2.revolutionOfMessages && chat2.revolutionOfMessages.unshift({"from": "code", "content": msg, "icon": pic, "color": color || "purple"});
 }
 
 
@@ -36,6 +36,7 @@ var chat2 = {
     iTrap: new Trap(),
     mTrap: new Trap(),
     msgPic: null,
+    msgColor: null,
     incomingSound: null,
     leavingSound: null,
     speakingSound: null,
@@ -66,7 +67,7 @@ var chat2 = {
 
     onMessageSubmit: function() {
         var v = document.getElementById('messageBody');
-        a2ac.me.postMessage(v.value, chat2.msgPic);
+        a2ac.me.postMessage(v.value, chat2.msgPic, chat2.msgColor);
         v.value = "";
     },
 
@@ -95,14 +96,24 @@ var chat2 = {
         chat2.setMsgPic(null);
     },
 
+    onMeColor: function(variable, value) {
+        document.getElementById("meColor").value = value;
+        chat2.setMsgColor(null);
+    },
+
     setMsgPic: function(url) {
         chat2.msgPic = url;
         if (!url) url = a2ac.me.icon || "images/star.gif"; 
         document.getElementById("msgPicImg").src = url;
     },
 
+    setMsgColor: function(color) {
+        chat2.msgColor = color;
+        if (!color) color = a2ac.me.color; 
+    },
+
     updateForm: function(variable, value) {
-        var t = { "nickname": "iName", "icon": "iPic", "emblem": "iEmblem", "mind": "iMind", "from": "mFrom", "date": "mDate" } ;
+        var t = { "nickname": "iName", "icon": "iPic", "emblem": "iEmblem", "mind": "iMind", "color": "iColor", "from": "mFrom", "date": "mDate" } ;
         var id = t[variable];
         if (!id) return;
         document.getElementById(id).value = value;
@@ -125,6 +136,7 @@ var chat2 = {
                 chat2.context.unsubscribe("icon", chat2.updateForm);
                 chat2.context.unsubscribe("mind", chat2.updateForm);
                 chat2.context.unsubscribe("emblem", chat2.updateForm);
+                chat2.context.unsubscribe("color", chat2.updateForm);
                 chat2.context = null;
             } else if (char2.context.content !== undefined) {
                 chat2.context.unsubscribe("content", chat2.updateForm);
@@ -150,6 +162,7 @@ var chat2 = {
             e.item.subscribeSync("icon", chat2.updateForm);
             e.item.subscribeSync("mind", chat2.updateForm);
             e.item.subscribeSync("emblem", chat2.updateForm);
+            e.item.subscribeSync("color", chat2.updateForm);
             chat2.context = e.item;
         } else if (targetForm == "mPropsForm") {
             e.item.subscribeSync("from", chat2.updateForm);
@@ -188,6 +201,7 @@ var chat2 = {
         a2ac.me.set('emblem', document.getElementById('meEmblem').value);
         a2ac.me.set('mind', document.getElementById('meMind').value);
         a2ac.me.set('icon', document.getElementById('mePic').value);
+        a2ac.me.set('color', document.getElementById('meColor').value);
         chat2.showContextForm(null);
     },
 
@@ -241,9 +255,9 @@ var chat2 = {
         }
 
         document.getElementById("intendeesBack").onmousedown = function() { chat2.revolutionOfIntendees.friction = -0.2; chat2.revolutionOfIntendees.resume(); };
-        document.getElementById("intendeesBack").onmouseup = function() { chat2.revolutionOfIntendees.friction = null; };
+        document.getElementById("intendeesBack").onmouseup = document.getElementById("intendeesBack").onmouseout = function() { chat2.revolutionOfIntendees.friction = null; };
         document.getElementById("intendeesForward").onmousedown = function() { chat2.revolutionOfIntendees.friction = 0.2; chat2.revolutionOfIntendees.resume(); };
-        document.getElementById("intendeesForward").onmouseup = function() { chat2.revolutionOfIntendees.friction = null; };
+        document.getElementById("intendeesForward").onmouseup = document.getElementById("intendeesForward").onmouseout = function() { chat2.revolutionOfIntendees.friction = null; };
  
         document.getElementById("meProfileId").onblur = function() { a2ac.me.setProfileId(this.value); }
  
@@ -256,7 +270,7 @@ var chat2 = {
         input.onkeyup = function() { a2ac.me.typingActivity.set(false); };
         var defaultValue = input.value;
         input.style.color = "gray";
-        input.onfocus = function() { if (this.value == defaultValue) { this.value=''; this.style.color = "#AAA"; this.style.textShadow = "0 1px 0.05em #000, 0 -1px 0.05em #000"} };
+        input.onfocus = function() { if (this.value == defaultValue) { this.value=''; this.style.color = a2ac.me.color; this.style.textShadow = "0 1px 0.05em #000, 0 -1px 0.05em #000"} };
         input.onblur = function() { if (!this.value.length) { this.value = defaultValue; this.style.color = "gray"; this.style.textShadow = ""; } };
         a2ac.init();
 
@@ -265,6 +279,7 @@ var chat2 = {
         a2ac.me.subscribeSync("icon", chat2.onMeIcon);
         a2ac.me.subscribeSync("mind", chat2.onMeMind);
         a2ac.me.subscribeSync("emblem", chat2.onMeEmblem);
+        a2ac.me.subscribeSync("color", chat2.onMeColor);
     },
 
     finalize: function() {
