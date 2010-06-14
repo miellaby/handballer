@@ -72,7 +72,16 @@ var chat2 = {
     },
 
     onMeProfileId: function(variable, value) {
-        document.getElementById("meProfileId").value = value;
+        var s = document.getElementById("meProfileId");
+        var ot = s.options;
+        s.value = value;            
+//         for (var i = 0; i < ot.length && ot[i].text != value; i++);
+//         if (i < ot.length)
+//             s.selectedIndex = i;
+//         else {
+//             s.add(new Option(value, value));
+//             s.selectedIndex = ot.length;
+//         }
     },
 
 
@@ -82,7 +91,7 @@ var chat2 = {
 
     onMeIcon: function(variable, value) {
         document.getElementById("mePic").value = value;
-        imgBoxURL(document.getElementById("mePicImg"), value, 100, 150);
+        imgBoxURL(document.getElementById("mePicImg"), value, 99, 133);
         chat2.setMsgPic(null);
     },
 
@@ -109,7 +118,6 @@ var chat2 = {
 
     setMsgColor: function(color) {
         chat2.msgColor = color;
-        if (!color) color = a2ac.me.color; 
     },
 
     updateForm: function(variable, value) {
@@ -118,7 +126,7 @@ var chat2 = {
         if (!id) return;
         document.getElementById(id).value = value;
         if (id == 'iPic')
-            imgBoxURL(document.getElementById("iPicImg"), value, 100, 150);
+            imgBoxURL(document.getElementById("iPicImg"), value, 99, 133);
         if (id == 'iEmblem')
             document.getElementById("iEmblemImg").src = value;
     },
@@ -192,7 +200,8 @@ var chat2 = {
     },
 
     submitContextForm: function(e) {
-        var profileId = document.getElementById('meProfileId').value;
+        var s = document.getElementById('meProfileId');
+        var profileId = s.options[s.selectedIndex].text;
         if (a2ac.me.get("profileId") != profileId) {
             a2ac.me.setProfileId(profileId);
             return;
@@ -259,20 +268,50 @@ var chat2 = {
         document.getElementById("intendeesForward").onmousedown = function() { chat2.revolutionOfIntendees.friction = 0.2; chat2.revolutionOfIntendees.resume(); };
         document.getElementById("intendeesForward").onmouseup = document.getElementById("intendeesForward").onmouseout = function() { chat2.revolutionOfIntendees.friction = null; };
  
-        document.getElementById("meProfileId").onblur = function() { a2ac.me.setProfileId(this.value); }
+        document.getElementById("meProfileId").onchange = function() { a2ac.me.setProfileId(this.options[this.selectedIndex].value); }
  
         document.body.onmouseover = function() { a2ac.me.watchingActivity.set(true); };
         document.body.onmouseout = function() { a2ac.me.watchingActivity.set(false); };
         window.onfocus = function() { a2ac.me.typingActivity.set(true); a2ac.me.typingActivity.set(false); };
         window.onblur = function() { a2ac.me.typingActivity.set(false); };
+
         var input = document.getElementById("messageBody");
-        input.onkeydown = function() { a2ac.me.typingActivity.set(true); };
-        input.onkeyup = function() { a2ac.me.typingActivity.set(false); };
+        input.onkeydown = function() {
+            a2ac.me.typingActivity.set(true);
+        };
+        input.onkeyup = function() {
+            a2ac.me.typingActivity.set(false);
+        };
         var defaultValue = input.value;
-        input.style.color = "gray";
-        input.onfocus = function() { if (this.value == defaultValue) { this.value=''; this.style.color = a2ac.me.color; this.style.textShadow = "0 1px 0.05em #000, 0 -1px 0.05em #000"} };
-        input.onblur = function() { if (!this.value.length) { this.value = defaultValue; this.style.color = "gray"; this.style.textShadow = ""; } };
+        input.value = '';
+
+        input.onfocus = function() {
+            if (this.value == defaultValue) {
+                this.value='';
+                this.style.color = a2ac.me.color;
+                this.style.textShadow = "0 1px 0.5px #000, 0 -1px 0.5px #000"
+            }
+        };
+        input.onblur = function() {
+            if (!this.value.length) {
+                this.value = defaultValue;
+                this.style.color = "gray";
+                this.style.textShadow = "0 1px 10px #000, 0 -1px 0.05px #000";
+            }
+        };
+        input.onblur();
+
         a2ac.init();
+
+        var s = document.getElementById("meProfileId");
+        for (var k in settings.current) {
+            if (!k) continue;
+            if (!settings.current.hasOwnProperty(k)) continue;
+            var o = document.createElement("option");
+            o.value = k;
+            o.text = k;
+            s.options.add(o);
+        }
 
         a2ac.me.subscribeSync("profileId", chat2.onMeProfileId);
         a2ac.me.subscribeSync("nickname", chat2.onMeNickname);

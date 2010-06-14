@@ -189,7 +189,7 @@ PubSubAgent.prototype.forget = function() {
 
 PubSubAgent.prototype.status = function() {
   var pic = {};
-  for (p in this) {
+  for (var p in this) {
     if (typeof this[p] == "function" || !this.cbList[p]) continue;
     pic[p] = this[p];
   }
