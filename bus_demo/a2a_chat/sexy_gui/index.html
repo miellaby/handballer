@@ -8,7 +8,7 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Bitstream Vera Sans','sans';
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
     background-color: transparent;
     overflow: hidden;
 }
@@ -25,9 +25,10 @@ button:hover{
 }
 
 label {
+    /* margin-top:-0.5em; */
     margin-right: 100%;
     float: right;
-    line-height:1.5em;
+    line-height:2em;
     height:1px;
 }
 
@@ -36,13 +37,14 @@ form p {
     clear:right;
 }
 
-input {
+input, textarea, select {
     border: 1px solid #000;
     padding: 2px 1px 3px 1px;
     margin: 0 0 3px 1px;
     -moz-border-radius:4px;
     -webkit-border-radius:4px;
     border-radius:4px;
+    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
     background-color:#FFF;
 }
 
@@ -175,7 +177,7 @@ input {
     -moz-border-radius:20px;
     -webkit-border-radius:20px;
     position:absolute;
-    width:400px;
+    width:500px;
     right:5px;
     top:100px;
     z-index:40;
@@ -189,6 +191,18 @@ input {
 #mePicDiv {
  float: left;
 }
+
+#meEmblemDiv {
+ position: absolute;
+ top: 5px;
+ left: 5px;
+}
+
+#meEmblemImg {
+  width: 32px;
+  height: 32px;
+}
+
 
 #iPicDiv {
  float: left;
@@ -261,6 +275,8 @@ input {
   padding:0;
   border:0;
   height:100%;
+  line-height:2em;
+  font-family: Tahoma, Arial, Helvetica, sans-serif;
 }
 
 
@@ -338,25 +354,27 @@ input {
   <div id="contextForm" style="display:none;">
     <button style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);"><img src="images/cross.png"/></button>
     <form id="mePropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
-      <!-- the div / table hereafter aims to facilate conservative ratio re-dimensionning -->
+      <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
       <div id="mePicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="mePicImg" src="images/blank.gif"/></td></tr></table></div>
+      <h2>My properties</h2>
       <p><label for="meProfileId">profile&nbsp;ID&nbsp;</label>
-        <input type="text" id="meProfileId" value="" style=""></p>
-      <p><label for="meNickname">nick&nbsp;</label>
+        <select id="meProfileId"><option value="#NEW#">New ...</option></select>
+        <input type="text" id="meNewProfileId" value="" style="display:none;">
+      </p>
+      <p><label for="meNickname">nickname&nbsp;</label>
         <input type="text" id="meNickname" value="" style=""></p>
-      <p><label for="mePic">pic&nbsp;</label>
+      <p><label for="mePic">picture&nbsp;</label>
         <input type="text" id="mePic" value="" style=""></p>
       <p><label for="meMind">mind&nbsp;</label>
         <input type="text" id="meMind" value=""></p>
       <p><label for="meEmblem">emblem&nbsp;</label>
-        <img id="meEmblemImg" src="images/blank.gif" style="width: 32px; height: 32px;"/>&nbsp;<input type="text" id="meEmblem" value="">
-      </p>
+        <input type="text" id="meEmblem" value="">&nbsp;<div id="meEmblemDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="meEmblemImg" src="images/blank.gif"/ </td></tr></table></div></p>
       <p><label for="meColor">color&nbsp;</label>
         <input type="text" id="meColor" value="" style=""></p>
       <button style="float: right; margin-right: 10px;" onclick="javascript:chat2.submitContextForm();">Submit</button>&nbsp;
     </form>
     <form id ="iPropsForm" class="ContextForm" action="null">
-      <!-- the div / table hereafter aims to facilate conservative ratio re-dimensionning -->
+      <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
       <div id="iPicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="iPicImg" src="images/blank.gif"/></td></tr></table></div>
       <p><label for="iName">nick&nbsp;</label>
         <input type="text" readonly="readonly" id="iName" value="" style=""></p>
@@ -365,7 +383,7 @@ input {
       <p><label for="iMind">mind&nbsp;</label>
         <input type="text" readonly="readonly" id="iMind" value=""></p>
       <p><label for="iEmblem">emblem&nbsp;</label>
-        <img id="iEmblemImg" src="images/blank.gif" style="width: 32px; height: 32px;"/>&nbsp;<input type="text" id="iEmblem" readonly="readonly" value="">
+        <input type="text" id="iEmblem" readonly="readonly" value="">&nbsp;<img id="iEmblemImg" src="images/blank.gif" style="width: 32px; height: 32px;"/></p>
       <p><label for="iColor">color&nbsp;</label>
         <input type="text" readonly="readonly" id="iColor" value=""></p>
     </form>
@@ -380,7 +398,7 @@ input {
   <div id="postLayer"></div>
   <form id="postForm" action="javascript:chat2.onMessageSubmit();">
     <div id="messageBodyDiv"><input id="messageBody" autocomplete="off" value="*type a message here*" /></div>
-    <!-- the div / table hereafter aims to facilate conservative ratio re-dimensionning -->
+    <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
     <div id="msgPicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="msgPicImg" src="images/blank.gif"/ </td></tr></table></div>
         
     <button type="submit" style="display:none;">submit</button>
