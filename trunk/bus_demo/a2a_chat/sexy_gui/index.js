@@ -74,7 +74,14 @@ var chat2 = {
     onMeProfileId: function(variable, value) {
         var s = document.getElementById("meProfileId");
         var ot = s.options;
-        s.value = value;            
+        s.value = value;
+        if (s.selectedIndex <= 0) {
+            var o = document.createElement("option");
+            o.value = value;
+            o.text = value;
+            s.options.add(o);
+            s.value = value;
+        }
 //         for (var i = 0; i < ot.length && ot[i].text != value; i++);
 //         if (i < ot.length)
 //             s.selectedIndex = i;
@@ -118,6 +125,20 @@ var chat2 = {
 
     setMsgColor: function(color) {
         chat2.msgColor = color;
+    },
+
+    resetProfileList: function() {
+        var p = a2ac.me.profileId, s = document.getElementById("meProfileId");
+        s.options.length = 1;
+        for (var k in settings.current) {
+            if (!k) continue;
+            if (!settings.current.hasOwnProperty(k)) continue;
+            var o = document.createElement("option");
+            o.value = k;
+            o.text = k;
+            s.options.add(o);
+            if (k == p) s.selectedIndex = s.options.length - 1;
+        }
     },
 
     updateForm: function(variable, value) {
@@ -200,8 +221,12 @@ var chat2 = {
     },
 
     submitContextForm: function(e) {
-        var s = document.getElementById('meProfileId');
-        var profileId = s.options[s.selectedIndex].text;
+        var s = document.getElementById('meProfileId'), profileId;
+        if (s.style.display != 'none') {
+            profileId = s.options[s.selectedIndex].text;
+        } else {
+            profileId = document.getElementById('meNewProfileId').value;
+        }
         if (a2ac.me.get("profileId") != profileId) {
             a2ac.me.setProfileId(profileId);
             return;
@@ -267,8 +292,24 @@ var chat2 = {
         document.getElementById("intendeesBack").onmouseup = document.getElementById("intendeesBack").onmouseout = function() { chat2.revolutionOfIntendees.friction = null; };
         document.getElementById("intendeesForward").onmousedown = function() { chat2.revolutionOfIntendees.friction = 0.2; chat2.revolutionOfIntendees.resume(); };
         document.getElementById("intendeesForward").onmouseup = document.getElementById("intendeesForward").onmouseout = function() { chat2.revolutionOfIntendees.friction = null; };
- 
-        document.getElementById("meProfileId").onchange = function() { a2ac.me.setProfileId(this.options[this.selectedIndex].value); }
+        document.getElementById("meNewProfileId").onblur = function() {
+                a2ac.me.setProfileId(this.value);
+                this.style.display = 'none';
+                var s = document.getElementById("meProfileId");
+                s.style.display = "inline";
+        }
+        document.getElementById("meProfileId").onchange = function() {
+            if (this.selectedIndex <= 0) {
+                this.style.display = 'none';
+                var i = document.getElementById("meNewProfileId");
+                i.style.display = "inline";
+                i.value = "my new profile";
+                i.focus();
+                
+                
+            } else
+                a2ac.me.setProfileId(this.options[this.selectedIndex].value);
+        }
  
         document.body.onmouseover = function() { a2ac.me.watchingActivity.set(true); };
         document.body.onmouseout = function() { a2ac.me.watchingActivity.set(false); };
@@ -302,17 +343,7 @@ var chat2 = {
         input.onblur();
 
         a2ac.init();
-
-        var s = document.getElementById("meProfileId");
-        for (var k in settings.current) {
-            if (!k) continue;
-            if (!settings.current.hasOwnProperty(k)) continue;
-            var o = document.createElement("option");
-            o.value = k;
-            o.text = k;
-            s.options.add(o);
-        }
-
+        chat2.resetProfileList();
         a2ac.me.subscribeSync("profileId", chat2.onMeProfileId);
         a2ac.me.subscribeSync("nickname", chat2.onMeNickname);
         a2ac.me.subscribeSync("icon", chat2.onMeIcon);
@@ -323,6 +354,11 @@ var chat2 = {
 
     finalize: function() {
         a2ac.finalize();
+    },
+    
+    reset: function() {
+        a2ac.reset();
+        chat2.resetProfileList();
     },
 
     hide: function(value) {
