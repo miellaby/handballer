@@ -97,8 +97,8 @@ var settings = {
     },
 
     reset: function() {
-        this.current = {};
-        this.save();
+        this.current = this.initial;
+        this.doSave();
     }
 };
 
@@ -226,11 +226,11 @@ Me.prototype.onWorking = function(variable, value) {
 
 Me.prototype.setProfileId = function(profileId) {
     this.set("profileId", profileId);
-    var nickname = settings.get(profileId, "nickname") || profileId,
-        icon = settings.get(profileId, "icon") || "./images/guest.gif",
-        mind = settings.get(profileId, "mind") || "what's the?",
+    var nickname = settings.get(profileId, "nickname"),
+        icon = settings.get(profileId, "icon"),
+        mind = settings.get(profileId, "mind"),
         emblem = settings.get(profileId, "emblem"),
-        color = settings.get(profileId, "color") || "black";
+        color = settings.get(profileId, "color");
 
     nickname &&  this.set("nickname", nickname);
     icon && this.set("icon", icon);
@@ -346,6 +346,12 @@ var a2ac = {
     finalize: function() {
         a2ac.me.forget();
         a2ac.me.tell();
+    },
+
+    reset: function() {
+        settings.reset();
+        cookies.set("a2ac_profileId", "");
+        a2ac.me.autoConfig();
     }
 };
 

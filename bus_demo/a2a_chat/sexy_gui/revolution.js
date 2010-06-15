@@ -115,7 +115,7 @@ Revolution.prototype.computeSpeed = function() {
             if (this.speed > 0.2) this.speed = 0.2;
         }
         this.motion = true;
-    } else if (!this.donuts && this.nbItem && this.n > this.nbItem - 1) {
+    } else if (!this.donuts && this.nbItem && this.n >= this.nbItem - 1) {
         if (this.speed > -0.2) {
             this.speed -= (this.n - this.nbItem) * 0.1;
             if (this.speed < -0.2) this.speed = -0.2;
@@ -123,7 +123,7 @@ Revolution.prototype.computeSpeed = function() {
         this.motion = true;
     } else {
         var a = Math.abs(this.speed); 
-        if (a > 0.1) {
+        if (a > 0.2) {
             this.speed *= 0.8; // slowing quick
             this.motion = true;
         } else { // notch motion
