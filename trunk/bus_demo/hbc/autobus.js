@@ -12,10 +12,23 @@ function Autobus(agora, hbc) {
 
 Autobus.singleton = null;
 
+
+// Bus agent factory,
+// If the named agent already exists, one returns it without creating a second copy.
+Autobus.prototype.busAgent = function(name, location, recipient) {
+    var e = this.tagsonomy.getOr(name, null);
+    if (e) { // if the agent exists both here and there, one takes note of it
+        if (location == e.HERE && e.location == e.THERE ||
+            location == e.THERE && e.location == e.HERE)
+            e.location = e.BOTH;
+        return e;
+    }
+    return new BusAgent(this, name, location, recipient);
+}
+
 Autobus.prototype.callback = function(label, body) {
    var obj = null ;
    var variable = null ;
-   var command = null ;
    var id = null ;
 
    if (this.agora)
@@ -29,22 +42,27 @@ Autobus.prototype.callback = function(label, body) {
    if (label.substring(0,6)== "freed/") {
       var agentName = label.substring(6);
       obj = this.tagsonomy.getOr(agentName,null);
-      if (obj && obj.there()) obj.forget();
+      if (obj) {
+          if (!obj.here())
+              obj.forget(); // really there (not both)
+          else
+              obj.status(); // one won't let people believe there is no more copy 
+      }
       return;
    }
 
    if (label.substring(0,8)== "control/") {
       var slashIdx = label.indexOf("/",8);
       var slash2Idx = label.indexOf("/", slashIdx+1);
-      var agentName = label.substring(8, slashIdx);
-      var command=null, parameter=null;
+      var who = label.substring(8, slashIdx);
+      var command = null, parameter = null;
       if (slash2Idx!=-1) {
         command = label.substring(slashIdx + 1, slash2Idx);
         parameter = label.substr(1 + slash2Idx);
       } else {
         command = label.substring(slashIdx + 1);
       }
-      var agents = this.tagsonomy.getOr(agentName, []);
+      var agents = this.tagsonomy.getOr(who, []);
       if (!agents.indexOf) agents = [agents];
       for (var lst = agents, l = lst.length, i = 0; i < l; i++) {
         var obj = lst[i];
@@ -65,11 +83,7 @@ Autobus.prototype.callback = function(label, body) {
       var agentName = slashIdx != -1 ? label.substring(6, slashIdx) : label.substring(6);
       var slot = slashIdx != -1 ? label.substring(slashIdx + 1) : undefined;
       
-      obj = this.tagsonomy.getOr(agentName,null);
-
-      if (!obj) {
-         obj = new BusAgent(this, agentName, BusAgent.prototype.there);
-      }
+      obj = this.busAgent(agentName, BusAgent.prototype.THERE);
  
       if (obj.there()) {
          if (slot)
@@ -79,8 +93,8 @@ Autobus.prototype.callback = function(label, body) {
       } 
 
    } else if (label.substring(0,7) == "status/") {
-      var agentName = label.substring(7);
-      var agents = this.tagsonomy.getOr(agentName, []);
+      var who = label.substring(7);
+      var agents = this.tagsonomy.getOr(who, []);
       if (!agents.indexOf) agents = [agents];
 
       for (var lst = agents, l = lst.length, i = 0; i < l; i++) {

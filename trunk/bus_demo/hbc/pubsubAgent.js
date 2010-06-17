@@ -83,10 +83,10 @@ PubSubAgent.prototype.set_and_fire = function(attribut, value) {
 
   if (attribut == "name" && oldValue != value) {
     if (oldValue) {
-       this.tagsonomy.set(oldValue, undefined);
-       this.setTags();
+       this.tagsonomy.set(oldValue, undefined); // current key removed
+       if (!value) this.setTags(); // no new key ==> forgotten objected
     }
-    if (value)    this.tagsonomy.set(value, this);
+    if (value)    this.tagsonomy.set(value, this); // name = key
   }
 
   if (attribut == "tags") {
@@ -109,7 +109,7 @@ PubSubAgent.prototype.set_and_fire = function(attribut, value) {
 
 PubSubAgent.prototype.get = function(attribut) { return this[attribut]; };
 
-PubSubAgent.prototype.getOr = function(attribut, defaultValue) { return (this[attribut] == undefined ? defaultValue : this[attribut]); };
+PubSubAgent.prototype.getOr = function(attribut, defaultValue) { return (this[attribut] === undefined ? defaultValue : this[attribut]); };
 
 PubSubAgent.prototype.setted = function(attribut, newValue) {
   if (newValue == this[attribut])
