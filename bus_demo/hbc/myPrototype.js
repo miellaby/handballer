@@ -1,5 +1,5 @@
 // console
-if (typeof console != "object") { var console = { log: function() {} }; };
+// if (typeof console != "object") { var console = { log: function() {} }; };
 
 
 // occurences removal helper
@@ -15,7 +15,7 @@ if (Array.prototype.remove === undefined) {
 
 function getURLParameters(a) {
     a = a || window.location.href;
-    var params = {};
+    var results, params = {};
     var regex = /[\?&]([^=]+)=([^&]*)/g;
 	while( ( results = regex.exec( a ) ) != null )
 		params[results[1]] = results[2];

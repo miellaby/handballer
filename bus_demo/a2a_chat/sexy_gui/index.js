@@ -240,6 +240,7 @@ var chat2 = {
     },
 
     init: function() {
+        if (typeof console != "object") { var console = { log: function() {} }; };
 
         var a2acAgora = getURLParameterByName("agora"),
             back = getURLParameterByName("back");

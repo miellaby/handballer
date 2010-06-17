@@ -111,13 +111,13 @@ Revolution.prototype.computeSpeed = function() {
         this.motion = true;
     } else if (!this.donuts && this.pos < -0.5) {
         if (this.speed < 0.2) {
-            this.speed -= this.pos * 0.1;
+            this.speed -= this.pos * 0.02;
             if (this.speed > 0.2) this.speed = 0.2;
         }
         this.motion = true;
-    } else if (!this.donuts && this.nbItem && this.n >= this.nbItem - 1) {
+    } else if (!this.donuts && this.nbItem && this.pos > this.nbItem - 0.5) {
         if (this.speed > -0.2) {
-            this.speed -= (this.n - this.nbItem) * 0.1;
+            this.speed -= (this.pos - this.nbItem) * 0.02;
             if (this.speed < -0.2) this.speed = -0.2;
         }
         this.motion = true;

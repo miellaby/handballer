@@ -14,10 +14,10 @@ function BusAgent(autobus, name, location, recipient) {
 
   this.recipient = recipient ? (recipient.abccli || this.autobus.agora) : this.autobus.agora;
 
-  if ((location === BusAgent.prototype.here || location === BusAgent.prototype.both) && autobus.agora)
+  if ((location == BusAgent.prototype.HERE || location == BusAgent.prototype.BOTH) && autobus.agora)
       this.setted("abcli", autobus.hbc.token + autobus.hbc.clientId);
 
-  this.location = (location === undefined ? BusAgent.prototype.there : location);
+  this.location = (location === undefined ? BusAgent.prototype.THERE : location);
 
   if (this.here()) {
       if (this.tagsonomy && name)
@@ -27,16 +27,16 @@ function BusAgent(autobus, name, location, recipient) {
 
 BusAgent.prototype = new PubSubAgent();
 BusAgent.prototype.constructor = BusAgent;
-BusAgent.prototype.here = 1;
-BusAgent.prototype.there = 2;
-BusAgent.prototype.both = 3;
+BusAgent.prototype.HERE = 1; // means: local agent. Its changes are advertised via the bus. 
+BusAgent.prototype.THERE = 2; // mean: proxified agent. Actions are translated into bus messages.
+BusAgent.prototype.BOTH = 3; // means: local agent but 1/more copies may be on the bus as well.
 
 BusAgent.prototype.here = function() {
-   return this.location !== undefined && this.location !== BusAgent.prototype.there;
+   return this.location !== undefined && this.location !== BusAgent.prototype.THERE;
 };
 
 BusAgent.prototype.there = function() {
-   return this.location !== BusAgent.prototype.here;
+   return this.location !== BusAgent.prototype.HERE;
 };
 
 BusAgent.prototype.setted = function(variable, newValue) { 
@@ -93,10 +93,8 @@ BusAgent.prototype.tell = function() {
        this.autobus.hbc.send(toTell.recipient + "model/" + this.autobus.toTellName, jsonize(this.autobus.delta));
 
        if (!toTell.name)
-          this.autobus.hbc.sendNow(toTell.recipient + "freed/" + this.autobus.toTellName);
-    }
-    
-    if (toTell.there()) {
+           this.autobus.hbc.sendNow(toTell.recipient + "freed/" + this.autobus.toTellName, null);
+    } else {
        this.autobus.hbc.send((toTell.abcli ? toTell.abcli : this.autobus.agora) + "control/" + this.autobus.toTellName + "/set", jsonize(this.autobus.delta));
     }
     this.autobus.delta = {};

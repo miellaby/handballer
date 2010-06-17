@@ -7,7 +7,7 @@ var autobus = new Autobus();
 // helpers
 // ======================================================================
 function log(msg) {
-    console.log(msg);
+    window.console && console.log(msg);
     //puts(msg);
 }
 
@@ -134,8 +134,8 @@ Activity.prototype.set = function(value) {
 // Me object, a bus agent representing a local user (you actually!)
 // ======================================================================
 
-function Me() {
-    BusAgent.call(this, autobus, agentUUID("i"), BusAgent.prototype.here);
+function Me(uid) {
+    BusAgent.call(this, autobus, uid, BusAgent.prototype.HERE);
     this.setTags("intendee");
     this.ping = 0;
     this.awayTimeout = undefined;
@@ -146,7 +146,7 @@ function Me() {
 
 Me.prototype = new BusAgent();
 
-Me.prototype.init = function() {
+Me.prototype.init = function(profileId) {
     this.subscribe("profileId", this.onProfileId);
     this.subscribe("nickname", this.onNickname);
     this.subscribe("icon", this.onIcon);
@@ -159,15 +159,14 @@ Me.prototype.init = function() {
     var self = this;
     setInterval(function() { self.doPing() }, 60 * 2 * 1000 - 30 * Math.random() * 1000);
 
-    var profileId = cookies.get("a2ac_profileId");
-    if (profileId)
+    if (profileId) {
         this.setProfileId(profileId);
-    else // wait for few seconds to detect remote intendees and auto-configure
+    } else // wait for few seconds to detect remote intendees and auto-configure
         setTimeout(function() { self.autoConfig(); }, 3 * 1000);   
 };
 
 Me.prototype.postMessage = function(content, icon, color) {
-    var msg = new BusAgent(autobus, agentUUID("m"), BusAgent.prototype.here);
+    var msg = new BusAgent(autobus, agentUUID("m"), BusAgent.prototype.HERE);
     msg.sets({
             tags: ["message", "messageOf" + this.name],
                 from: this.name,
@@ -188,7 +187,7 @@ Me.prototype.doPing = function() {
 Me.prototype.onProfileId = function(variable, value) {
     var expire = new Date();
     expire.setTime(expire.getTime() + 3600 * 24 * 1000 * 30);
-    cookies.set("a2ac_profileId", value, expire);
+    cookies.set("a2ac_id", this.name + "+" + value, expire);
 }
 
 Me.prototype.onNickname = function(variable, value) {
@@ -240,7 +239,7 @@ Me.prototype.setProfileId = function(profileId) {
 };
 
 Me.prototype.autoConfig = function() {
-    var profileId = cookies.get("a2ac_profileId");
+    var profileId = cookies.get("a2ac_id");
     if (profileId) return; // already a non default settings
 
     // list known intendees names
@@ -336,9 +335,13 @@ var a2ac = {
         autobus.tagsonomy.subscribe("intendee", a2ac.onIntendeesSplice);
         autobus.tagsonomy.subscribe("message", a2ac.onMessagesSplice);
         autobus.init();
-
-        a2ac.me = new Me();
-        a2ac.me.init();
+        
+        var uIDnProf = cookies.get("a2ac_id");
+        var t = uIDnProf ? uIDnProf.split("+") : [];
+        var meUID = t.length ? t[0] : agentUUID("i");
+        var profileID = t.length > 1 ? t[1] : null;
+        a2ac.me = new Me(meUID);
+        a2ac.me.init(profileID);
 
         setInterval(a2ac.cleanGone, 60 * 2 * 1000);
     },
@@ -350,7 +353,8 @@ var a2ac = {
 
     reset: function() {
         settings.reset();
-        cookies.set("a2ac_profileId", "");
+        cookies.set("a2ac_id", "");
+        a2ac.me.set('name', agentUUID("i"));
         a2ac.me.autoConfig();
     }
 };
