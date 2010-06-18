@@ -43,6 +43,18 @@ var default_profiles = {
         icon: "./images/pink.gif",
         mind: "groovy",
         color: "pink"
+    },
+    purple: {
+        nickname: "purple",
+        icon: "./images/purple.gif",
+        mind: "zen",
+        color: "purple"
+    },
+    orange: {
+        nickname: "orange",
+        icon: "./images/orange.gif",
+        mind: "zen",
+        color: "open"
     }
 };
 
@@ -249,7 +261,7 @@ Me.prototype.autoConfig = function() {
         names.push(intendees[i].nickname);
     
     // here is a default list of nickname
-    var lst = [ "red", "blue", "green", "pink", "gray", "purple", "orange", "guest" ];
+    var lst = [ "red", "blue", "green", "pink", "purple", "orange", "guest" ];
 
     // try to find a free nickname
     for (var l = lst.length, i = l - 1; i >= 0; i--) {

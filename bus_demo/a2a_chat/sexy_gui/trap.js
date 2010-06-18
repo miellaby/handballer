@@ -64,7 +64,7 @@ Trap.prototype.bind = function(element) {
    element.onselectstart = function() { return false;}
    element.unselectable = "on";
    element.style.MozUserSelect = "none";
-   element.style.cursor = "default";
+   element.style.cursor = "pointer";
    element.style.display = "none";
 }
 
