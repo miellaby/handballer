@@ -15,7 +15,7 @@ function IntendeeCell(area) {
     area.appendChild(this.emblem);
 
     var self =this;
-    this.selfUpdate = function() { self.show(self.item); };
+    this.selfUpdate = function(name, value) { self.show(self.item, name); };
     this.img.onclick = function () { self.onClick(); } ;
     this.desc.onclick = function () { self.onClick(); } ;
     chat2.iTrap.bindTarget(this.img);
@@ -30,7 +30,7 @@ IntendeeCell.prototype.height = 130;
 
 IntendeeCell.prototype.defaultImg = "./images/guest.gif";
 
-IntendeeCell.prototype.defaultDesc = "???";
+IntendeeCell.prototype.defaultName = "...";
 
 IntendeeCell.prototype.defaultEmblem = "./images/blank.gif";
 
@@ -49,21 +49,26 @@ IntendeeCell.prototype.getOpeningSize = function(area) {
     return area.clientWidth / IntendeeCell.prototype.gap;
 }
 
-IntendeeCell.prototype.hide = function() {
-    if (!this.item) return;
+IntendeeCell.prototype.unbind = function() {
     if (this.item.unsubscribe) {
         this.item.unsubscribe("icon", this.selfUpdate);
         this.item.unsubscribe("nickname", this.selfUpdate);
         this.item.unsubscribe("emblem", this.selfUpdate);
         this.item.unsubscribe("mind", this.selfUpdate);
         this.item.unsubscribe("color", this.selfUpdate);
+        this.item.unsubscribe("away", this.selfUpdate);
         this.item.unsubscribe("typing", this.selfUpdate);
         this.item.unsubscribe("watching", this.selfUpdate);
     }
+};
+
+IntendeeCell.prototype.hide = function() {
+    if (!this.item) return;
+    this.unbind();
+    this.item = null;
     this.emblem.style.display = "none";
     this.img.style.display = "none";
     this.desc.style.display = "none";
-    this.item = null;
 };
 
 function centerByMargin(img) {
@@ -72,16 +77,17 @@ function centerByMargin(img) {
     s.marginTop =  (- parseInt(s.height) / 2) + "px";
 }
 
-IntendeeCell.prototype.show = function(item) {
+IntendeeCell.prototype.show = function(item, change) {
     if (item !== this.item) {
-        if (this.item) this.hide();
+        if (this.item) this.unbind();
         this.item = item;
         if (item.subscribe) {
-            item.subscribe("nickname", this.selfUpdate);
             item.subscribe("icon", this.selfUpdate);
+            item.subscribe("nickname", this.selfUpdate);
             item.subscribe("emblem", this.selfUpdate);
             item.subscribe("mind", this.selfUpdate);
             item.subscribe("color", this.selfUpdate);
+            item.subscribe("away", this.selfUpdate);
             item.subscribe("typing", this.selfUpdate);
             item.subscribe("watching", this.selfUpdate);
         }
@@ -92,18 +98,27 @@ IntendeeCell.prototype.show = function(item) {
         this.desc.style.fontStyle = (item === a2ac.me ? "italic" : "normal");
         this.desc.style.fontWeight = (item === a2ac.me ? "bold" : "normal");
     }
+    if (!change || change == "icon")
+        imgBoxURL(this.img, item.icon || this.defaultImg, 96, 130, centerByMargin);
+    if (!change || change == "emblem")
+        this.emblem.src = item.emblem || this.defaultEmblem;
 
-    imgBoxURL(this.img, item.icon || this.defaultImg, 99, 133, centerByMargin);
-    this.emblem.src = item.emblem || this.defaultEmblem;
-    var desc = item.nickname || this.defaultDesc;
-    if (item.away)
-        desc += " <small><br/>(away)</small>";
-    else if (item.watching || item.typing)
-        desc += " <small><br/>" + ( item.typing ? " typing" : ( item.watching ? " watching" : "") ) + "</small>";
-    // this.desc.style.height = item.mind ? "90px" : "60px";
-    if (item.mind) desc += "<br/><quote style='color: " + item.color + "'>" + item.mind + "</quote>";
+    if (!change || change != "icon" && change != "emblem") {
+        // change = nickname, desc, color, etc.
+        var desc = (item.nickname || this.defaultName);
+        
+        if (item.mind) desc += "<quote><br/>" + item.mind + "</quote>";
+        if (item.away)
+            desc += "<br/><small>(away)</small>";
+        else if (item.typing)
+            desc += "<br/><small>typing</small>";
+        else if (item.watching)
+            desc += "<br/><small>watching</small>";
+        // this.desc.style.height = item.mind ? "90px" : "60px";
 
-    this.desc.innerHTML = desc;
+        this.desc.innerHTML = desc;
+        this.desc.style.color = item.color;
+    }
 };
 
 // ======================================================================
@@ -118,7 +133,7 @@ function MessageCell(area) {
     this.desc.className += 'msgDesc';
 
     var self =this;
-    this.selfUpdate = function() { self.show(self.item); };
+    this.selfUpdate = function(name, value) { self.show(self.item, name); };
     this.img.onclick = function () { self.onClick(); } ;
     this.desc.onclick = function () { self.onClick(); } ;
     chat2.mTrap.bindTarget(this.img);
@@ -128,11 +143,11 @@ MessageCell.prototype = new ImgDescCell();
 MessageCell.prototype.constructor = MessageCell;
 
 
-MessageCell.prototype.gap = 43;
+MessageCell.prototype.gap = 53;
 
-MessageCell.prototype.defaultImg = "./images/star.gif";
+MessageCell.prototype.defaultImg = "./images/star.png";
 
-MessageCell.prototype.defaultDesc = "";
+MessageCell.prototype.defaultDesc = "...";
 
 
 MessageCell.prototype.setCoords = function(inFactor, x) {
@@ -150,33 +165,39 @@ MessageCell.prototype.getOpeningSize = function(area) {
     return (area === document.body ? window.innerHeight : area.clientHeight) / MessageCell.prototype.gap;
 }
 
-MessageCell.prototype.hide = function() {
-    if (!this.item) return;
+MessageCell.prototype.unbind = function() {
     if (this.item.unsubscribe) {
         this.item.unsubscribe("from", this.selfUpdate);
         this.item.unsubscribe("content", this.selfUpdate);
         this.item.unsubscribe("icon", this.selfUpdate);
         this.item.unsubscribe("color", this.selfUpdate);
 
-        if (this.item.intendee) this.item.intendee.unsubscribe("icon", this.selfUpdate);
-        if (this.item.intendee) this.item.intendee.unsubscribe("color", this.selfUpdate);
+        if (this.item.intendee) {
+            this.item.intendee.unsubscribe("icon", this.selfUpdate);
+            this.item.intendee.unsubscribe("color", this.selfUpdate);
+        }
     }
+}
+
+MessageCell.prototype.hide = function() {
+    if (!this.item) return;
+    this.unbind();
     this.item = null;
     this.img.style.display = "none";
     this.desc.style.display = "none";
 };
 
-MessageCell.prototype.show = function(item) {
+MessageCell.prototype.show = function(item, change) {
     // if not yet done, find the intendee object corresponding to this message
     if (!item.intendee)
         item.intendee = item.from && Autobus.singleton.tagsonomy.getOr(item.from, null);
 
     if (item !== this.item) {
-        if (this.item) this.hide();
+        if (this.item) this.unbind();
         this.item = item;
         if (item.subscribe) {
-            item.subscribe("content", this.selfUpdate);
             item.subscribe("from", this.selfUpdate);
+            item.subscribe("content", this.selfUpdate);
             item.subscribe("icon", this.selfUpdate);
             item.subscribe("color", this.selfUpdate);
         }

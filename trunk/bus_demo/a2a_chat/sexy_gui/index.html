@@ -9,6 +9,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: Tahoma, Arial, Helvetica, sans-serif;
+    font-size: 18px;
     background-color: transparent;
     overflow: hidden;
 }
@@ -45,6 +46,7 @@ input, textarea, select {
     -webkit-border-radius: 4px;
     border-radius: 4px;
     font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+    font-size: 18px;
     background-color: #FFF;
 }
 
@@ -61,7 +63,7 @@ input, textarea, select {
   position: absolute;
   background-color: transparent;
   width: 100%;
-  height: 133px;
+  height: 130px;
   z-index: 10;
 }
 
@@ -98,15 +100,16 @@ input, textarea, select {
   left: 0%;
   width: 0%;
   height: 3px;
-  top: 175px;
+  top: 177px;
   z-index: 16;
 }
 
 
 .intendeePic {
   position: absolute;
-  width: 99px;
-  height: 133px;
+  width: 96px; /* 192/2 */
+  height: 130px; /* 260/2 */
+  cursor: pointer;
 }
 
 .intendeeEmblem {
@@ -124,8 +127,7 @@ input, textarea, select {
   position: absolute;
   text-align: center;
   overflow: hidden;
-  width: 99px;
-  font-size:16px;
+  width: 96px;
   margin: 0;
   color: #AAA;
   text-shadow: 0 1px 0.05em #000, 0 -1px 0.05em #000;
@@ -137,35 +139,29 @@ input, textarea, select {
 
 .intendeeDesc small {
   font-size: 7px;
+  color: black;
 }
 
 .msgPic {
   position: absolute;
   background-color: transparent;
-/*  width: 25px; */
-  height: 40px;
+  height: 48px;
   margin-bottom:10px;
   z-index: 8;
   left: 4px;
-   
 }
 
-.msgPic:hover {
-  left: 8px;
-}
 
 .msgDesc {
   position: absolute;
   background-color: transparent;
   color: #AAA;
-  left: 0;
-  padding: 10px 6px 0 56px;
+  left: 56px;
+  margin-bottom: 5px;
   height: 38px ;
-  font-size: 18px;
   overflow: auto;
-  margin: 0;
+  padding: 0 2px; /* stupid padding to prevent scrollbar because of shadow */
 /*  background-image:url('images/lines.gif');*/
-  max-width: 99%;
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   border-radius: 4px;
@@ -190,6 +186,8 @@ input, textarea, select {
 
 #mePicDiv {
  float: left;
+ witdh: 192;
+ height: 260;
 }
 
 #meEmblemDiv {
@@ -213,7 +211,7 @@ input, textarea, select {
 
 #msgsArea {
    position: absolute;
-   top: 180px;
+   top: 192px;
    bottom: 60px;
    width: 100%;
    overflow: hidden;
@@ -273,8 +271,8 @@ input, textarea, select {
   margin: 0;
   padding: 0;
   border: 0;
-  margin-top: 0.5em;
-  height: 1.5em;
+  padding-top: 0.5em;
+  height: 2em;
   font-family: Tahoma, Arial, Helvetica, sans-serif;
 }
 
@@ -282,26 +280,20 @@ input, textarea, select {
 #msgPicImg {
   position: absolute;
   left: 5px;
-  top: 6px;
-  height: 40px;
+  top: 3px;
+  height: 48px;
   z-index: 31;
 }
 
 #hideButton {
   position: absolute;
   right: 80px;
-  font-size: 40px;
-  text-shadow:  0 1px 0.05em #000, 0 -1px 0.05em #000;
-  text-decoration: none; 
   z-index: 11;
 }
 
 #closeButton {
   position: absolute;
   right: 20px;
-  font-size: 40px;
-  text-shadow:  0 1px 0.05em #000, 0 -1px 0.05em #000;
-  text-decoration: none; 
   z-index: 11;
 }
 
@@ -341,9 +333,9 @@ input, textarea, select {
     <div id="intendeesBack"></div>
     <div id="intendeesForward"></div>
     <div id="intendeesGlider"></div>
-    <img id="closeButton" src="images/cross.png"/>
+    <img id="closeButton" src="images/cross.png" />
   </div>
-  <img id="hideButton" src="images/micross.png"/>
+  <img id="hideButton" src="images/micross.png" />
   <div id="msgsArea">
     <div class="trap" id="msgsTrap"></div>
     <div id="messagesGlider"></div>
@@ -351,47 +343,47 @@ input, textarea, select {
   
 
   <div id="contextForm" style="display:none;">
-    <button style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);"><img src="images/cross.png"/></button>
+    <button style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);"><img src="images/cross.png" /></button>
     <form id="mePropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
       <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
-      <div id="mePicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="mePicImg" src="images/blank.gif"/></td></tr></table></div>
+      <div id="mePicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="mePicImg" src="images/blank.gif" /></td></tr></table></div>
       <h2>My properties</h2>
       <p><label for="meProfileId">profile&nbsp;ID&nbsp;</label>
         <select id="meProfileId"><option value="#NEW#">New ...</option></select>
-        <input type="text" id="meNewProfileId" value="" style="display:none;"/>
+        <input type="text" id="meNewProfileId" value="" style="display:none;" />
       </p>
       <p><label for="meNickname">nickname&nbsp;</label>
-        <input type="text" id="meNickname" value="" style=""/></p>
+        <input type="text" id="meNickname" value="" style="" /></p>
       <p><label for="mePic">picture&nbsp;</label>
-        <input type="text" id="mePic" value="" style=""/></p>
+        <input type="text" id="mePic" value="" style="" /></p>
       <p><label for="meMind">mind&nbsp;</label>
-        <input type="text" id="meMind" value=""/></p>
+        <input type="text" id="meMind" value="" /></p>
       <p><label for="meEmblem">emblem&nbsp;</label>
-        <input type="text" id="meEmblem" value=""/>&nbsp;<div id="meEmblemDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="meEmblemImg" src="images/blank.gif"/></td></tr></table></div></p>
+        <input type="text" id="meEmblem" value="" />&nbsp;<div id="meEmblemDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="meEmblemImg" src="images/blank.gif" /></td></tr></table></div></p>
       <p><label for="meColor">color&nbsp;</label>
-        <input type="text" id="meColor" value="" style=""/></p>
+        <input type="text" id="meColor" value="" style="" /></p>
       <button style="float: right; margin-right: 10px;" onclick="javascript:chat2.submitContextForm();">Submit</button>&nbsp;
       <button style="float: left; margin-right: 10px;" onclick="javascript:chat2.reset();">Reset</button>&nbsp;
     </form>
     <form id ="iPropsForm" class="ContextForm" action="null">
       <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
-      <div id="iPicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="iPicImg" src="images/blank.gif"/></td></tr></table></div>
+      <div id="iPicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="iPicImg" src="images/blank.gif" /></td></tr></table></div>
       <p><label for="iName">nick&nbsp;</label>
-        <input type="text" readonly="readonly" id="iName" value="" style=""/></p>
+        <input type="text" readonly="readonly" id="iName" value="" style="" /></p>
       <p><label for="iPic">pic&nbsp;</label>
-        <input type="text" readonly="readonly" id="iPic" value="" style=""/></p>
+        <input type="text" readonly="readonly" id="iPic" value="" style="" /></p>
       <p><label for="iMind">mind&nbsp;</label>
-        <input type="text" readonly="readonly" id="iMind" value=""/></p>
+        <input type="text" readonly="readonly" id="iMind" value="" /></p>
       <p><label for="iEmblem">emblem&nbsp;</label>
-        <input type="text" id="iEmblem" readonly="readonly" value=""/>&nbsp;<img id="iEmblemImg" src="images/blank.gif" style="width: 32px; height: 32px;"/></p>
+        <input type="text" id="iEmblem" readonly="readonly" value="" />&nbsp;<img id="iEmblemImg" src="images/blank.gif" style="width: 32px; height: 32px;" /></p>
       <p><label for="iColor">color&nbsp;</label>
-        <input type="text" readonly="readonly" id="iColor" value=""/></p>
+        <input type="text" readonly="readonly" id="iColor" value="" /></p>
     </form>
     <form id ="mPropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
       <label for="mFrom">from&nbsp;</label>
-      <input type="text" readonly="readonly" id="mFrom" value="" style=""/>
+      <input type="text" readonly="readonly" id="mFrom" value="" style="" />
       <p><label for="mDate">date&nbsp;</label>
-        <input type="text" readonly="readonly" id="mDate" value="" style=""/></p>
+        <input type="text" readonly="readonly" id="mDate" value="" style="" /></p>
     </form>
   </div>
 

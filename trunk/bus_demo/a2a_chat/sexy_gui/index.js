@@ -119,7 +119,7 @@ var chat2 = {
 
     setMsgPic: function(url) {
         chat2.msgPic = url;
-        if (!url) url = a2ac.me.icon || "images/star.gif"; 
+        if (!url) url = a2ac.me.icon || "images/star.png"; 
         document.getElementById("msgPicImg").src = url;
     },
 
