@@ -99,7 +99,7 @@ var chat2 = {
     onMeIcon: function(variable, value) {
         document.getElementById("mePic").value = value;
         imgBoxURL(document.getElementById("mePicImg"), value, 99, 133);
-        chat2.setMsgPic(null);
+        chat2.setMsgPic(null); /* Reset msg icon */
     },
 
     onMeMind: function(variable, value) {
@@ -108,8 +108,8 @@ var chat2 = {
 
     onMeEmblem: function(variable, value) {
         document.getElementById("meEmblem").value = value;
-        document.getElementById("meEmblemImg").src = value;
-        chat2.setMsgPic(null);
+        document.getElementById("meEmblemImg").src = value || 'images/blank.gif';
+        chat2.setMsgPic(null); /* Reset msg icon */
     },
 
     onMeColor: function(variable, value) {

@@ -53,8 +53,8 @@ var default_profiles = {
     orange: {
         nickname: "orange",
         icon: "./images/orange.gif",
-        mind: "zen",
-        color: "open"
+        mind: "open",
+        color: "orange"
     }
 };
 
