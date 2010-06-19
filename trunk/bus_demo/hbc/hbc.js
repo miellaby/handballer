@@ -22,6 +22,8 @@ function Hbc() {
   // default client ID
   this.clientId = "top";
   this.token = String(Number(new Date()) % (Math.random() * 0xAFF00000)).substr(0,9);
+  this.count = 0;
+  this.timeShift = 0;
 }
 
 Hbc.prototype.logCB = null;
@@ -42,13 +44,21 @@ Hbc.prototype.sendOne = function(label, body) {
         hbc.isSending = false;
         hbc.sendNext();
   } };
-
   this.sendXhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
   this.sendXhr.send(body == null ? "" : "" + body);
 };
 
 // private function called back when a message sending is done
 Hbc.prototype.sendNext = function() {
+    if (this.sendXhr.readyState >= 4) {
+        var serverTime = this.sendXhr.getResponseHeader('Date');
+        if (serverTime) {
+            serverTime = Number(new Date(serverTime));
+            var delta = serverTime - Number(new Date());
+            this.timeShift = (this.timeShift * this.count + delta) / ++this.count;
+        }
+    }
+
   var next = this.sendFifo.shift();
   if (next)
      this.sendOne(next[0], next[1]);

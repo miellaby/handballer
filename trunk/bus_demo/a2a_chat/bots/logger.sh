@@ -1,17 +1,24 @@
 #!/bin/bash
-export HANDBALLER=localhost:81/bus/
-#export HANDBALLER=192.168.1.77:81/bus/
+if [ -z "$HANDBALLER" ] ; then
+   export HANDBALLER=localhost:81/bus/
+fi
 bot=ilogger
 nickname=Logger
 icon=images/bot.gif
 mind="is logging"
 agora=a2ac
+PING=100
 if [ -n "$1" ] ; then agora=$1 ; fi
 
-trap "hbcpost $agora/freed/$bot" SIGHUP SIGINT SIGTERM
+trap "hbcpost $agora/freed/$bot$$" SIGHUP SIGINT SIGTERM
 
 function advertise {
    hbcpost $agora/model/$bot$$ "{name:'"$bot$$"',tags:['bot', 'intendee'],nickname:'"$nickname"',icon:'"$icon"',mind:'$mind'}"
+}
+
+function ping {
+   hbcpost $agora/model/$bot$$/ping "$PING"
+   PING=$(expr $PING + 1)
 }
 
 function beep {
@@ -19,6 +26,7 @@ function beep {
 }
 
 advertise
+(while sleep 120; do ping; done)&
 
 hbcget "$agora/model/m*|$agora/model/i*|$agora/status/here" |\
      while read l; do
@@ -27,7 +35,7 @@ hbcget "$agora/model/m*|$agora/model/i*|$agora/status/here" |\
      beep
  fi
  echo $l
- echo $(date +%F/%R) $l >> /tmp/bot_logger.txt
+ echo {timestamp: \'$(date +%F/%R)\'\, label:\'\, \'$l\' \} >> /tmp/bot_logger.txt
  play ~/bin/chhh.aif &> /dev/null
 done
-
+kill $(jobs -p)
