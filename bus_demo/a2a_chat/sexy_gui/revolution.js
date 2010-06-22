@@ -4,10 +4,9 @@ function Revolution() {
 
 Revolution.prototype = new Anim();
 
-Revolution.prototype.init = function (areaElement, cellConstructor, glider) {
+Revolution.prototype.init = function (cellConstructor, glider) {
 
     //Parameters
-    this.areaElement = areaElement;
     this.cellConstructor = cellConstructor;
     this.glider = glider;
 
@@ -144,6 +143,13 @@ Revolution.prototype.computeSpeed = function() {
     }
 };
 
+
+Revolution.prototype.computeItemSide = function(item) {
+    var x = item.revolutionPos - this.pos - 1.0;
+    return (x > this.cellConstructor.prototype.getOpeningSize() ? 1
+            : (x < - 1.0 ? - 1 : 0));
+}
+
 Revolution.prototype.iterate = function(factor) {
     // compute speed from acceleration/strengths
     this.computeSpeed();
@@ -162,14 +168,14 @@ Revolution.prototype.redraw = function() {
     var nbItem = this.items.length;
     var pos    = this.pos;
     var n      = pos > 0 ? parseInt(pos) : parseInt(pos) - 1 ;
-    var o      = this.cellConstructor.prototype.getOpeningSize(this.areaElement) || 1;
+    var o      = this.cellConstructor.prototype.getOpeningSize() || 1;
 
     this.generation ^= true;
 
     if (this.visibleCells.length || nbItem) {
-    //    if (this.n != n || this.nbItem != nbItem) {
+        //    if (this.n != n || this.nbItem != nbItem) {
         this.n = n;
-        this.nbItem = nbItem;
+            this.nbItem = nbItem;
 
         var toGet = [];
 
@@ -177,13 +183,12 @@ Revolution.prototype.redraw = function() {
         for (i = 0; i < nbItem; ++i) {
             var j = (i + n) %nbItem;
             if (j < 0) j += nbItem;
-            var offset = this.items[j].revolutionPos - pos;
-            var visible = this.cellConstructor.prototype.visible(this.areaElement, offset);
-            if (visible > 0) {
+            var side = this.computeItemSide(this.items[j]);
+            if (side > 0) {
                 toRight = true ;
                 continue;
             }
-            if (visible) continue;
+            if (side) continue;
             nothing = false;
             cell = this.items[j].cell;
             if (cell != null) {
@@ -214,7 +219,7 @@ Revolution.prototype.redraw = function() {
 
         while (toGet.length) {
             var item = toGet.shift();
-            var cell = this.pool.shift() || new this.cellConstructor(this.areaElement);
+            var cell = this.pool.shift() || new this.cellConstructor();
             item.cell = cell;
             cell.show(item);
             this.visibleCells.push(cell);
@@ -238,7 +243,7 @@ Revolution.prototype.redraw = function() {
             m--;
         } else {
             if (!item.cell) {
-                item.cell = this.pool.shift() || new this.cellConstructor(this.areaElement);
+                item.cell = this.pool.shift() || new this.cellConstructor();
                 item.cell.show(item);
             }
             item.cell.setCoords(item.inFactor, item.revolutionPos - pos);

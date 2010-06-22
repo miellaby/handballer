@@ -67,7 +67,6 @@ input, textarea, select {
   z-index: 10;
 }
 
-
 #intendeesBack {
   background-color: transparent;
   position: absolute;
@@ -101,7 +100,7 @@ input, textarea, select {
   width: 0%;
   height: 3px;
   top: 177px;
-  z-index: 16;
+  z-index: 20;
 }
 
 
@@ -110,12 +109,14 @@ input, textarea, select {
   width: 96px; /* 192/2 */
   height: 130px; /* 260/2 */
   cursor: pointer;
+  z-index: 16;
 }
 
 .intendeeEmblem {
   position: absolute;
   width: 32px;
   height: 32px;
+  z-index: 17;
 }
 
 .intendeeDesc {
@@ -131,6 +132,7 @@ input, textarea, select {
   margin: 0;
   color: #AAA;
   text-shadow: 0 1px 0.05em #000, 0 -1px 0.05em #000;
+  z-index: 18;
 }
 
 .intendeeDesc quote {
@@ -140,6 +142,15 @@ input, textarea, select {
 .intendeeDesc small {
   font-size: 7px;
   color: black;
+}
+
+
+#eventsArea {
+  position: absolute:
+  background-color: transparent;
+  width: 100%;
+  height: 260px;
+  z-index: 50;
 }
 
 .msgPic {
@@ -172,6 +183,7 @@ input, textarea, select {
 #contextForm {
     -moz-border-radius: 20px;
     -webkit-border-radius: 20px;
+    border-radius: 20px;
     position: absolute;
     width: 500px;
     right: 5px;
@@ -188,12 +200,6 @@ input, textarea, select {
  float: left;
  witdh: 192;
  height: 260;
-}
-
-#meEmblemDiv {
- position: absolute;
- top: 5px;
- left: 5px;
 }
 
 #meEmblemImg {
@@ -328,6 +334,7 @@ input, textarea, select {
 <body onload="setTimeout(function(){chat2.init();},500);" onunload="chat2.finalize();">
 
   <!-- intendy area -->
+  <img id="hideButton" src="images/micross.png" />
   <div id="intendeesArea">
     <div class="trap" id="intendeesTrap"></div>
     <div id="intendeesBack"></div>
@@ -335,7 +342,8 @@ input, textarea, select {
     <div id="intendeesGlider"></div>
     <img id="closeButton" src="images/cross.png" />
   </div>
-  <img id="hideButton" src="images/micross.png" />
+  <div id="eventsArea">
+  </div>
   <div id="msgsArea">
     <div class="trap" id="msgsTrap"></div>
     <div id="messagesGlider"></div>
@@ -359,7 +367,7 @@ input, textarea, select {
       <p><label for="meMind">mind&nbsp;</label>
         <input type="text" id="meMind" value="" /></p>
       <p><label for="meEmblem">emblem&nbsp;</label>
-        <input type="text" id="meEmblem" value="" />&nbsp;<div id="meEmblemDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="meEmblemImg" src="images/blank.gif" /></td></tr></table></div></p>
+        <input type="text" id="meEmblem" value="" />&nbsp;<img id="meEmblemImg" src="images/blank.gif" /></p>
       <p><label for="meColor">color&nbsp;</label>
         <input type="text" id="meColor" value="" style="" /></p>
       <button style="float: right; margin-right: 10px;" onclick="javascript:chat2.submitContextForm();">Submit</button>&nbsp;
