@@ -281,7 +281,7 @@ var chat2 = {
 
             this.revolutionOfIntendees.init(IntendeeCell, this.intendeesGlider);
             this.revolutionOfMessages.init(MessageCell, this.messagesGlider);
-            this.revolutionOfEvents.init(EventCell, this.messagesGlider);
+            this.revolutionOfEvents.init(EventCell, null);
         }
 
         if (!a2acAgora)
@@ -401,6 +401,7 @@ var chat2 = {
                a.ia.style.display =
                     a.pf.style.display =
                     a.pl.style.display = "block";
+               chat2.revolutionOfIntendees.redraw(); // redraw to get cells removed by hiding
         }
         a.iterate = function() {
             this.current.y = this.start.y + (this.end.y - this.start.y) * this.ratio;
@@ -417,6 +418,7 @@ var chat2 = {
                         this.ma.style.display = "none";
                 } else {
                     this.ma.style.display = "block";
+                    chat2.revolutionOfMessages.redraw(); // redraw to get cells removed by hiding
                 }
             }
             return this.ratio <= 1;
