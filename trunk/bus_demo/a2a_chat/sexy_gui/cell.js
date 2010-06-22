@@ -1,17 +1,11 @@
-function ImgDescCell(areaElement) {
-    if (!areaElement) return;
+function ImgDescCell() {
     this.img = document.createElement('img');
     this.desc = document.createElement('p');
     this.img.style.display = "none";
     this.desc.style.display = "none";
-    areaElement.appendChild(this.desc);
-    areaElement.appendChild(this.img);
-}
-
-ImgDescCell.prototype.visible = function(area, x) {
-    x -=1.0;
-    return (x > this.getOpeningSize(area) ? 1
-            : (x < - 1.0 ? - 1 : 0));
+    if (!this.area) return;
+    this.area.appendChild(this.desc);
+    this.area.appendChild(this.img);
 }
 
 ImgDescCell.prototype.show = function(item) { };

@@ -1,10 +1,16 @@
+// little helpers
+function centerByMargin(img) {
+    var s = img.style;
+    s.marginLeft = (- parseInt(s.width) / 2) + "px";
+    s.marginTop =  (- parseInt(s.height) / 2) + "px";
+}
+
 // ======================================================================
 // Intendee cell
 // ======================================================================
 
-function IntendeeCell(area) {
-    if (!area) return;
-    ImgDescCell.call(this, area);
+function IntendeeCell() {
+    ImgDescCell.call(this);
     this.item = null;
     this.img.className += 'intendeePic';
     this.desc.className += 'intendeeDesc';
@@ -12,26 +18,24 @@ function IntendeeCell(area) {
     this.emblem = document.createElement('img');
     this.emblem.style.display = 'none';
     this.emblem.className += 'intendeeEmblem';
-    area.appendChild(this.emblem);
+    this.area.appendChild(this.emblem);
 
     var self =this;
     this.selfUpdate = function(name, value) { self.show(self.item, name); };
     this.img.onclick = function () { self.onClick(); } ;
     this.desc.onclick = function () { self.onClick(); } ;
-    chat2.iTrap.bindTarget(this.img);
+    if (this.trap) { this.trap.bindTarget(this.img); }
 }
 
 IntendeeCell.prototype = new ImgDescCell();
+
 IntendeeCell.prototype.constructor = IntendeeCell;
-
+IntendeeCell.prototype.area = null;
+IntendeeCell.prototype.trap = null;
 IntendeeCell.prototype.gap = 130;
-
 IntendeeCell.prototype.height = 130;
-
 IntendeeCell.prototype.defaultImg = "./images/guest.gif";
-
 IntendeeCell.prototype.defaultName = "...";
-
 IntendeeCell.prototype.defaultEmblem = "./images/blank.gif";
 
 IntendeeCell.prototype.setCoords = function(inFactor, x) {
@@ -45,8 +49,10 @@ IntendeeCell.prototype.setCoords = function(inFactor, x) {
     this.desc.style.left = ((x-1) * gap) + "px";
 };
 
-IntendeeCell.prototype.getOpeningSize = function(area) {
-    return area.clientWidth / IntendeeCell.prototype.gap;
+// to call like this:
+// var o = IntendeeCell.prototype.getOpeningSize();
+IntendeeCell.prototype.getOpeningSize = function() {
+    return this.area.clientWidth / this.gap;
 }
 
 IntendeeCell.prototype.unbind = function() {
@@ -70,12 +76,6 @@ IntendeeCell.prototype.hide = function() {
     this.img.style.display = "none";
     this.desc.style.display = "none";
 };
-
-function centerByMargin(img) {
-    var s = img.style;
-    s.marginLeft = (- parseInt(s.width) / 2) + "px";
-    s.marginTop =  (- parseInt(s.height) / 2) + "px";
-}
 
 IntendeeCell.prototype.show = function(item, change) {
     if (item !== this.item) {
@@ -125,9 +125,8 @@ IntendeeCell.prototype.show = function(item, change) {
 // Message cell
 // ======================================================================
 
-function MessageCell(area) {
-    if (!area) return;
-    ImgDescCell.call(this, area);
+function MessageCell() {
+    ImgDescCell.call(this);
     this.item = null;
     this.img.className += 'msgPic';
     this.desc.className += 'msgDesc';
@@ -136,19 +135,16 @@ function MessageCell(area) {
     this.selfUpdate = function(name, value) { self.show(self.item, name); };
     this.img.onclick = function () { self.onClick(); } ;
     this.desc.onclick = function () { self.onClick(); } ;
-    chat2.mTrap.bindTarget(this.img);
+    if (this.trap) this.trap.bindTarget(this.img);
 }
 
 MessageCell.prototype = new ImgDescCell();
 MessageCell.prototype.constructor = MessageCell;
-
-
+MessageCell.prototype.area = null;
+MessageCell.prototype.trap = null;
 MessageCell.prototype.gap = 53;
-
 MessageCell.prototype.defaultImg = "./images/star.png";
-
 MessageCell.prototype.defaultDesc = "...";
-
 
 MessageCell.prototype.setCoords = function(inFactor, x) {
     //console.log("inFactor " + inFactor + "; x " + x);
@@ -161,8 +157,11 @@ MessageCell.prototype.setCoords = function(inFactor, x) {
     this.desc.style.bottom = ((x-1) * gap) + "px";
 };
 
-MessageCell.prototype.getOpeningSize = function(area) {
-    return (area === document.body ? window.innerHeight : area.clientHeight) / MessageCell.prototype.gap;
+
+// to call like this:
+// var o = MessageCell.prototype.getOpeningSize();
+MessageCell.prototype.getOpeningSize = function() {
+    return (this.area === document.body ? window.innerHeight : this.area.clientHeight) / this.gap;
 }
 
 MessageCell.prototype.unbind = function() {
@@ -215,4 +214,25 @@ MessageCell.prototype.show = function(item, change) {
 
 };
 
-MessageCell.prototype.gap = 50;
+// ======================================================================
+// Event cell
+// ======================================================================
+function EventCell() {
+    MessageCell.call(this);
+}
+
+EventCell.prototype = new MessageCell();
+EventCell.prototype.constructor = EventCell;
+EventCell.prototype.area = null;
+EventCell.prototype.trap = null;
+
+EventCell.prototype.setCoords = function(inFactor, x) {
+    //console.log("inFactor " + inFactor + "; x " + x);
+    var gap = this.gap;
+    
+    this.img.style.opacity = inFactor;
+    this.desc.style.opacity = inFactor;
+
+    this.img.style.top = (x * gap) + "px";
+    this.desc.style.top = (x * gap) + "px";
+};

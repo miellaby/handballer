@@ -31,6 +31,7 @@ var chat2 = {
     contextForm: null,
     revolutionOfIntendees: new Revolution(),
     revolutionOfMessages:  new Revolution(),
+    revolutionOfEvents:  new Revolution(),
     intendeesGlider: new Glider(),
     messagesGlider: new Glider(),
     iTrap: new Trap(),
@@ -52,6 +53,8 @@ var chat2 = {
 
     onMessagesSplice: function(tag, index, howMany /*, message, message ... */) {
         
+        var hidden = (document.getElementById("msgsArea").style.display == "none");
+
         if (chat2.speakingSound && arguments.length > 2 && !a2ac.me.watching && !a2ac.me.typing) // need to make sound if no activity
             chat2.speakingSound.play();
 
@@ -62,6 +65,7 @@ var chat2 = {
         for (var l = arguments, i = 3 /* jump over the first args */, n = l.length; i < n; ++i) {
             var newItem = l[i];
             chat2.revolutionOfMessages.unshift(newItem);
+            if (hidden) chat2.revolutionOfEvents.push(newItem);
         }
     },
 
@@ -118,13 +122,13 @@ var chat2 = {
     },
 
     setMsgPic: function(url) {
-        chat2.msgPic = url;
+        this.msgPic = url;
         if (!url) url = a2ac.me.icon || "images/star.png"; 
         document.getElementById("msgPicImg").src = url;
     },
 
     setMsgColor: function(color) {
-        chat2.msgColor = color;
+        this.msgColor = color;
     },
 
     resetProfileList: function() {
@@ -153,23 +157,23 @@ var chat2 = {
     },
     
     showContextForm: function(e) {
-        var form = chat2.contextForm = document.getElementById("contextForm");
+        var form = this.contextForm = document.getElementById("contextForm");
         form.style.display = "none";
         form.style.width = "";
         form.style.height = "";
         if (!e || !form) return;
 
-        if (chat2.context) {
-            if (chat2.context.profileId !== undefined) {
-                chat2.context.unsubscribe("nickname", chat2.updateForm);
-                chat2.context.unsubscribe("icon", chat2.updateForm);
-                chat2.context.unsubscribe("mind", chat2.updateForm);
-                chat2.context.unsubscribe("emblem", chat2.updateForm);
-                chat2.context.unsubscribe("color", chat2.updateForm);
-                chat2.context = null;
+        if (this.context) {
+            if (this.context.profileId !== undefined) {
+                this.context.unsubscribe("nickname", this.updateForm);
+                this.context.unsubscribe("icon", this.updateForm);
+                this.context.unsubscribe("mind", this.updateForm);
+                this.context.unsubscribe("emblem", this.updateForm);
+                this.context.unsubscribe("color", this.updateForm);
+                this.context = null;
             } else if (char2.context.content !== undefined) {
-                chat2.context.unsubscribe("content", chat2.updateForm);
-                chat2.context.unsubscribe("date", chat2.updateForm);
+                this.context.unsubscribe("content", this.updateForm);
+                this.context.unsubscribe("date", this.updateForm);
             }
         }
 
@@ -187,15 +191,15 @@ var chat2 = {
 
         // form fill up
         if (targetForm == "iPropsForm") {
-            e.item.subscribeSync("nickname", chat2.updateForm);
-            e.item.subscribeSync("icon", chat2.updateForm);
-            e.item.subscribeSync("mind", chat2.updateForm);
-            e.item.subscribeSync("emblem", chat2.updateForm);
-            e.item.subscribeSync("color", chat2.updateForm);
-            chat2.context = e.item;
+            e.item.subscribeSync("nickname", this.updateForm);
+            e.item.subscribeSync("icon", this.updateForm);
+            e.item.subscribeSync("mind", this.updateForm);
+            e.item.subscribeSync("emblem", this.updateForm);
+            e.item.subscribeSync("color", this.updateForm);
+            this.context = e.item;
         } else if (targetForm == "mPropsForm") {
-            e.item.subscribeSync("from", chat2.updateForm);
-            e.item.subscribeSync("date", chat2.updateForm);
+            e.item.subscribeSync("from", this.updateForm);
+            e.item.subscribeSync("date", this.updateForm);
         }
 
 
@@ -236,7 +240,7 @@ var chat2 = {
         a2ac.me.set('mind', document.getElementById('meMind').value);
         a2ac.me.set('icon', document.getElementById('mePic').value);
         a2ac.me.set('color', document.getElementById('meColor').value);
-        chat2.showContextForm(null);
+        this.showContextForm(null);
     },
 
     init: function() {
@@ -259,10 +263,26 @@ var chat2 = {
             document.getElementById("closeButton").onclick = function() {window.location = back;};
             document.getElementById("hideButton").onclick = function() {chat2.hide();};
         }
+
+        // Init gliders
         this.intendeesGlider.init(document.getElementById("intendeesGlider"), "left", "width");
         this.messagesGlider.init(document.getElementById("messagesGlider"), "bottom", "height");
-        this.revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, this.intendeesGlider);
-        this.revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, this.messagesGlider);
+
+        { // Init revolutions
+            var iArea = document.getElementById("intendeesArea");
+            var mArea = document.getElementById("msgsArea");
+            var eArea = document.getElementById("eventsArea");
+            IntendeeCell.prototype.area = iArea;
+            IntendeeCell.prototype.trap = this.iTrap;
+            MessageCell.prototype.area = mArea;
+            MessageCell.prototype.trap = this.mTrap;
+            EventCell.prototype.area = eArea;
+            EventCell.prototype.trap = null;
+
+            this.revolutionOfIntendees.init(IntendeeCell, this.intendeesGlider);
+            this.revolutionOfMessages.init(MessageCell, this.messagesGlider);
+            this.revolutionOfEvents.init(EventCell, this.messagesGlider);
+        }
 
         if (!a2acAgora)
             a2acAgora = (back ? back.b64() : 'a2ac') ;
@@ -344,13 +364,13 @@ var chat2 = {
         input.onblur();
 
         a2ac.init();
-        chat2.resetProfileList();
-        a2ac.me.subscribeSync("profileId", chat2.onMeProfileId);
-        a2ac.me.subscribeSync("nickname", chat2.onMeNickname);
-        a2ac.me.subscribeSync("icon", chat2.onMeIcon);
-        a2ac.me.subscribeSync("mind", chat2.onMeMind);
-        a2ac.me.subscribeSync("emblem", chat2.onMeEmblem);
-        a2ac.me.subscribeSync("color", chat2.onMeColor);
+        this.resetProfileList();
+        a2ac.me.subscribeSync("profileId", this.onMeProfileId);
+        a2ac.me.subscribeSync("nickname", this.onMeNickname);
+        a2ac.me.subscribeSync("icon", this.onMeIcon);
+        a2ac.me.subscribeSync("mind", this.onMeMind);
+        a2ac.me.subscribeSync("emblem", this.onMeEmblem);
+        a2ac.me.subscribeSync("color", this.onMeColor);
     },
 
     finalize: function() {
@@ -359,7 +379,7 @@ var chat2 = {
     
     reset: function() {
         a2ac.reset();
-        chat2.resetProfileList();
+        this.resetProfileList();
     },
 
     hide: function(value) {
