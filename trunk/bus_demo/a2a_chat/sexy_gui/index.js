@@ -227,7 +227,6 @@ var chat2 = {
             w: ed[0],
             h: ed[1]
         };
-        log(a.end);
         a.iterate = contextFormAnimIterate;
         a.onResume = function() { this.form.style.display = "block"; };
         a.resume();
