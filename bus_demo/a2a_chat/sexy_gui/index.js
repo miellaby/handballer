@@ -41,6 +41,8 @@ var chat2 = {
     incomingSound: null,
     leavingSound: null,
     speakingSound: null,
+    history: [],
+    historyIndex: -1,
     onIntendeesSplice: function(tag, index, howMany /*, intendee, intendee ... */) {
         //console.log(arguments);
         var args = Array.prototype.slice.call(arguments,1);
@@ -73,6 +75,8 @@ var chat2 = {
     onMessageSubmit: function() {
         var v = document.getElementById('messageBody');
         a2ac.me.postMessage(v.value, chat2.msgPic, chat2.msgColor);
+        chat2.history.unshift(v.value);
+        chat2.historyIndex = -1;
         v.value = "";
     },
 
@@ -252,6 +256,25 @@ var chat2 = {
         chat2.revolutionOfEvents.splice(0, 1);
     },
 
+    browsePast: function(event) {
+        var keyId = event.keyCode;
+        if (keyId == 38) { // up 
+            if (chat2.historyIndex < chat2.history.length - 1) {
+                chat2.historyIndex++;
+                this.value = chat2.history[chat2.historyIndex];
+            }
+            
+        } else if (keyId == 40) { // down
+            if (chat2.historyIndex >= 0) {
+                chat2.historyIndex--;
+                this.value = (chat2.historyIndex == -1
+                              ? '' : chat2.history[chat2.historyIndex]);
+            }
+        } else {
+            // chat2.historyIndex = 0;
+        }
+    },
+
     init: function() {
         if (typeof console != "object") { var console = { log: function() {} }; };
 
@@ -350,9 +373,10 @@ var chat2 = {
         input.onkeydown = function() {
             a2ac.me.typingActivity.set(true);
         };
-        input.onkeyup = function() {
+        input.onkeyup = function(e) {
             a2ac.me.typingActivity.set(false);
-        };
+            chat2.browsePast.call(this, e);
+        }
         var defaultValue = input.value;
         input.value = '';
 
