@@ -2,17 +2,15 @@ function Trap(animator) {
     Anim.call(animator);
     this.down = false;
     this.dx = this.dy = this.s = 0;
-    this.t = null ; // hiding delay timer
+    this.trapped = null;
 }
 
 Trap.prototype = new Anim();
+Trap.prototype.constructor = Trap;
 
-Trap.prototype.trap = function(e) {
-    var self = this;
-    if (this.t != null) return;
-    this.t = setTimeout(function() {
-            self.onMouseDown(e);
-            self.t = null; }, 200);
+Trap.prototype.trap = function(element, e) {
+    this.trapped = element;
+    this.onMouseDown(e);
 }
 
 Trap.prototype.onMouseDown = function(e) {
@@ -35,10 +33,8 @@ Trap.prototype.onMouseUp = function(e) {
     this.element.onmousemove = null;
     this.dx = this.dy = this.s = 0;
     this.pause();
-
-    if (this.t != null) {
-        clearTimeout(this.t);
-        this.t = null;
+    if (click && this.trapped) {
+        this.trapped.onclick();
     }
 }
 
@@ -70,7 +66,7 @@ Trap.prototype.bind = function(element) {
 
 Trap.prototype.bindTarget = function(element) {
    var self = this;
-   element.onmousedown = function(e) { self.trap(e); if (e.preventDefault) e.preventDefault(); else e.returnValue = false; };
+   element.onmousedown = function(e) { self.trap(this, e); if (e.preventDefault) e.preventDefault(); else e.returnValue = false; };
    element.onmouseup = function(e) { return self.onMouseUp(e);};
    element.onmouseout = function(e) { return self.onMouseOut(e); }
    element.onselectstart = function() { return false;};
