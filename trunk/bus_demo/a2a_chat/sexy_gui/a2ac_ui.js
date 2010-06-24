@@ -11,16 +11,13 @@ function centerByMargin(img) {
 
 function IntendeeCell() {
     ImgDescCell.call(this);
-    this.item = null;
-    this.img.className += 'intendeePic';
-    this.desc.className += 'intendeeDesc';
 
     this.emblem = document.createElement('img');
     this.emblem.style.display = 'none';
     this.emblem.className += 'intendeeEmblem';
     this.area.appendChild(this.emblem);
 
-    var self =this;
+    var self = this;
     this.selfUpdate = function(name, value) { self.show(self.item, name); };
     this.img.onclick = function () { self.onClick(); } ;
     this.desc.onclick = function () { self.onClick(); } ;
@@ -28,8 +25,8 @@ function IntendeeCell() {
 }
 
 IntendeeCell.prototype = new ImgDescCell();
-
 IntendeeCell.prototype.constructor = IntendeeCell;
+IntendeeCell.prototype.cssClass = "intendee";
 IntendeeCell.prototype.area = null;
 IntendeeCell.prototype.trap = null;
 IntendeeCell.prototype.gap = 130;
@@ -127,11 +124,8 @@ IntendeeCell.prototype.show = function(item, change) {
 
 function MessageCell() {
     ImgDescCell.call(this);
-    this.item = null;
-    this.img.className += 'msgPic';
-    this.desc.className += 'msgDesc';
 
-    var self =this;
+    var self = this;
     this.selfUpdate = function(name, value) { self.show(self.item, name); };
     this.img.onclick = function () { self.onClick(); } ;
     this.desc.onclick = function () { self.onClick(); } ;
@@ -140,6 +134,7 @@ function MessageCell() {
 
 MessageCell.prototype = new ImgDescCell();
 MessageCell.prototype.constructor = MessageCell;
+MessageCell.prototype.cssClass = "msg";
 MessageCell.prototype.area = null;
 MessageCell.prototype.trap = null;
 MessageCell.prototype.gap = 53;
@@ -223,6 +218,7 @@ function EventCell() {
 
 EventCell.prototype = new MessageCell();
 EventCell.prototype.constructor = EventCell;
+EventCell.prototype.cssClass = "event";
 EventCell.prototype.area = null;
 EventCell.prototype.trap = null;
 
@@ -233,6 +229,10 @@ EventCell.prototype.setCoords = function(inFactor, x) {
     this.img.style.opacity = inFactor;
     this.desc.style.opacity = inFactor;
 
-    this.img.style.top = (x * gap) + "px";
-    this.desc.style.top = (x * gap) + "px";
+    this.img.style.top = ((x -1) * gap) + "px";
+    this.desc.style.top = ((x - 1) * gap) + "px";
 };
+
+EventCell.prototype.getOpeningSize = function() {
+    return 10;
+}
