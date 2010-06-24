@@ -75,7 +75,11 @@ var chat2 = {
     onMessageSubmit: function() {
         var v = document.getElementById('messageBody');
         a2ac.me.postMessage(v.value, chat2.msgPic, chat2.msgColor);
-        chat2.history.unshift(v.value);
+        if (v.value) {
+            chat2.history.unshift(v.value);
+            if (chat2.history.length > 100)
+                chat2.history.splice(100,1);
+        }
         chat2.historyIndex = -1;
         v.value = "";
     },
