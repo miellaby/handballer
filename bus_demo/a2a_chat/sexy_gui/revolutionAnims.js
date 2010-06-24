@@ -1,6 +1,7 @@
 function RevolutionInAnim(revolution, start, howMany) {
     Anim.call(this);
     this.revolution = revolution;
+    this.prop = revolution.prop;
     this.start = start;
     this.howMany = howMany;
     this.ratio = 0;
@@ -25,7 +26,7 @@ RevolutionInAnim.prototype.iterate = function() {
     for (var lst = this.revolution.items, i = this.start, n = this.start + this.howMany ; i < n; ++i) {
         var elt = lst[i];
         if (this.jumpOver.indexOf(elt) != -1) continue;
-        elt.inFactor = this.ratio;
+        elt[this.prop].inFactor = this.ratio;
     }
     return !done;
 };
@@ -68,6 +69,7 @@ RevolutionInAnim.prototype.c1 = 0.02;
 function RevolutionOutAnim(revolution, start, items) {
     Anim.call(this);
     this.revolution = revolution;
+    this.prop = revolution.prop;
     this.start = start;
     this.items = items;
     this.ratio = 1;
@@ -89,7 +91,7 @@ RevolutionOutAnim.prototype.iterate = function() {
     for (var lst = this.items, i = 0, n = this.items.length ; i < n; ++i) {
         var elt = lst[i];
         if (this.jumpOver.indexOf(elt) != -1) continue;
-        elt.inFactor = this.ratio;
+        elt[this.prop].inFactor = this.ratio;
     }
     return !done;
 };
@@ -131,6 +133,7 @@ RevolutionOutAnim.prototype.c1 = 0.02;
 function RevolutionShiftAnim(revolution, start, howMany, offset) {
     Anim.call(this);
     this.revolution = revolution;
+    this.prop = revolution.prop;
     this.start = start;
     this.howMany = howMany;
     this.offset = offset;
@@ -160,7 +163,7 @@ RevolutionShiftAnim.prototype.iterate = function() {
     while (n--) {
         var elt=l[i++];
         if (this.jumpOver.indexOf(elt) != -1) continue;
-        elt.revolutionPos += delta;
+        elt[this.prop].revolutionPos += delta;
     }
     
     this.current += delta;

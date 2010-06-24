@@ -65,7 +65,8 @@ var chat2 = {
         for (var l = arguments, i = 3 /* jump over the first args */, n = l.length; i < n; ++i) {
             var newItem = l[i];
             chat2.revolutionOfMessages.unshift(newItem);
-            if (hidden) chat2.revolutionOfEvents.push(newItem);
+            if (hidden || chat2.revolutionOfMessages.n > 0)
+                chat2.advertiseMessage(newItem);
         }
     },
 
@@ -241,6 +242,14 @@ var chat2 = {
         a2ac.me.set('icon', document.getElementById('mePic').value);
         a2ac.me.set('color', document.getElementById('meColor').value);
         this.showContextForm(null);
+    },
+
+    advertiseMessage: function(item) {
+        chat2.revolutionOfEvents.push(item);
+        setTimeout(chat2.unstackEventCB, 5000);
+    },
+    unstackEventCB: function() {
+        chat2.revolutionOfEvents.splice(0, 1);
     },
 
     init: function() {
