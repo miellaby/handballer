@@ -25,22 +25,22 @@ Trap.prototype.onMouseDown = function(e) {
     return false;
 }
 
-Trap.prototype.onMouseUp = function(e) {
+Trap.prototype.onMouseUp = function(e) { 
+    this.down = false;
     this.element.style.display = "none";
     
-    var click = Math.abs(this.s) < 4;
-    this.down = false;
+    var s = this.s;
     this.element.onmousemove = null;
     this.dx = this.dy = this.s = 0;
     this.pause();
-    if (click && this.trapped) {
+    if (s < 8 && this.trapped) {
         this.trapped.onclick();
     }
 }
 
 Trap.prototype.onMouseOut = function(e) {
     if (e.target != this.element) return;
-    this.onMouseUp();
+    if (this.down) this.onMouseUp();
     return false;
 }
 
@@ -67,8 +67,6 @@ Trap.prototype.bind = function(element) {
 Trap.prototype.bindTarget = function(element) {
    var self = this;
    element.onmousedown = function(e) { self.trap(this, e); if (e.preventDefault) e.preventDefault(); else e.returnValue = false; };
-   element.onmouseup = function(e) { return self.onMouseUp(e);};
-   element.onmouseout = function(e) { return self.onMouseOut(e); }
    element.onselectstart = function() { return false;};
    element.unselectable = "on";
    element.style.MozUserSelect = "none";
