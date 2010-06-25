@@ -419,6 +419,7 @@ var chat2 = {
     },
 
     hide: function(value) {
+        var c = document.getElementById("hideButton");
         var a = new Anim();
         a.ia = document.getElementById("intendeesArea");
         a.ma = document.getElementById("msgsArea");
@@ -429,15 +430,17 @@ var chat2 = {
         var edp = getEltDimensions(a.pf);
         if (value === undefined)
             value = (a.ma.style.display != "none");
+        c.src = value ? "images/micross.png" : "images/crossmi.png";
         a.start = a.current = {y: value ? 0 : -edi[1]};        
         a.start2 = a.current2 = {y: value ? 0 : -edp[1]};        
         a.end = { y: value ? -edi[1] : 0 };
         a.end2 = { y: value ? -edp[1] : 0 };
         if (!value) {
-               a.ia.style.display =
-                    a.pf.style.display =
-                    a.pl.style.display = "block";
-               chat2.revolutionOfIntendees.redraw(); // redraw to get cells removed by hiding
+            
+            a.ia.style.display =
+                a.pf.style.display =
+                a.pl.style.display = "block";
+            chat2.revolutionOfIntendees.redraw(); // redraw to get cells removed by hiding
         }
         a.iterate = function() {
             this.current.y = this.start.y + (this.end.y - this.start.y) * this.ratio;
