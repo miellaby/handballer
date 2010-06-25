@@ -34,8 +34,11 @@ hbcget "$agora/model/m*|$agora/model/i*|$agora/status/here" |\
      advertise
      beep
  fi
- echo $l
- echo {timestamp: \'$(date +%F/%R)\'\, label:\'\, \'$l\' \} >> /tmp/bot_logger.txt
+ label=$(expr match "$l" '\([^ ]*\)')
+ n=$(expr 3 + ${#label})
+ body=${l:$n}
+ echo $label : $body
+ echo {timestamp: \'$(date +%F/%R)\'\, label:\'$label\', body:\'$body\' \} >> /tmp/bot_logger.txt
  play ~/bin/chhh.aif &> /dev/null
 done
 kill $(jobs -p)
