@@ -102,18 +102,18 @@ IntendeeCell.prototype.show = function(item, change) {
 
     if (!change || change != "icon" && change != "emblem") {
         // change = nickname, desc, color, etc.
-        var desc = (item.nickname || this.defaultName);
-        
-        if (item.mind) desc += "<quote><br/>" + item.mind + "</quote>";
-        if (item.away)
-            desc += "<br/><small>(away)</small>";
-        else if (item.typing)
-            desc += "<br/><small>typing</small>";
-        else if (item.watching)
-            desc += "<br/><small>watching</small>";
+        this.desc.innerHTML = (item.nickname || this.defaultName);
+        if (item.mind) {
+            var mindElement = document.createElement('quote');
+            chat2.creole.parse(mindElement, item.mind)
+            this.desc.appendChild(mindElement);
+        }
+        var status =
+            item.away? "<small>(away)</small>"
+            : item.typing ? "<small>typing</small>"
+            : item.watching ? "<small>watching</small>" : null;
+        if (status) this.desc.innerHTML += status;
         // this.desc.style.height = item.mind ? "90px" : "60px";
-
-        this.desc.innerHTML = desc;
         this.desc.style.color = item.color;
     }
 };
@@ -205,8 +205,12 @@ MessageCell.prototype.show = function(item, change) {
     }
     this.img.src = item.icon || ( item.intendee && item.intendee.icon ) || this.defaultImg;
     this.desc.style.color = item.color || ( item.intendee && item.intendee.color );
-    this.desc.innerHTML = item.content || this.defaultDesc;
-
+    if (item.content) {
+        this.desc.innerHTML = ''
+        chat2.creole.parse(this.desc, item.content);
+    } else {
+        this.desc.innerHTML = this.defaultDesc;
+    }
 };
 
 // ======================================================================
