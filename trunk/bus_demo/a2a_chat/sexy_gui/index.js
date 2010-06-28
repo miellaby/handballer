@@ -38,6 +38,11 @@ var chat2 = {
     mTrap: new Trap(),
     msgPic: null,
     msgColor: null,
+    creole: new Parse.Simple.Creole({forIE: document.all,
+                                     interwiki: {
+                WikiCreole: 'http://www.wikicreole.org/wiki/',
+                Wikipedia: 'http://en.wikipedia.org/wiki/'},
+                                     linkFormat: '' }),
     incomingSound: null,
     leavingSound: null,
     speakingSound: null,
