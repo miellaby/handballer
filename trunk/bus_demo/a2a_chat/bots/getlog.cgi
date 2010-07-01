@@ -1,4 +1,5 @@
 #!/bin/sh
+PATH=/opt/bin:$PATH
 echo -e "Content-type: text/javascript\n\n"
 
 # our html code
