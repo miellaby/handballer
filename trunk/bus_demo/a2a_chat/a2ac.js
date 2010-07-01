@@ -24,37 +24,43 @@ var default_profiles = {
         nickname: "red",
         icon: "./images/red.gif",
         mind: "happy",
-        color: "red"
+        color: "red",
+        emblem: ""
     },
     blue: {
         nickname: "blue",
         icon: "./images/blue.gif",
         mind: "cool",
-        color: "blue"
+        color: "blue",
+        emblem: ""
     },
     green: {
         nickname: "green",
         icon: "./images/green.gif",
         mind: "watchful",
-        color: "green"
+        color: "green",
+        emblem: ""
     },
     pink: {
         nickname: "pink",
         icon: "./images/pink.gif",
         mind: "groovy",
-        color: "pink"
+        color: "pink",
+        emblem: ""
     },
     purple: {
         nickname: "purple",
         icon: "./images/purple.gif",
         mind: "zen",
-        color: "purple"
+        color: "purple",
+        emblem: ""
     },
     orange: {
         nickname: "orange",
         icon: "./images/orange.gif",
         mind: "open",
-        color: "orange"
+        color: "orange",
+        emblem: ""
     }
 };
 
@@ -340,6 +346,55 @@ var a2ac = {
             // }
         }
     },
+
+    loadLog: function(jsonLog) {
+      var freeds = [];
+      if (!jsonLog || jsonLog.charAt(0) != "[") {
+        console.log("not a log : " + jsonLog);
+        return;
+      }
+      var log = eval("jsonLog");
+      for (var i = 0; i < log.length; i++) {
+         var event = log[i];
+         var label = event.label;
+         if (autobus.agora) label = label.substring(label.indexOf('/') + 1);
+         if (label.substring(0, 6) == "freed") {
+            freeds.push(label.substring(6));
+         } else if (label.substring(0,6) == "model/") {
+            var slashIdx = label.indexOf("/", 6);
+            var agentName = slashIdx != -1 ? label.substring(6, slashIdx) : label.substring(6);
+            var slot = slashIdx != -1 ? label.substring(slashIdx + 1) : undefined;
+            if (freeds.indexOf(agentName) == -1) {
+               obj = this.busAgent(agentName, BusAgent.prototype.THERE);
+               if (obj.there()) {
+                  if (slot) {
+                     value = eval("(" + body + ")");
+                     if (obj[slot] === undefined)
+                        obj.setted(slot, value); 
+                  } else {
+                     delta = eval("(" + body + ")");
+                     for (var slot in delta) {
+                        if (!this.hasOwnProperty(slot)) continue;
+                        if (obj[slot] !== undefined) continue;
+                        obj.setted(slot, delta[slot]);
+                     }
+                  }
+               }
+            }
+         } 
+      }
+    },
+
+    retrieveLog: function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/a2a_chat/bots/getLog.cgi", true);
+        xhr.onreadystatechange = function() {
+           if (xhr.readyState >= 4) {
+               a2ac.loadLog(xhr.responseState);
+           }
+        }
+        xhr.send("");
+    },
     
     init: function() {
         settings.init("a2ac", default_profiles);
@@ -354,7 +409,7 @@ var a2ac = {
         var profileID = t.length > 1 ? t[1] : null;
         a2ac.me = new Me(meUID);
         a2ac.me.init(profileID);
-
+        a2ac.retrieveLog();
         setInterval(a2ac.cleanGone, 60 * 2 * 1000);
     },
 
