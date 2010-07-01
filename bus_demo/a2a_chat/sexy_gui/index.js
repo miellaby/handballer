@@ -79,7 +79,20 @@ var chat2 = {
 
     onMessageSubmit: function() {
         var v = document.getElementById('messageBody');
-        a2ac.me.postMessage(v.value, chat2.msgPic, chat2.msgColor);
+        if (v.value && settings.current[v.value]) {
+           a2ac.me.setProfileId(v.value);
+           // a2ac.me.postMessage("", a2ac.me.icon, a2ac.me.color);
+        } else {
+           var lastWord = v.value.substr(v.value.lastIndexOf(' ') + 1);
+           var p = settings.current[lastWord];
+           if (p) {
+               v.value = v.value.substr(0, v.value.lastIndexOf(' '));
+               a2ac.me.postMessage(v.value, p.icon, p.color);
+           } else {
+               a2ac.me.postMessage(v.value, a2ac.me.icon, a2ac.me.color);
+           }
+        }
+
         if (v.value) {
             chat2.history.unshift(v.value);
             if (chat2.history.length > 100)
