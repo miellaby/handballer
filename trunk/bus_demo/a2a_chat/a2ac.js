@@ -268,6 +268,8 @@ Me.prototype.autoConfig = function() {
     
     // here is a default list of nickname
     var lst = [ "red", "blue", "green", "pink", "purple", "orange", "guest" ];
+    var default_prefix = "guest";
+    var nickname;
 
     // try to find a free nickname
     for (var l = lst.length, i = l - 1; i >= 0; i--) {
@@ -276,7 +278,6 @@ Me.prototype.autoConfig = function() {
     }   
 
     if (!nickname) { // no more free nickname, build a numbered one 
-        var default_prefix = "guest";
         var i = 2;
         while (names.indexOf(default_prefix + i) != -1) i++;
         nickname = default_prefix + i;

@@ -105,12 +105,13 @@ var chat2 = {
     onMeProfileId: function(variable, value) {
         var s = document.getElementById("meProfileId");
         var ot = s.options;
+        value = decodeURIComponent(value);
         s.value = value;
         if (s.selectedIndex <= 0) {
             var o = document.createElement("option");
             o.value = value;
             o.text = value;
-            s.options.add(o);
+            ot.add(o);
             s.value = value;
         }
 //         for (var i = 0; i < ot.length && ot[i].text != value; i++);
@@ -165,8 +166,9 @@ var chat2 = {
             if (!k) continue;
             if (!settings.current.hasOwnProperty(k)) continue;
             var o = document.createElement("option");
-            o.value = k;
-            o.text = k;
+            var dk = decodeURIComponent(k);
+            o.value = dk;
+            o.text = dk;
             s.options.add(o);
             if (k == p) s.selectedIndex = s.options.length - 1;
         }
@@ -212,7 +214,7 @@ var chat2 = {
                 this.context.unsubscribe("emblem", this.updateForm);
                 this.context.unsubscribe("color", this.updateForm);
                 this.context = null;
-            } else if (char2.context.content !== undefined) {
+            } else if (this.context.content !== undefined) {
                 this.context.unsubscribe("content", this.updateForm);
                 this.context.unsubscribe("date", this.updateForm);
             }
@@ -271,6 +273,7 @@ var chat2 = {
         } else {
             profileId = document.getElementById('meNewProfileId').value;
         }
+        profileId = encodeURIComponent(profileId).replace(/\./g, '%2E');
         if (a2ac.me.get("profileId") != profileId) {
             a2ac.me.setProfileId(profileId);
             return;
@@ -381,7 +384,7 @@ var chat2 = {
         document.getElementById("intendeesForward").onmousedown = function() { chat2.revolutionOfIntendees.friction = 0.2; chat2.revolutionOfIntendees.resume(); };
         document.getElementById("intendeesForward").onmouseup = document.getElementById("intendeesForward").onmouseout = function() { chat2.revolutionOfIntendees.friction = null; };
         document.getElementById("meNewProfileId").onblur = function() {
-                a2ac.me.setProfileId(this.value);
+                a2ac.me.setProfileId(encodeURIComponent(this.value).replace(/\./g,'%2E'));
                 this.style.display = 'none';
                 var s = document.getElementById("meProfileId");
                 s.style.display = "inline";
@@ -395,8 +398,11 @@ var chat2 = {
                 i.focus();
                 
                 
-            } else
-                a2ac.me.setProfileId(this.options[this.selectedIndex].value);
+            } else {
+                var profileId = this.options[this.selectedIndex].value;
+                profileId = encodeURIComponent(profileId).replace(/\./g,'%2E');
+                a2ac.me.setProfileId(profileId);
+            }
         }
  
         document.body.onmouseover = function() { a2ac.me.watchingActivity.set(true); };

@@ -84,7 +84,7 @@ window.getWindowDimensions = function(window) {
        windowWidth = document.body.clientWidth;
        windowHeight = document.body.clientHeight;
     }
-	
+   var pageWidth, pageHeight;                                                   
    // for small pages with total height less then height of the viewport
    if (yScroll < windowHeight){
       pageHeight = windowHeight;
