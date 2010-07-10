@@ -145,7 +145,7 @@ input, textarea, select {
 
 .intendeeDesc img {
    max-width: 32px;
-   max-heigth: 32px;
+   max-height: 32px;
 }
 .intendeeDesc small {
   font-size: 7px;
@@ -231,8 +231,8 @@ input, textarea, select {
 
 #mePicDiv {
  float: left;
- witdh: 192;
- height: 260;
+ width: 192px;
+ height: 260px;
 }
 
 #meEmblemImg, #iEmblemImg {
@@ -352,6 +352,7 @@ input, textarea, select {
 <script type="text/javascript" src="/a2a_chat/a2ac.js"></script>
 <!-- UI technologies -->
 <script type="text/javascript" src="helpers.js"></script>
+<script type="text/javascript" src="rgbcolor.js"></script>
 <script type="text/javascript" src="animator.js"></script>
 <script type="text/javascript" src="anim.js"></script>
 <script type="text/javascript" src="trap.js"></script>
@@ -394,6 +395,7 @@ input, textarea, select {
       <p><label for="meProfileId">profile&nbsp;ID&nbsp;</label>
         <select id="meProfileId"><option value="#NEW#">New ...</option></select>
         <input type="text" id="meNewProfileId" value="" style="display:none;" />
+        &nbsp;<button onclick="javascript:chat2.deleteCurrentProfile();" style="-moz-border-radius: 20px; -webkit-border-radius: 20px; width: 2em;">X</button> 
       </p>
       <p><label for="meNickname">nickname&nbsp;</label>
         <input type="text" id="meNickname" value="" style="" /></p>

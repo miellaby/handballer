@@ -172,6 +172,20 @@ var chat2 = {
         }
     },
 
+    deleteCurrentProfile: function() {
+        var d = null, p = a2ac.me.profileId;
+        for (var k in settings.current) {
+            if (!k || !settings.current.hasOwnProperty(k) || k == p) continue;
+            a2ac.me.setProfileId(k);
+            d = p;
+            break;
+        }
+        if (d) {
+            delete settings.current[d];
+            this.resetProfileList();
+        }
+    },
+
     updateForm: function(variable, value) {
         var t = { "nickname": "iName", "icon": "iPic", "emblem": "iEmblem", "mind": "iMind", "color": "iColor", "from": "mFrom", "date": "mDate" } ;
         var id = t[variable];
@@ -405,7 +419,9 @@ var chat2 = {
             if (this.value == defaultValue) {
                 this.value='';
                 this.style.color = a2ac.me.color;
-                this.style.textShadow = "0 1px 0.5px #000, 0 -1px 0.5px #000"
+                var darker = RGBColor.darker(a2ac.me.color).toName();
+
+                this.style.textShadow = "0 1px 0.5px " + darker + ", 0 -1px 0.5px " + darker;
             }
         };
         input.onblur = function() {

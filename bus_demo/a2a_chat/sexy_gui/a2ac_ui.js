@@ -114,7 +114,9 @@ IntendeeCell.prototype.show = function(item, change) {
             : item.watching ? "<small>watching</small>" : null;
         if (status) this.desc.innerHTML += status;
         // this.desc.style.height = item.mind ? "90px" : "60px";
+        var darker = RGBColor.darker(item.color).toName();
         this.desc.style.color = item.color;
+        this.desc.style.textShadow = "0 1px 0.5px " + darker + ", 0 -1px 0.5px " + darker;
     }
 };
 
@@ -204,7 +206,10 @@ MessageCell.prototype.show = function(item, change) {
         this.desc.style.display = "block";
     }
     this.img.src = item.icon || ( item.intendee && item.intendee.icon ) || this.defaultImg;
-    this.desc.style.color = item.color || ( item.intendee && item.intendee.color );
+    var color = item.color || ( item.intendee && item.intendee.color );
+    var darker = RGBColor.darker(color).toName();
+    this.desc.style.color = color;
+    this.desc.style.textShadow = "0 1px 0.5px " + darker + ", 0 -1px 0.5px " + darker;
     if (item.content) {
         this.desc.innerHTML = ''
         chat2.creole.parse(this.desc, item.content);
