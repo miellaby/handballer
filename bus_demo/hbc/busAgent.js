@@ -45,7 +45,8 @@ BusAgent.prototype.setted = function(variable, newValue) {
 };
 
 BusAgent.prototype.setteds = function(deltaObj) {
-    for (variable in deltaObj) {
+    for (var variable in deltaObj) {
+        if (!deltaObj.hasOwnProperty(variable)) continue;
         var newValue = deltaObj[variable];
         if (newValue != this[variable])
             this.set_and_fire(variable, newValue);
@@ -80,7 +81,8 @@ BusAgent.prototype.set = function(variable, value) {
 };
 
 BusAgent.prototype.sets = function(deltaObj) {
-    for (variable in deltaObj) {
+    for (var variable in deltaObj) {
+        if (!deltaObj.hasOwnProperty(variable)) continue;
         this.set(variable, deltaObj[variable]);
     }
 };
@@ -115,7 +117,7 @@ BusAgent.prototype.call = function(fnName) {
 
 BusAgent.prototype.getStatus = function() {
     var pic = {};  
-    for (p in this) {
+    for (var p in this) {
         if (typeof this[p] == "function" || !this.cbList[p]) continue;
         pic[p] = this[p];
     }
