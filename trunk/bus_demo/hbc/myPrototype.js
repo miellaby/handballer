@@ -1,6 +1,32 @@
 // console
 // if (typeof console != "object") { var console = { log: function() {} }; };
 
+// object cloning (in prototype-oriented way)
+Object.clone = function(obj) {
+    // A clone of an object is an empty object 
+    // with a prototype reference to the original.
+
+    // a private constructor, used only by this one clone.
+    function Clone() { };
+    Clone.prototype = obj;
+    var c = new Clone();
+    c.constructor = Clone;
+    return c;
+}
+
+// object copying
+Object.copy = function(obj) {
+  var newObj = (obj instanceof Array) ? [] : {};
+  for (k in obj) {
+    if (!obj.hasOwnProperty(k)) continue;
+    if (obj[k] && typeof obj[k] == "object") {
+       newObj[k] = Object.copy(obj[k]);
+    } else
+       newObj[k] = obj[k];
+  }
+  return newObj;
+};
+
 
 // occurences removal helper
 if (Array.prototype.remove === undefined) {
