@@ -76,7 +76,8 @@ var settings = {
 
     init: function(cookieName, default_profiles) {
         this.cookieName = cookieName;
-        this.initial = this.current = default_profiles || {};
+        this.initial = default_profiles || {};
+        this.current = Object.copy(this.initial);
         this.load();
     },
 
@@ -115,7 +116,7 @@ var settings = {
     },
 
     reset: function() {
-        this.current = this.initial;
+        this.current = Object.copy(this.initial);
         this.doSave();
     }
 };

@@ -114,6 +114,7 @@ var chat2 = {
             ot.add(o);
             s.value = value;
         }
+        s.defaultValue = value;
 //         for (var i = 0; i < ot.length && ot[i].text != value; i++);
 //         if (i < ot.length)
 //             s.selectedIndex = i;
@@ -125,27 +126,32 @@ var chat2 = {
 
 
     onMeNickname: function(variable, value) {
-        document.getElementById("meNickname").value = value;
+        var e = document.getElementById("meNickname");
+        e.defaultValue = e.value = value;
     },
 
     onMeIcon: function(variable, value) {
-        document.getElementById("mePic").value = value;
+        var e = document.getElementById("mePic");
+        e.defaultValue = e.value = value;
         imgBoxURL(document.getElementById("mePicImg"), value, 99, 133);
         chat2.setMsgPic(null); /* Reset msg icon */
     },
 
     onMeMind: function(variable, value) {
-        document.getElementById("meMind").value = value;
+        var e = document.getElementById("meMind");
+        e.defaultValue = e.value = value;
     },
 
     onMeEmblem: function(variable, value) {
-        document.getElementById("meEmblem").value = value;
+        var e = document.getElementById("meEmblem");
+        e.defaultValue = e.value = value;
         document.getElementById("meEmblemImg").src = value || 'images/blank.gif';
         chat2.setMsgPic(null); /* Reset msg icon */
     },
 
     onMeColor: function(variable, value) {
-        document.getElementById("meColor").value = value;
+        var e = document.getElementById("meColor");
+        e.defaultValue = e.value = value;
         chat2.setMsgColor(null);
     },
 
@@ -437,7 +443,7 @@ var chat2 = {
                 this.style.textShadow = "0 1px 10px #000, 0 -1px 0.05px #000";
             }
         };
-        input.onblur();
+        input.onfocus();
 
         a2ac.init();
         this.resetProfileList();

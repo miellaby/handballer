@@ -387,15 +387,15 @@ input, textarea, select {
   
 
   <div id="contextForm" style="display:none;">
-    <button style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);"><img src="images/cross.png" /></button>
     <form id="mePropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
+      <button type="reset" style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);"><img src="images/cross.png" /></button>
       <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
       <div id="mePicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="mePicImg" src="images/blank.gif" /></td></tr></table></div>
       <h2>My properties</h2>
       <p><label for="meProfileId">profile&nbsp;ID&nbsp;</label>
         <select id="meProfileId"><option value="#NEW#">New ...</option></select>
         <input type="text" id="meNewProfileId" value="" style="display:none;" />
-        &nbsp;<button onclick="javascript:chat2.deleteCurrentProfile();" style="-moz-border-radius: 20px; -webkit-border-radius: 20px; width: 2em;">X</button> 
+        &nbsp;<button type="button" onclick="javascript:chat2.deleteCurrentProfile();" style="-moz-border-radius: 20px; -webkit-border-radius: 20px; width: 2em;">X</button> 
       </p>
       <p><label for="meNickname">nickname&nbsp;</label>
         <input type="text" id="meNickname" value="" style="" /></p>
@@ -407,10 +407,13 @@ input, textarea, select {
         <input type="text" id="meEmblem" value="" />&nbsp;<img id="meEmblemImg" src="images/blank.gif" /></p>
       <p><label for="meColor">color&nbsp;</label>
         <input type="text" id="meColor" value="" style="" /></p>
-      <button style="float: right; margin-right: 10px;" onclick="javascript:chat2.submitContextForm();">Submit</button>&nbsp;
-      <button style="float: left; margin-right: 10px;" onclick="javascript:chat2.reset();">Reset</button>&nbsp;
+      <div style="position: absolute; bottom: 0; margin: 10px; left: 0; right: 0;">
+         <button style="float: right;" onclick="javascript:chat2.submitContextForm();">Submit</button>
+         <button type="button" style="float: left;" onclick="javascript:chat2.reset();">Reset all settings</button>
+      </div>
     </form>
-    <form id ="iPropsForm" class="ContextForm" action="null">
+<form id ="iPropsForm" class="ContextForm" action="null">
+      <button style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);"><img src="images/cross.png" /></button>
       <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
       <div id="iPicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="iPicImg" src="images/blank.gif" /></td></tr></table></div>
       <p><label for="iName">nick&nbsp;</label>
@@ -425,6 +428,7 @@ input, textarea, select {
         <input type="text" readonly="readonly" id="iColor" value="" /></p>
     </form>
     <form id ="mPropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
+      <button style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);"><img src="images/cross.png" /></button>
       <label for="mFrom">from&nbsp;</label>
       <input type="text" readonly="readonly" id="mFrom" value="" style="" />
       <p><label for="mDate">date&nbsp;</label>
@@ -434,7 +438,7 @@ input, textarea, select {
 
   <div id="postLayer"></div>
   <form id="postForm" action="javascript:chat2.onMessageSubmit();">
-    <div id="messageBodyDiv"><input id="messageBody" autocomplete="off" value="*type a message here*" /></div>
+    <div id="messageBodyDiv"><input id="messageBody" autofocus autocomplete="off" value="*type a message here*" /></div>
     <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
     <div id="msgPicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="msgPicImg" src="images/blank.gif"/ </td></tr></table></div>
         
