@@ -100,6 +100,14 @@ var settings = {
         this.saveTask = setTimeout(function() { self.doSave(); }, 500);
     },
 
+    exist: function(key) {
+        return (this.current[key] ? true : false);
+    },
+
+    duplicate: function(target, source) {
+        this.current[target] = Object.copy(this.current[source]);
+    },
+
     set: function(key, variable, value) {
         if (value == this.get(key, variable)) return; // nothing new here
 
@@ -112,7 +120,7 @@ var settings = {
 
     get: function(key, variable) {
         var c = this.current[key];
-        return c ? c[variable] : c;
+        return c ? c[variable] : c /* that is undefined */;
     },
 
     reset: function() {
@@ -203,7 +211,13 @@ Me.prototype.doPing = function() {
     this.set("ping", 1 + this.ping);
 };
 
+var lastProfileId = null;
 Me.prototype.onProfileId = function(variable, value) {
+    if (!settings.exist(value) && lastProfileId)
+        settings.duplicate(value, lastProfileId);
+
+    lastProfileId = value;
+
     var expire = new Date();
     expire.setTime(expire.getTime() + 3600 * 24 * 1000 * 30);
     cookies.set("a2ac_id", this.name + "+" + value, expire);
@@ -242,19 +256,21 @@ Me.prototype.onWorking = function(variable, value) {
     }
 };
 
-Me.prototype.setProfileId = function(profileId) {
+Me.prototype.setProfileId = function(profileId, isNew) {
     this.set("profileId", profileId);
-    var nickname = settings.get(profileId, "nickname"),
-        icon = settings.get(profileId, "icon"),
-        mind = settings.get(profileId, "mind"),
-        emblem = settings.get(profileId, "emblem"),
-        color = settings.get(profileId, "color");
+    if (isNew) return;
 
-    nickname &&  this.set("nickname", nickname);
-    icon && this.set("icon", icon);
-    mind && this.set("mind", mind);
-    emblem && this.set("emblem", emblem);
-    color && this.set("color", color);
+    var nickname = settings.get(profileId, "nickname") || '',
+        icon = settings.get(profileId, "icon") || '',
+        mind = settings.get(profileId, "mind") || '',
+        emblem = settings.get(profileId, "emblem") || '',
+        color = settings.get(profileId, "color") || '';
+
+    this.set("nickname", nickname);
+    this.set("icon", icon);
+    this.set("mind", mind);
+    this.set("emblem", emblem);
+    this.set("color", color);
 };
 
 Me.prototype.autoConfig = function() {
