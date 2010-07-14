@@ -389,7 +389,7 @@ var a2ac = {
 
     retrieveLog: function() {
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/a2a_chat/bots/getLog.cgi", true);
+        xhr.open("GET", "/a2a_chat/bots/getlog.cgi", true);
         xhr.onreadystatechange = function() {
            if (xhr.readyState >= 4) {
                a2ac.loadLog(xhr.responseState);

@@ -25,7 +25,9 @@ function puts(msg, pic, color) {
     chat2.revolutionOfMessages && chat2.revolutionOfMessages.unshift({"from": "code", "content": msg, "icon": pic, "color": color || "purple"});
 }
 
-
+// ****************************************
+// The main application logic : chat2
+// ****************************************
 var chat2 = {
     context: null,
     contextForm: null,
@@ -79,20 +81,18 @@ var chat2 = {
 
     onMessageSubmit: function() {
         var v = document.getElementById('messageBody');
-        if (v.value && settings.current[v.value]) {
-           a2ac.me.setProfileId(v.value);
+        var lastWord = v.value.substr(v.value.lastIndexOf(' ') + 1);
+        var p = lastWord ? settings.current[encodeURIComponent(lastWord).replace(/\./g, '%2E')] : null;
+        if (p && lastWord == v.value) {
+            a2ac.me.setProfileId(encodeURIComponent(lastWord).replace(/\./g, '%2E'));
            // a2ac.me.postMessage("", a2ac.me.icon, a2ac.me.color);
+        } else if (p) {
+            v.value = v.value.substr(0, v.value.lastIndexOf(' '));
+            a2ac.me.postMessage(v.value, p.icon, p.color);
         } else {
-           var lastWord = v.value.substr(v.value.lastIndexOf(' ') + 1);
-           var p = settings.current[lastWord];
-           if (p) {
-               v.value = v.value.substr(0, v.value.lastIndexOf(' '));
-               a2ac.me.postMessage(v.value, p.icon, p.color);
-           } else {
-               a2ac.me.postMessage(v.value, a2ac.me.icon, a2ac.me.color);
-           }
+            a2ac.me.postMessage(v.value, a2ac.me.icon, a2ac.me.color);
         }
-
+      
         if (v.value) {
             chat2.history.unshift(v.value);
             if (chat2.history.length > 100)
@@ -103,9 +103,9 @@ var chat2 = {
     },
 
     onMeProfileId: function(variable, value) {
+        value = decodeURIComponent(value);
         var s = document.getElementById("meProfileId");
         var ot = s.options;
-        value = decodeURIComponent(value);
         s.value = value;
         if (s.selectedIndex <= 0) {
             var o = document.createElement("option");
@@ -169,8 +169,7 @@ var chat2 = {
         var p = a2ac.me.profileId, s = document.getElementById("meProfileId");
         s.options.length = 1;
         for (var k in settings.current) {
-            if (!k) continue;
-            if (!settings.current.hasOwnProperty(k)) continue;
+            if (!k || !settings.current.hasOwnProperty(k)) continue;
             var o = document.createElement("option");
             var dk = decodeURIComponent(k);
             o.value = dk;
@@ -260,7 +259,8 @@ var chat2 = {
         if (isNaN(coords.x)) coords = readDOM(e.desc);
         var ed = getEltDimensions(form);
         var wd = getWindowDimensions(window);
-        a.start = a.current = {x: coords.x, y: coords.y, w: coords.w, h: coords.h};        
+        a.start = {x: coords.x, y: coords.y, w: coords.w, h: coords.h};
+        a.current = Object.copy(a.start);
         a.end = {
             x: (wd[0]-ed[0]) / 2,
             y: (wd[1]-ed[1]) / 2,
@@ -390,10 +390,10 @@ var chat2 = {
         document.getElementById("intendeesForward").onmousedown = function() { chat2.revolutionOfIntendees.friction = 0.2; chat2.revolutionOfIntendees.resume(); };
         document.getElementById("intendeesForward").onmouseup = document.getElementById("intendeesForward").onmouseout = function() { chat2.revolutionOfIntendees.friction = null; };
         document.getElementById("meNewProfileId").onblur = function() {
-                a2ac.me.setProfileId(encodeURIComponent(this.value).replace(/\./g,'%2E'));
-                this.style.display = 'none';
-                var s = document.getElementById("meProfileId");
-                s.style.display = "inline";
+             if (this.value) a2ac.me.setProfileId(encodeURIComponent(this.value).replace(/\./g,'%2E'));
+             this.style.display = 'none';
+             var s = document.getElementById("meProfileId");
+             s.style.display = "inline";
         }
         document.getElementById("meProfileId").onchange = function() {
             if (this.selectedIndex <= 0) {
@@ -477,8 +477,10 @@ var chat2 = {
         if (value === undefined)
             value = (a.ma.style.display != "none");
         c.src = value ? "images/micross.png" : "images/crossmi.png";
-        a.start = a.current = {y: value ? 0 : -edi[1]};        
-        a.start2 = a.current2 = {y: value ? 0 : -edp[1]};        
+        a.start = {y: value ? 0 : -edi[1]};
+        a.current = Object.copy(a.start);
+        a.start2 = {y: value ? 0 : -edp[1]};
+        a.current2 = Object.copy(a.start2);
         a.end = { y: value ? -edi[1] : 0 };
         a.end2 = { y: value ? -edp[1] : 0 };
         if (!value) {
