@@ -402,6 +402,7 @@ var chat2 = {
                 i.style.display = "inline";
                 i.value = "my new profile";
                 i.focus();
+                i.select();
                 
                 
             } else {
