@@ -187,13 +187,19 @@ input, textarea, select {
   left: 56px;
   margin-bottom: 5px;
   height: 38px ;
-  overflow: auto;
   padding: 0 2px; /* stupid padding to prevent scrollbar because of shadow */
 /*  background-image:url('images/lines.gif');*/
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   border-radius: 4px;
   text-shadow: 0 1px 0.05em #000, 0 -1px 0.05em #000;
+  overflow: auto;
+}
+
+.msgDesc img {
+   max-width: 32px;
+   max-height: 32px;
+   vertical-align: middle;
 }
 
 .eventDesc {
@@ -212,6 +218,11 @@ input, textarea, select {
   z-index: 30;
 }
 
+.eventDesc img {
+   max-width: 32px;
+   max-height: 32px;
+   vertical-align: middle;
+}
 
 #contextForm {
     -moz-border-radius: 20px;
