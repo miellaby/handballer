@@ -88,7 +88,7 @@ var chat2 = {
            // a2ac.me.postMessage("", a2ac.me.icon, a2ac.me.color);
         } else if (p) {
             v.value = v.value.substr(0, v.value.lastIndexOf(' '));
-            a2ac.me.postMessage(v.value, p.icon, p.color);
+            a2ac.me.postMessage(p.emblem ? v.value + " {{" + p.emblem + "}}" : v.value, p.icon, p.color);
         } else {
             a2ac.me.postMessage(v.value, a2ac.me.icon, a2ac.me.color);
         }
