@@ -408,7 +408,7 @@ var a2ac = {
         xhr.open("GET", "/a2a_chat/bots/getlog.cgi", true);
         xhr.onreadystatechange = function() {
            if (xhr.readyState >= 4) {
-               a2ac.loadLog(xhr.responseState);
+               a2ac.loadLog(xhr.responseText);
            }
         }
         xhr.send("");
