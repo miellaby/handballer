@@ -1,6 +1,6 @@
 #!/bin/sh
 PATH=/opt/bin:$PATH
-echo -e "Content-type: text/javascript\n\n"
+echo -e "Content-type: text/javascript\n"
 
 # our html code
 echo -n "["
