@@ -38,6 +38,12 @@ hbcget "$agora/model/m*|$agora/model/i*|$agora/status/here" |\
  n=$(expr 3 + ${#label})
  body=${l:$n}
  echo $label : $body
+ # time to escape dangerous characters
+ label=${label//\\/\\\\\\}
+ label=${label//\'/\\\\\'}
+ body=${body//\\/\\\\\\}
+ body=${body//\'/\\\\\'}
+
  echo {timestamp: \'$(date +%F/%R)\'\, label:\'$label\', body:\'$body\' \} >> /tmp/bot_logger.txt
  play ~/bin/chhh.aif &> /dev/null
 done

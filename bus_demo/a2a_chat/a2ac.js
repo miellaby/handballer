@@ -371,9 +371,10 @@ var a2ac = {
         console.log("not a log : " + jsonLog);
         return;
       }
-      var log = eval("jsonLog");
+      var log = eval(jsonLog);
       for (var i = 0; i < log.length; i++) {
          var event = log[i];
+         if (!event) break;
          var label = event.label;
          if (autobus.agora) label = label.substring(label.indexOf('/') + 1);
          if (label.substring(0, 6) == "freed") {
@@ -383,16 +384,16 @@ var a2ac = {
             var agentName = slashIdx != -1 ? label.substring(6, slashIdx) : label.substring(6);
             var slot = slashIdx != -1 ? label.substring(slashIdx + 1) : undefined;
             if (freeds.indexOf(agentName) == -1) {
-               obj = this.busAgent(agentName, BusAgent.prototype.THERE);
+               obj = autobus.busAgent(agentName, BusAgent.prototype.THERE);
                if (obj.there()) {
                   if (slot) {
-                     value = eval("(" + body + ")");
+                     value = eval("(" + event.body + ")");
                      if (obj[slot] === undefined)
                         obj.setted(slot, value); 
                   } else {
-                     delta = eval("(" + body + ")");
+                     delta = eval("(" + event.body + ")");
                      for (var slot in delta) {
-                        if (!this.hasOwnProperty(slot)) continue;
+                        if (!delta.hasOwnProperty(slot)) continue;
                         if (obj[slot] !== undefined) continue;
                         obj.setted(slot, delta[slot]);
                      }
