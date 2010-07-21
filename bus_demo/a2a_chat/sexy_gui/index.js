@@ -64,7 +64,7 @@ var chat2 = {
         
         var hidden = (document.getElementById("msgsArea").style.display == "none");
 
-        if (chat2.speakingSound && arguments.length > 2 && !a2ac.me.watching && !a2ac.me.typing) // need to make sound if no activity
+        if (chat2.speakingSound && arguments.length > 2 && a2ac.me.activity == 'idle') // need to make sound if no activity
             chat2.speakingSound.play();
 
         for (var i = index, n = index + howMany ; i < index; i++) {
@@ -412,17 +412,14 @@ var chat2 = {
             }
         }
  
-        document.body.onmouseover = function() { a2ac.me.watchingActivity.set(true); };
-        document.body.onmouseout = function() { a2ac.me.watchingActivity.set(false); };
-        window.onfocus = function() { a2ac.me.typingActivity.set(true); a2ac.me.typingActivity.set(false); };
-        window.onblur = function() { a2ac.me.typingActivity.set(false); };
+        document.body.onmouseover = function() { a2ac.me.activityProxy.set('watching'); };
+        window.onfocus = function() { a2ac.me.activityProxy.set('typing'); };
 
         var input = document.getElementById("messageBody");
         input.onkeydown = function() {
-            a2ac.me.typingActivity.set(true);
+            a2ac.me.activityProxy.set('typing');
         };
         input.onkeyup = function(e) {
-            a2ac.me.typingActivity.set(false);
             chat2.browsePast.call(this, e);
         }
         var defaultValue = input.value;

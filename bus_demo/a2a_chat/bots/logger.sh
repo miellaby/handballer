@@ -10,14 +10,14 @@ agora=a2ac
 PING=100
 if [ -n "$1" ] ; then agora=$1 ; fi
 
-trap "hbcpost $agora/freed/$bot$$" SIGHUP SIGINT SIGTERM
+trap "hbcpost $agora/freed/$bot" SIGHUP SIGINT SIGTERM
 
 function advertise {
-   hbcpost $agora/model/$bot$$ "{name:'"$bot$$"',tags:['bot', 'intendee'],nickname:'"$nickname"',icon:'"$icon"',mind:'$mind'}"
+   hbcpost $agora/model/$bot "{name:'"$bot"',tags:['bot', 'intendee'],nickname:'"$nickname"',icon:'"$icon"',mind:'$mind'}"
 }
 
 function ping {
-   hbcpost $agora/model/$bot$$/ping "$PING"
+   hbcpost $agora/model/$bot/ping "$PING"
    PING=$(expr $PING + 1)
 }
 

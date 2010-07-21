@@ -60,8 +60,7 @@ IntendeeCell.prototype.unbind = function() {
         this.item.unsubscribe("mind", this.selfUpdate);
         this.item.unsubscribe("color", this.selfUpdate);
         this.item.unsubscribe("away", this.selfUpdate);
-        this.item.unsubscribe("typing", this.selfUpdate);
-        this.item.unsubscribe("watching", this.selfUpdate);
+        this.item.unsubscribe("activity", this.selfUpdate);
     }
 };
 
@@ -85,8 +84,7 @@ IntendeeCell.prototype.show = function(item, change) {
             item.subscribe("mind", this.selfUpdate);
             item.subscribe("color", this.selfUpdate);
             item.subscribe("away", this.selfUpdate);
-            item.subscribe("typing", this.selfUpdate);
-            item.subscribe("watching", this.selfUpdate);
+            item.subscribe("activity", this.selfUpdate);
         }
 
         this.emblem.style.display = "block";
@@ -108,11 +106,10 @@ IntendeeCell.prototype.show = function(item, change) {
             chat2.creole.parse(mindElement, item.mind)
             this.desc.appendChild(mindElement);
         }
-        var status =
-            item.away? "<small>(away)</small>"
-            : item.typing ? "<small>typing</small>"
-            : item.watching ? "<small>watching</small>" : null;
-        if (status) this.desc.innerHTML += status;
+        if (item.activity) {
+            this.desc.innerHTML +=
+               "<small>" + item.activity + "</small>";
+        }
         // this.desc.style.height = item.mind ? "90px" : "60px";
         var darker = RGBColor.darker(item.color).toName();
         this.desc.style.color = item.color;

@@ -1,6 +1,6 @@
 #!/bin/sh
 PATH=/opt/bin:$PATH
-echo -e "Content-type: text/javascript\n"
+echo -e "Pragma: no-cache\nCache-control: no-cache, must-revalidate\nContent-type: text/javascript\n"
 
 # our html code
 echo -n "["

@@ -130,31 +130,51 @@ var settings = {
 };
 
 // ======================================================================
-// Activity object = agent boolean variable manager with sligh positive hysteris 
+// Activity object = variable accessor proxy which falls back to a default value
+// after an idle delay
 // ======================================================================
 
-function Activity(agent, action, delay) {
+function Activity(agent, variable, delay, awayDelay, levels) {
     this.agent = agent;
-    this.action = action;
+    this.variable = variable;
     this.timeout = undefined;
+    this.awayTimeout = undefined;
     this.now = false;
-    this.delay = delay || 500;
-    agent.set(action, false);
+    this.delay = delay;
+    this.awayDelay = awayDelay;
+    this.levels = levels;
+    this.currentLevel = 1;
+    agent.set(variable, levels[1]);
     var self = this;
     this.cb = function () {
         self.timeout = undefined ;
-        agent.set(self.action, self.now);
-    };  
+        self.currentLevel = 1;
+        self.agent.set(self.variable, self.levels[1]);
+        self.awayTimeout = setTimeout(self.awayCB, self.awayDelay);
+    };
+    this.awayCB = function () {
+        self.awayTimeout = undefined;
+        self.currentLevel = 0;
+        self.agent.set(self.variable, self.levels[0]);
+    };
 }
 
 Activity.prototype.set = function(value) {
-    if (this.timeout !== undefined) clearTimeout(this.timeout) ;
-    this.now = value;
-    if (value) {
-        this.timeout = undefined ;
-        this.agent.set(this.action, true);
-    } else
-        this.timeout = setTimeout(this.cb, this.delay);
+    if (this.timeout !== undefined) clearTimeout(this.timeout);
+    if (this.awayTimeout !== undefined) clearTimeout(this.awayTimeout);
+    var level = this.levels.indexOf(value);
+    if (level == 0) {
+       this.awayCB(); // direct in 'away' status
+    } else if (level == 1) {
+       this.cb(); // direct in 'idle' status;
+    } else if (level > this.currentLevel) {
+        this.currentLevel = level;
+        this.agent.set(this.variable, value);
+    }
+
+    if (level > 1) {
+      this.timeout = setTimeout(this.cb, this.delay);
+    }
 };
 
 // ======================================================================
@@ -165,9 +185,7 @@ function Me(uid) {
     BusAgent.call(this, autobus, uid, BusAgent.prototype.HERE);
     this.setTags("intendee");
     this.ping = 0;
-    this.awayTimeout = undefined;
-    this.typingActivity = new Activity(this, "typing", 5000);
-    this.watchingActivity = new Activity(this, "watching", 5000);
+    this.activityProxy = new Activity(this, "activity", 5000, 60000, ["away", "idle", "watching", "typing"]);
     this.profileId = undefined;
 }
 
@@ -180,8 +198,6 @@ Me.prototype.init = function(profileId) {
     this.subscribe("mind", this.onMind);
     this.subscribe("emblem", this.onEmblem);
     this.subscribe("color", this.onColor);
-    this.subscribe("watching", this.onWorking);
-    this.subscribe("typing", this.onWorking);
     this.doPing();
     var self = this;
     setInterval(function() { self.doPing() }, 60 * 2 * 1000 - 30 * Math.random() * 1000);
@@ -241,19 +257,6 @@ Me.prototype.onEmblem = function(variable, value) {
 
 Me.prototype.onColor = function(variable, value) {
     settings.set(this.profileId, "color", value);
-};
-
-Me.prototype.onWorking = function(variable, value) {
-    if (this.awayTimeout !== undefined) {
-        clearTimeout(this.awayTimeout);
-        this.awayTimeout = undefined;
-    }
-    if (value)
-        this.set("away", false);
-    else if (!this.get("watching") && !this.get("typing")) { // not working any more
-        var self = this;
-        this.awayTimeout = setTimeout(function() {self.set("away" ,true);}, 60 * 1000);
-    }
 };
 
 Me.prototype.setProfileId = function(profileId, isNew) {
