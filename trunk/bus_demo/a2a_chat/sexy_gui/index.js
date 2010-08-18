@@ -489,13 +489,14 @@ var chat2 = {
             chat2.revolutionOfIntendees.redraw(); // redraw to get cells removed by hiding
         }
         a.iterate = function() {
+            this.ratio += 0.1;
+            if (this.ratio > 1) this.ratio = 1;
             this.current.y = this.start.y + (this.end.y - this.start.y) * this.ratio;
             this.current2.y = this.start2.y + (this.end2.y - this.start2.y) * this.ratio;
             writeDOM(this.ia, this.current);
             writeDOM(this.pf, this.current2, "left", "bottom");
             writeDOM(this.pl, this.current2, "left", "bottom");
-            this.ratio += 0.1;
-            if (this.ratio > 1) {
+            if (this.ratio == 1) {
                 if (this.end.y < 0) {
                     this.ia.style.display =
                         this.pf.style.display =
@@ -505,8 +506,9 @@ var chat2 = {
                     this.ma.style.display = "block";
                     chat2.revolutionOfMessages.redraw(); // redraw to get cells removed by hiding
                 }
+                return false;
             }
-            return this.ratio <= 1;
+            return true;
         }
         a.resume();
 
