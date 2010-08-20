@@ -244,4 +244,4 @@ The embedded system just calls this script at startup, and then either runs the 
 
 As stated, the GUI will be the same in any platform, because it uses the HTML standard.
 
-A system like the one presented in this note was implemented on a mini2440 (from [http://www.friendlyarm.net/ FriendlyARM]) running [http://code.google.com/p/handballer/ Handballer] and the Web browser provided as an example of WebKit usage with [http://doc.trolltech.com/4.5/index.html Qt 4.5.3] ([http://doc.trolltech.com/4.5/webkit-fancybrowser.html Fancy Browser]). 
+A system like the one presented in this note was implemented on a mini2440 (from [http://www.friendlyarm.net/ FriendlyARM]) running [http://code.google.com/p/handballer/ Handballer] and the Web browser provided as an example of !WebKit usage with [http://doc.trolltech.com/4.5/index.html Qt 4.5.3] ([http://doc.trolltech.com/4.5/webkit-fancybrowser.html Fancy Browser]). 
