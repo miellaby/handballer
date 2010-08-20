@@ -1,0 +1,247 @@
+#summary Bidirectional communication between an embedded system and a Web browser lets the embedded developer forget about writing graphical applications.
+
+= Introduction =
+
+One of the common tasks when developing an embedded system is programming a GUI (Graphical User Interface), not only for the embedded system itself but also for a computer connected to the system. In the former case, the developer may choose whatever platform he or she finds suitable. In the latter case, on the contrary, the developer must adapt the GUI to the user’s platform. Embedded platforms with enough resources to run a [http://code.google.com/p/handballer/ Handballer] Web server and a Web browser are now affordable.
+But for a Web browser-based GUI to interact properly with the application, there is a need for a mechanism to update the web page in response to server-initiated messages. One of the simplest and more efficient ways to accomplish the task is to use [http://code.google.com/p/handballer/ Handballer] as the embedded Web server.
+
+
+= Details =
+
+When a Web browser, either local or remote, is directed to the IP of the embedded system, [http://code.google.com/p/handballer/ Handballer]  serves an HTML page containing the GUI, and Javascript code to enable bidirectional communication between the Web browser and the server. This Javascript code is a stripped down version of hbc.js, and the resulting page will be similar to the following:
+
+{{{
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+
+  <head>
+    <title> 
+      Handballer application example
+    </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Expires" content="Tue, 20 Aug 1996 14:25:27 GMT">
+    <link rel="stylesheet" type="text/css" href="fp.css">
+  </head>
+
+  <body>
+    <!-- Received from server -->
+    <p>
+      Value: <span id="receive">0</span> m
+    </p>
+    <p>
+      <span id="status"></span>
+    </p>
+    <!-- Actions -->
+    <p>
+      <button id="start" type="button">
+        Start application
+      </button>
+    </p>
+    <p>
+      <button disabled id="cancel" type="button">
+        Cancel
+      </button>
+    </p>
+
+  </body>
+
+  <script type="text/javascript"> 
+
+    //-------------------------------------------------------------------
+    // Interact with DOM 
+    //-------------------------------------------------------------------
+
+    var begin = document.getElementById("start");
+
+    begin.onclick = command_start;
+
+    function command_start() { 
+      // show status
+      document.getElementById("status").innerHTML = "Sending data..."; 
+      // send data to server to start the application
+      send("application", "start");
+      // enable cancel button
+      document.getElementById("cancel").disabled = false;
+      // disable start button
+      document.getElementById("start").disabled = true;
+      // show status
+      document.getElementById("status").innerHTML = "Awaiting answer from server...";
+    }
+
+    var end = document.getElementById("cancel");
+
+    end.onclick = command_stop;
+
+    function command_stop() {
+      send("application", "cancel");
+    }
+
+    //-------------------------------------------------------------------
+    // Interact with server
+    // (stripped down hbc.js) 
+    //------------------------------------------------------------------- 
+
+    //-------------------------------------------------------------------
+    // Initializations
+    //-------------------------------------------------------------------
+    baseURL = "/bus/";
+    pattern = "**";
+    clientId = "top";
+    token = String(Number(new Date()) % (Math.random() * 0xAFF00000)).substr(0,9);
+    pollPeriod = 200; // 200 ms interval when polling is necessary
+    pollInterval = undefined;
+    sendXHR = new XMLHttpRequest(); // recyclable message sending dedicated XHR
+    isSending = false; // sending status 
+    sendFifo = []; // to-be-sent messages queue 
+    var pollIdx; 
+    var lastXHRstate; 
+    var receiveXHR; 
+
+    //------------------------------------------------------------------- 
+    // Generic functions for reception: poll(), openXHR() 
+    //------------------------------------------------------------------- 
+    poll = function() { 
+      if(receiveXHR.readyState < 3) { 
+        return; 
+      } 
+      var r = receiveXHR.responseText; 
+      while(true) { // received message parsing loop 
+        var labelEnd = r.indexOf("\x00", pollIdx); 
+        if(labelEnd == -1) { 
+          break; 
+        } 
+        var bodyEnd = r.indexOf("\x00", labelEnd + 1); 
+        if (bodyEnd == -1) { 
+          break; 
+        } 
+        var label = r.substring(pollIdx, labelEnd); 
+        var body = r.substring(labelEnd + 1, bodyEnd); 
+        try { 
+          receiveCB(label, body); 
+        } catch (e) { 
+          alert("Exception when trying receiveCB from poll"); 
+        } 
+        pollIdx = bodyEnd + 1; 
+      } 
+      if(receiveXHR.readyState == 4) { 
+        // if connection aborted, try to relaunch it once 
+        if(lastXHRstate >= 3) { 
+          openXHR(); 
+        } 
+      } else { 
+        lastXHRstate = receiveXHR.readyState; 
+      } 
+    }; 
+
+    openXHR = function() { 
+      pollIdx = 0; // for polled XHR response parsing 
+      lastXHRstate = -1; // for XHR state change detection 
+      receiveXHR = new XMLHttpRequest(); // bus message receiving dedicated XHR 
+      var url = baseURL + pattern + "?label&timestamp=" + Number(new Date()); 
+      url += "&null&flush&box=" + token + clientId; 
+      receiveXHR.open('GET', url, true); receiveXHR.onreadystatechange = poll; 
+      receiveXHR.send(null); 
+    }; 
+
+    //------------------------------------------------------------------- 
+    // Initial call to openXHR() 
+    //------------------------------------------------------------------- 
+    openXHR(); 
+
+    //------------------------------------------------------------------- 
+    // Application specific function: receiveCB() 
+    //------------------------------------------------------------------- 
+    receiveCB = function(label, body) { 
+      if(label == "**wait") { 
+        ...; 
+        return; 
+      } 
+      if(label == "**finished") { 
+        ...; 
+        return; 
+      } 
+    }; 
+
+    //------------------------------------------------------------------- 
+    // Generic functions for transmission: send(), sendNext(), sendOne() 
+    //------------------------------------------------------------------- 
+    send = function(label, body) { 
+      sendFifo.push([label, body]); 
+      if(isSending) { 
+        return; 
+      } 
+      sendNext(); 
+    }; 
+
+    sendNext = function() { 
+      var next = sendFifo.shift(); 
+      if(next) { 
+        sendOne(next[0], next[1]); 
+      } 
+    }; 
+
+    sendOne = function(label, body) { 
+      isSending = true; 
+      sendXHR.open("POST", baseURL + label, true); 
+      sendXHR.onreadystatechange = function() { 
+        if(sendXHR.readyState >= 4) { 
+          isSending = false;
+          sendNext(); 
+        } 
+      }; 
+      sendXHR.setRequestHeader("Content-Type", "text/plain;charset=UTF-8"); 
+      sendXHR.send(body == null ? "" : "" + body);
+    }; 
+
+  </script> 
+
+</html>
+}}}
+
+The code that handles Web browser requests and the application itself can be just a shell script as in demo.sh and logger.sh:
+
+{{{
+#! /bin/bash 
+
+# kill any user handballer and start a new one 
+killall handballer
+handballer -d /www -b 'bus/**' -D -p 7777 & 
+
+app_function() { 
+  ... 
+  hbcpost wait "something&$var_1" 
+  ... 
+  result=$(./app_executable) 
+  ... 
+  hbcpost finished "$result" 
+  ... 
+} 
+
+sleep 1 
+
+hbcget |\ 
+          while read line 
+          do 
+            if [[ "$line" == "application : "* ]] 
+            then 
+              action=${line#"application : "} 
+              if [ "$action" = "start" ] 
+              then 
+                var_1=xx 
+                app_function & 
+                ... 
+              elif [ "$action" = "cancel" ] 
+              then 
+                ... 
+              fi 
+            fi 
+          done 
+# EOF
+}}}
+
+The embedded system just calls this script at startup, and then either runs the local Web browser, if no remote browser is connected, or just serves the remote Web browser, if connected.
+
+As stated, the GUI will be the same in any platform, because it uses the HTML standard.
+
+A system like the one presented in this note was implemented on a mini2440 (from [http://www.friendlyarm.net/ FriendlyARM]) running [http://code.google.com/p/handballer/ Handballer] and the Web browser provided as an example of WebKit usage with [http://doc.trolltech.com/4.5/index.html Qt 4.5.3] ([http://doc.trolltech.com/4.5/webkit-fancybrowser.html Fancy Browser]). 
