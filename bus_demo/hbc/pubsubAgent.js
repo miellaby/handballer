@@ -36,7 +36,12 @@ PubSubAgent.prototype.subscribe = function (attribut, cb) {
 PubSubAgent.prototype.subscribeSync = function (attribut, cb) {
     var result = this.subscribe(attribut, cb);
     var value = this[attribut];
-    if (value !== undefined) cb.call(this, attribut, value); // invoke callback once
+    if (value !== undefined) {
+       if (typeof value == "object" && value.constructor == Array) {
+          cb.apply(this, [attribut, 0, 0].concat(value)); // invoke callback in list mode
+       } else
+          cb.call(this, attribut, value); // invoke callback once
+    }
     return result;
 }
 

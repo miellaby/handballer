@@ -64,7 +64,7 @@ var chat2 = {
         
         var hidden = (document.getElementById("msgsArea").style.display == "none");
 
-        if (chat2.speakingSound && arguments.length > 2 && a2ac.me.activity == 'idle') // need to make sound if no activity
+        if (chat2.speakingSound && arguments.length > 3 && a2ac.me.activity == 'away') // need to make sound if away
             chat2.speakingSound.play();
 
         for (var i = index, n = index + howMany ; i < index; i++) {
@@ -364,7 +364,6 @@ var chat2 = {
             a2acAgora = (back ? back.b64() : 'a2ac') ;
         autobus.agora = a2acAgora + '/';
 
-        autobus.tagsonomy.subscribe("intendee", chat2.onIntendeesSplice);
         autobus.tagsonomy.subscribe("message", chat2.onMessagesSplice);
 
         this.iTrap.bind(document.getElementById("intendeesTrap"));
@@ -412,22 +411,32 @@ var chat2 = {
             }
         }
  
-        document.body.onmouseover = function() { a2ac.me.activityProxy.set('watching'); };
-        window.onfocus = function() { a2ac.me.activityProxy.set('typing'); };
-
+        document.body.onmouseover = function() {
+            a2ac.me.awayAttractor.set('away', false);
+        };
+        window.onfocus = function() {
+            a2ac.me.activitySummary.set('watching', true);
+            a2ac.me.awayAttractor.set('away', false);
+        };
+        window.onblur = function() {
+            a2ac.me.activitySummary.set('watching', false);
+            a2ac.me.awayAttractor.set('away', true);
+        };
         var input = document.getElementById("messageBody");
         input.onkeydown = function() {
-            a2ac.me.activityProxy.set('typing');
+            a2ac.me.awayAttractor.set('away', false);
+            a2ac.me.typingAttractor.set('typing', true);
         };
         input.onkeyup = function(e) {
             chat2.browsePast.call(this, e);
-        }
+        };
         var defaultValue = input.value;
         input.value = '';
 
         input.onfocus = function() {
+            a2ac.me.awayAttractor.set('away', false);
             if (this.value == defaultValue) {
-                this.value='';
+                this.value = '';
                 this.style.color = a2ac.me.color;
                 var darker = RGBColor.darker(a2ac.me.color).toName();
 
@@ -435,16 +444,18 @@ var chat2 = {
             }
         };
         input.onblur = function() {
+            a2ac.me.awayAttractor.set('away', false);
             if (!this.value.length) {
                 this.value = defaultValue;
                 this.style.color = "gray";
                 this.style.textShadow = "0 1px 10px #000, 0 -1px 0.05px #000";
             }
         };
-        input.onfocus();
 
         a2ac.init();
+        input.onfocus();
         this.resetProfileList();
+        a2ac.neighbourhood.subscribeSync("intendees", chat2.onIntendeesSplice);
         a2ac.me.subscribeSync("profileId", this.onMeProfileId);
         a2ac.me.subscribeSync("nickname", this.onMeNickname);
         a2ac.me.subscribeSync("icon", this.onMeIcon);

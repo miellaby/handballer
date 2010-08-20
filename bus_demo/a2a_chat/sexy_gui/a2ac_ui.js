@@ -106,7 +106,7 @@ IntendeeCell.prototype.show = function(item, change) {
             chat2.creole.parse(mindElement, item.mind)
             this.desc.appendChild(mindElement);
         }
-        if (item.activity) {
+        if (item.activity != "connected") {
             this.desc.innerHTML +=
                "<small>" + item.activity + "</small>";
         }
