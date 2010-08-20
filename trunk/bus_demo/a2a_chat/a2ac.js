@@ -130,51 +130,66 @@ var settings = {
 };
 
 // ======================================================================
-// Activity object = variable accessor proxy which falls back to a default value
-// after an idle delay
+// Attractor : accessor proxy which set backs a targeted variable to a
+// default value after a delay.
 // ======================================================================
 
-function Activity(agent, variable, delay, awayDelay, levels) {
-    this.agent = agent;
-    this.variable = variable;
-    this.timeout = undefined;
-    this.awayTimeout = undefined;
-    this.now = false;
-    this.delay = delay;
-    this.awayDelay = awayDelay;
-    this.levels = levels;
-    this.currentLevel = 1;
-    agent.set(variable, levels[1]);
-    var self = this;
-    this.cb = function () {
-        self.timeout = undefined ;
-        self.currentLevel = 1;
-        self.agent.set(self.variable, self.levels[1]);
-        self.awayTimeout = setTimeout(self.awayCB, self.awayDelay);
-    };
-    this.awayCB = function () {
-        self.awayTimeout = undefined;
-        self.currentLevel = 0;
-        self.agent.set(self.variable, self.levels[0]);
-    };
+function Attractor(agent, variable, delay, defaultValue) {
+   this.agent = agent;
+   this.variable = variable;
+   this.delay = delay;
+   this.timeout = undefined; 
+   this.defaultValue = defaultValue;
+   var self = this;
+   this.cb = function () {
+       self.timeout = undefined;
+       self.agent.set(self.variable, self.defaultValue);
+   };
 }
 
-Activity.prototype.set = function(value) {
-    if (this.timeout !== undefined) clearTimeout(this.timeout);
-    if (this.awayTimeout !== undefined) clearTimeout(this.awayTimeout);
-    var level = this.levels.indexOf(value);
-    if (level == 0) {
-       this.awayCB(); // direct in 'away' status
-    } else if (level == 1) {
-       this.cb(); // direct in 'idle' status;
-    } else if (level > this.currentLevel) {
-        this.currentLevel = level;
-        this.agent.set(this.variable, value);
-    }
-
-    if (level > 1) {
+Attractor.prototype.set = function(variable, value) {
+   this.agent.set(variable, value);
+   if (variable != this.variable) return value;
+   if (this.timeout !== undefined) clearTimeout(this.timeout);
+   if (value != this.defaultValue) {
       this.timeout = setTimeout(this.cb, this.delay);
     }
+   return value;
+};
+
+// ======================================================================
+// Summary : accessor proxy which determines the first variable
+// equals to true in an ordered list of boolean variables and set a target
+// variable to this variable name.
+// ======================================================================
+
+function Summary(agent, variable, levels, defaultValue) {
+    this.agent = agent;
+    this.variable = variable;
+    this.levels = levels;
+    this.defaultValue = defaultValue;
+    this.status = {};
+    this.currentLevel = levels.length;
+    agent.set(variable, defaultValue);
+}
+
+Summary.prototype.set = function(variable, value) {
+    this.status[variable] = value;
+    var i = this.levels.indexOf(variable);
+    if (i == -1) return value;
+    if (value && i < this.currentLevel) {
+       this.agent.set(this.variable, variable);
+       this.currentLevel = i;
+    }
+    if (!value && i == this.currentLevel) {
+       var s = this.levels.length;
+       for (i++; i < s; i++) {
+          if (this.status[this.levels[i]]) break;
+       }
+       this.agent.set(this.variable, i < s ? this.levels[i] : this.defaultValue);
+       this.currentLevel = i;
+    }
+    return value;
 };
 
 // ======================================================================
@@ -185,7 +200,9 @@ function Me(uid) {
     BusAgent.call(this, autobus, uid, BusAgent.prototype.HERE);
     this.setTags("intendee");
     this.ping = 0;
-    this.activityProxy = new Activity(this, "activity", 5000, 60000, ["away", "idle", "watching", "typing"]);
+    this.activitySummary = new Summary(this, "activity", ["disconnected", "typing", "watching", "way"], "connected");
+    this.awayAttractor = new Attractor(this.activitySummary, "away", 60000, true);
+    this.typingAttractor = new Attractor(this.activitySummary, "typing", 5000, false);
     this.profileId = undefined;
 }
 
@@ -200,7 +217,7 @@ Me.prototype.init = function(profileId) {
     this.subscribe("color", this.onColor);
     this.doPing();
     var self = this;
-    setInterval(function() { self.doPing() }, 60 * 2 * 1000 - 30 * Math.random() * 1000);
+    setInterval(function() { self.doPing() }, 100 * 1000 - 20 * Math.random() * 1000);
 
     if (profileId) {
         this.setProfileId(profileId);
@@ -312,7 +329,7 @@ Me.prototype.autoConfig = function() {
 
 var a2ac = {
     me: null,
-
+    neighbourhood: null,
     //messagesQueue: [],
 
     pingsLog: {},
@@ -320,12 +337,16 @@ var a2ac = {
 
     cleanGone: function() {
         for (var lst = autobus.tagsonomy.getOr("intendee",[]), l = lst.length, i = l - 1; i >= 0; i--) {
-            var intendee=lst[i];
+            var intendee = lst[i];
             if (intendee === this.me || a2ac.pingsLog[intendee.name] || a2ac.lastPingsLog[intendee.name])
                 continue; // intendee still here
             
             // intendee is gone
             log("intendee " + intendee.name + " is gone!");
+            if (intendee.neighbour) {
+              intendee.neighbour = false;
+              a2ac.neighbourhood.removeIn("intendees", intendee);
+            }
             intendee.forget();
         }
         
@@ -339,6 +360,18 @@ var a2ac = {
         if (a2ac.me.ping < value) a2ac.me.ping = value;
     },
 
+    onIntendeeActivity: function(variable, value) {
+        if (value == 'disconnected') {
+            if (this.neighbour) {
+              this.neighbour = false;
+              a2ac.neighbourhood.removeIn("intendees", this);
+            }
+        } else if (!this.neighbour) {
+            this.neighbour = true;
+            a2ac.neighbourhood.unshiftIn("intendees", this);
+        }
+    },
+
     onMessageTimestamp: function(variable, value) {
         if (a2ac.me.ping < value) a2ac.me.ping = value;
     },
@@ -349,6 +382,7 @@ var a2ac = {
            var intendee = args[j];
            log("new intendee id " + intendee.name);
            intendee.subscribe("ping", a2ac.onIntendeePing);
+           intendee.subscribe("activity", a2ac.onIntendeeActivity);
        }
     },
 
@@ -421,6 +455,9 @@ var a2ac = {
     init: function() {
         settings.init("a2ac", default_profiles);
 
+        this.neighbourhood = new PubSubAgent();
+        this.neighbourhood.intendees = [];
+
         autobus.tagsonomy.subscribe("intendee", a2ac.onIntendeesSplice);
         autobus.tagsonomy.subscribe("message", a2ac.onMessagesSplice);
         autobus.init();
@@ -436,7 +473,7 @@ var a2ac = {
     },
 
     finalize: function() {
-        a2ac.me.forget();
+        a2ac.me.activitySummary.set("disconnected", true);
         a2ac.me.tell();
     },
 
