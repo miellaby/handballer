@@ -374,12 +374,12 @@ var a2ac = {
 
     onMessageTimestamp: function(variable, value) {
         if (a2ac.me.ping < value) a2ac.me.ping = value;
-        if (!this.neighbour) {
+        if (value && !this.neighbour) {
           this.neighbour = true;
           var a = a2ac.neighbourhood.messages;
           for (var i = 0 ; i < a.length ; i++) {
             var m = a[i];
-            if (m.timestamp > value) break;
+            if (m.timestamp < value) break;
           }
           a2ac.neighbourhood.spliceIn("messages", i, 0, this);
         }
