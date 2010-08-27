@@ -374,6 +374,15 @@ var a2ac = {
 
     onMessageTimestamp: function(variable, value) {
         if (a2ac.me.ping < value) a2ac.me.ping = value;
+        if (!this.neighbour) {
+          this.neighbour = true;
+          var a = a2ac.neighbourhood.messages;
+          for (var i = 0 ; i < a.length ; i++) {
+            var m = a[i];
+            if (m.timestamp > value) break;
+          }
+          a2ac.neighbourhood.spliceIn("messages", i, 0, this);
+        }
     },
 
     onIntendeesSplice: function(tag, index, howMany /*, intendee, intendee ... */) {
@@ -381,8 +390,8 @@ var a2ac = {
        for (var j = 2; j < args.length; j++) {
            var intendee = args[j];
            log("new intendee id " + intendee.name);
-           intendee.subscribe("ping", a2ac.onIntendeePing);
-           intendee.subscribe("activity", a2ac.onIntendeeActivity);
+           intendee.subscribeSync("ping", a2ac.onIntendeePing);
+           intendee.subscribeSync("activity", a2ac.onIntendeeActivity);
        }
     },
 
@@ -390,7 +399,7 @@ var a2ac = {
         for (var j = 3; j < arguments.length; j++) { 
             var message = arguments[j];
             //log("new message " + message.name);
-            message.subscribe("timestamp", a2ac.onMessageTimestamp);
+            message.subscribeSync("timestamp", a2ac.onMessageTimestamp);
             //a2ac.messagesQueue.unshift(message);
             
             // var removed = a2ac.messagesQueue.splice(10,10);
@@ -444,6 +453,7 @@ var a2ac = {
     retrieveLog: function() {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "/a2a_chat/bots/getlog.cgi", true);
+        xhr.setRequestHeader("Pragma", "no-cache");
         xhr.onreadystatechange = function() {
            if (xhr.readyState >= 4) {
                a2ac.loadLog(xhr.responseText);
@@ -457,6 +467,7 @@ var a2ac = {
 
         this.neighbourhood = new PubSubAgent();
         this.neighbourhood.intendees = [];
+        this.neighbourhood.messages = [];
 
         autobus.tagsonomy.subscribe("intendee", a2ac.onIntendeesSplice);
         autobus.tagsonomy.subscribe("message", a2ac.onMessagesSplice);

@@ -364,8 +364,6 @@ var chat2 = {
             a2acAgora = (back ? back.b64() : 'a2ac') ;
         autobus.agora = a2acAgora + '/';
 
-        autobus.tagsonomy.subscribe("message", chat2.onMessagesSplice);
-
         this.iTrap.bind(document.getElementById("intendeesTrap"));
         this.iTrap.onResume = function() { chat2.revolutionOfIntendees.resume(); }
         this.iTrap.onPause = function() { chat2.revolutionOfIntendees.friction=null; }
@@ -456,6 +454,7 @@ var chat2 = {
         input.onfocus();
         this.resetProfileList();
         a2ac.neighbourhood.subscribeSync("intendees", chat2.onIntendeesSplice);
+        a2ac.neighbourhood.subscribeSync("messages", chat2.onMessagesSplice);
         a2ac.me.subscribeSync("profileId", this.onMeProfileId);
         a2ac.me.subscribeSync("nickname", this.onMeNickname);
         a2ac.me.subscribeSync("icon", this.onMeIcon);
