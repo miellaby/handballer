@@ -61,7 +61,7 @@ var chat2 = {
     },
 
     onMessagesSplice: function(tag, index, howMany /*, message, message ... */) {
-        
+        var args = Array.prototype.slice.call(arguments,1);                     
         var hidden = (document.getElementById("msgsArea").style.display == "none");
 
         if (chat2.speakingSound && arguments.length > 3 && a2ac.me.activity == 'away') // need to make sound if away
@@ -70,12 +70,14 @@ var chat2 = {
         for (var i = index, n = index + howMany ; i < index; i++) {
             chat2.revolutionOfMessages.remove(chat2.revolutionOfMessages.items.indexOf(this.intendees[i]));
         }
+        
+        chat2.revolutionOfMessages.splice.apply(chat2.revolutionOfMessages, args);
 
-        for (var l = arguments, i = 3 /* jump over the first args */, n = l.length; i < n; ++i) {
-            var newItem = l[i];
-            chat2.revolutionOfMessages.unshift(newItem);
-            if (hidden || chat2.revolutionOfMessages.n > 0)
-                chat2.advertiseMessage(newItem);
+        if (hidden || chat2.revolutionOfMessages.n > 0) {
+           for (var l = arguments, i = 3 /* jump over the first args */, n = l.length; i < n; ++i) {
+               var newItem = l[i];
+               chat2.advertiseMessage(newItem);
+           }
         }
     },
 
