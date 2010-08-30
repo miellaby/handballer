@@ -1,8 +1,7 @@
 function Glider() {
    Anim.call(this);
+   this.begin = this.end = 0.5;
    this.element = null;
-   this.begin = this.begin1 = 0.5;
-   this.end = this.end1 = 0.5;
    this.opacity = this.opacity1 = 0;
 }
 Glider.prototype = new Anim();
@@ -29,7 +28,7 @@ Glider.prototype.iterate = function() {
    else if (hidden)
        this.element.style.display = 'block';
 
-   return !(this.begin == this.begin1 && this.end == this.end1 && this.opacity == this.opacity1);
+   return !(this.opacity == this.opacity1);
 }
 
 Glider.prototype.update = function(begin, end, moving) {

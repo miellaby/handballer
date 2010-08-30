@@ -422,7 +422,11 @@ var a2ac = {
          var event = log[i];
          if (!event) break;
          var label = event.label;
-         if (autobus.agora) label = label.substring(label.indexOf('/') + 1);
+         if (autobus.agora) {
+            var agora = label.substring(0, label.indexOf('/') + 1);
+            if (agora != autobus.agora) continue;
+            label = label.substring(label.indexOf('/') + 1);
+         }
          if (label.substring(0, 6) == "freed") {
             freeds.push(label.substring(6));
          } else if (label.substring(0,6) == "model/") {
