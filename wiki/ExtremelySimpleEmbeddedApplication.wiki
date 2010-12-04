@@ -78,8 +78,7 @@ When a Web browser, either local or remote, is directed to the IP of the embedde
     }
 
     //-------------------------------------------------------------------
-    // Interact with server
-    // (stripped down hbc.js) 
+    // Interact with server (modified hbc.js) 
     //------------------------------------------------------------------- 
 
     //-------------------------------------------------------------------
