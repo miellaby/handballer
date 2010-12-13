@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html><head><title>Bus Sniffer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body><p>Here is a simple <i>HandBaller HTTP Bus based</i> instant messaging prototype. You may exchange messages from 2 running browsers.</p>This demo requires a "Multipart Push AJAX" compatible browser like Firefox 3. Otherwise, try <a href="hello.html">this generic version</a>.
+<h2>Post a  message</h2>
+
+<form action="javascript:postClick()">
+label: <input type="text" id="myLabel">
+body: <input type="text" id="myBody">
+ <input type="submit" value="POST">
+</form>
+
+<h2>Messages history</h2>
+<pre id="trace" name="trace"  style="border:2px solid black;background:#EFE;min-height:100px"></pre>
+
+<script type="text/javascript">
+var get_xhr = new XMLHttpRequest();
+var post_xhr = new XMLHttpRequest();
+get_xhr.multipart = true;       
+
+var msgHistory = [];
+get_xhr.onload = function(e) {           
+   var label_body = this.responseText.split("\n") ;
+   var e = document.getElementById('trace');
+  
+  msgHistory.unshift(label_body[0] + ':' + label_body[1].replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+  msgHistory.splice(6, 50);
+  e.innerHTML = msgHistory.join("\n");
+
+};
+
+get_xhr.open('GET', "/bus/**?label&push=XXX", true);       
+get_xhr.send(null);    
+
+function handballerPost(label, body) {
+  post_xhr.open('POST', "/bus/" + label, false);
+  post_xhr.send(body);
+}
+
+function postClick(){
+  label = document.getElementById('myLabel').value;
+  body = document.getElementById('myBody').value;
+
+  handballerPost(label, body);
+}
+</script>
+</body>
+</html>

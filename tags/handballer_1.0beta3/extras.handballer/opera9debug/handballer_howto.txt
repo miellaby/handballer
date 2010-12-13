@@ -1,0 +1,34 @@
+Handballer shell alias:
+      alias post='curl http://127.0.0.1:7007/bus/js --data'
+      alias listen='curl -B http://127.0.0.1:7007/bus/log'
+
+Handballer based Opera9 web application log
+===========================
+* put in your to-be-logged html page
+<event-source src="http://127.0.0.1:81/bus/js?event" id="bus">
+<script>
+
+var postMessageFakeImage = new Image ;
+var postMessageI = 0 ;
+
+function postMessage(txt) {
+    postMessageI++ ;
+    postMessageFakeImage.src = "http://127.0.0.1:81/bus/?post=log:"
+        + encodeURIComponent(txt) + 
+       "&stamp=" + postMessageI ;
+}
+
+function onPushMessage(e) {
+ try {
+  var result = eval("(" + e.data + ")");
+  postMessage(result) ;
+ } catch (e) {
+  postMessage(e) ;
+ }
+}
+document.getElementById("bus").addEventListener("message",onPushMessage,false) ;
+</script>
+============================
+Now display console.html published by handballer. It's done. You can even inject a command line: "js:command"
+
+  
