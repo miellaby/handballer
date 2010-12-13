@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html><head><title>Bus Sniffer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body><p>Here is a simple <i>HandBaller HTTP Bus based</i> instant messaging prototype. You may exchange messages from 2 running browsers.</p>This demo works with any known Javascript enabled browser. You may try <a href="hello_multipart.html">this alternative version for Firefox and relatives</a>.
+</p>
+<h2>Post a message</h2>
+<form action="javascript:postClick()">
+label: <input type="text" id="myLabel">
+body: <input type="text" id="myBody">
+ <input type="submit" value="POST">
+</form>
+<br>
+<h2>Messages history</h2>
+<pre id='trace' style="border:2px solid black;background:#EFE;min-height:100px"></pre>
+
+<!-- invisible resources -->
+<div id="invisiFormDiv" style="visibility:hidden;display:none">
+ <iframe id="iframeNotif" name="iframeNotif" src="/bus/**?label&script=window.parent.onBusMessage"></iframe>
+ <iframe id="invisiFormFrame" name="invisiFormFrame"></iframe>
+ <form name="invisiForm" action="/bus/" method="post" target="invisiFormFrame">') ;<input name="body" value="" /></form>
+</div>
+
+<script type="text/javascript">
+
+var msgHistory = [];
+function onBusMessage(label, body) {
+  msgHistory.unshift(label + ': ' + body.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+  msgHistory.splice(6, 50);
+  document.getElementById("trace").innerHTML = msgHistory.join("\n");
+}
+
+function handballerPost(label,body) {
+  document.forms.invisiForm.action = "/bus/" + label + "?form=body" ;
+  document.forms.invisiForm.body.value = body ;
+  document.forms.invisiForm.submit();
+}
+
+function postClick(){
+  var label = document.getElementById('myLabel').value;
+  var body = document.getElementById('myBody').value;
+
+  handballerPost(label, body);
+}
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+#!/bin/sh
+if [ -z "$STY" ] ; then
+  echo run $0 in screen
+  exec screen -dmS bots "$0"
+fi
+export LD_LIBRARY_PATH=/opt/lib
+/opt/var/www/a2a_chat/bots/logger.sh &
+# /opt/var/www/a2a_chat/bots/logger.sh fa &
+wait
+

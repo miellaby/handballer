@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+   <HEAD>
+      <META http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <TITLE>A2A Chat UI Test</TITLE>
+      <SCRIPT type="text/javascript" src="../../hbc/myPrototype.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="../../hbc/jsonize.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="helpers.js"></script>
+      <SCRIPT type="text/javascript" src="animator.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="anim.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="cell.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="revolutionAnims.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="revolution.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="trap.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="a2ac_ui.js"></SCRIPT>
+      <SCRIPT type="text/javascript">
+//<!--
+if (typeof console != "object") var console = { log: function() {} };
+var a2ac = {me: null};
+var chat2 = {iTrap: new Trap(), mTrap: new Trap()};
+var revolutionOfIntendees;
+var revolutionOfMessages;
+
+function a2ac_init() {
+   var i = 0;
+   revolutionOfIntendees = new Revolution();
+   revolutionOfIntendees.init(document.getElementById("intendeesArea"), IntendeeCell, 50);
+   revolutionOfIntendees.splice(0, 0, { icon: "images/blue.gif", nickname: "blue"  + (i++) }, { icon: "images/red.gif", nickname: "red" + (i++) }, { icon: "images/green.gif", nickname: "green" + (i++) });
+if(1) {
+   revolutionOfIntendees.splice(0, 0, { icon: "images/blue.gif", nickname: "blue"  + (i++) }, { icon: "images/red.gif", nickname: "red" + (i++) }, { icon: "images/green.gif", nickname: "green" + (i++) });
+   revolutionOfIntendees.splice(0, 0, { icon: "images/blue.gif", nickname: "blue"  + (i++) }, { icon: "images/red.gif", nickname: "red" + (i++) }, { icon: "images/green.gif", nickname: "green" + (i++) });
+   revolutionOfIntendees.splice(0, 0, { icon: "images/blue.gif", nickname: "blue"  + (i++) }, { icon: "images/red.gif", nickname: "red" + (i++) }, { icon: "images/green.gif", nickname: "green" + (i++) });
+   revolutionOfIntendees.splice(0, 0, { icon: "images/blue.gif", nickname: "blue"  + (i++) }, { icon: "images/red.gif", nickname: "red" + (i++) }, { icon: "images/green.gif", nickname: "green" + (i++) });
+   setTimeout(function() { revolutionOfIntendees.splice(1, 0, { icon: "images/green.gif", nickname: "green" + (i++) });
+          console.trace(revolutionOfIntendees.items.jsonize());
+     }, 3000);
+   setInterval(function() { revolutionOfIntendees.splice(1, 0, { icon: "images/green.gif", nickname: "green" + (i++) });}, 3000);
+   setInterval(function() { revolutionOfIntendees.splice(0, 0, { icon: "images/red.gif", nickname: "red" + (i++) });}, 2000);
+   setInterval(function() { revolutionOfIntendees.splice(2, 0, { icon: "images/blue.gif", nickname: "blue" + (i++) });}, 4000);
+   setInterval(function() { revolutionOfIntendees.splice(1, 1);}, 5000);
+
+}
+   chat2.iTrap.bind(document.getElementById("itsatrap"));
+   chat2.mTrap.bind(document.getElementById("itsatrap"));
+
+   revolutionOfMessages = new Revolution();
+   revolutionOfMessages.init(document.getElementById("msgsArea"), MessageCell, 50);
+   revolutionOfMessages.push({ icon: "images/blue.gif", content: "hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello " });
+   setInterval(function() { revolutionOfMessages.unshift({ icon: "images/green.gif", content: "green hello" + (i++) });}, 3000);
+
+   document.getElementById("intendeesBack").onmousedown = function() { revolutionOfIntendees.friction = 1; revolutionOfIntendees.resume(); };
+   document.getElementById("intendeesBack").onmouseup = function() { revolutionOfIntendees.friction = null; };
+   document.getElementById("intendeesForward").onmousedown = function() { revolutionOfIntendees.friction = -1; revolutionOfIntendees.resume(); };
+   document.getElementById("intendeesForward").onmouseup = function() { revolutionOfIntendees.friction = null; };
+}
+//-->
+     </SCRIPT>
+      <STYLE type="text/css">
+body {margin: 0px; padding: 0px;} 
+body {background-color: transparent;}
+
+#intendeesBack {
+  background-color: transparent;
+  position: absolute;
+  left: 0%;
+  top: 0%;
+  width: 9%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#intendeesArea {
+/*  background-color: #FFF; */
+  background-color: transparent;
+  position: absolute;
+/*  left: 0%; */
+/*  top: 0%; */
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+/* display:block; */
+ z-index:10;
+}
+
+#intendeesForward {
+  background-color: transparent;
+  position: absolute;
+  right: 0%;
+  top: 0%;
+  width: 9%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.intendeePic {
+  position: absolute;
+/*  left: 0px; */
+/*  top: 0px; */
+  width: 99px;
+  height: 133px;
+}
+
+.intendeePic:hover {
+  position: absolute;
+  width: 99px;
+  height: 133px;
+}
+
+.intendeeDesc {
+/* background: white; */
+  background: transparent;
+  position: absolute;
+  text-align: center;
+  overflow: hidden;
+/*  left: 0px; */
+/*  top: 0px; */
+  width: 99px;
+  height: 30px;
+/*  line-height:1.5em; */
+  font-family:'Bitstream Vera Sans','sans';
+  font-size:16px;
+  margin: 0;
+}
+
+#msgsArea {
+/* background-color: #EEE; */
+  position: absolute;
+  top: 166px;
+  bottom: 10px;
+  left: 1%;
+  right: 1%;
+    overflow: hidden;
+/* padding:1%; */
+}
+
+
+.msgPic {
+  position: absolute;
+  background-color: white;
+/*  width: 25px; */
+  height: 30px;
+}
+
+.msgPic:hover {
+  position: absolute;
+  background-color: white;
+/*  width: 25px; */
+  height: 30px;
+}
+
+
+.msgDesc {
+  position: absolute;
+  background-color: white;
+  color: black;
+/*  text-align: left; */
+  left: 30px;
+  /*width: 90%; */
+  right: 0px;
+  line-height: 30px;
+  height: 30px ;
+  font-family:'Bitstream Vera Sans','sans';
+  font-size:18px;
+  padding:0%;
+  overflow: auto;
+  margin:0;
+}
+
+      </STYLE>
+
+   </HEAD>
+   <BODY id="demo" onload="a2ac_init();">
+<div id="intendeesArea">
+  <div id="intendeesBack"></div>
+  <div id="intendeesForward"></div>
+</div>
+<div id="msgsArea">
+</div>
+<div id="itsatrap"></div>
+   </BODY>
+</HTML>
