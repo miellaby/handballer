@@ -86,131 +86,69 @@ When a Web browser, either local or remote, is directed to the IP of the embedde
     //-------------------------------------------------------------------
     baseURL = "/bus/";
     pattern = "**";
-    sendXHR = new XMLHttpRequest(); // recyclable message sending dedicated XHR
-    isSending = false; // sending status 
-    sendFifo = []; // to-be-sent messages queue 
-    var lastXHRstate; 
-    var receiveXHR; 
+    clientId = "top";
+    token = String(Number(new Date()) % (Math.random() * 0xAFF00000)).substr(0,9);
+    pollPeriod = 200;  // 200 ms interval when polling is necessary
+    pollInterval = undefined;
+    sendXHR = createXMLHttpRequestObject();  // recyclable message-sending dedicated XHR
+    isSending = false;  // sending status
+    sendFifo = [];  // to-be-sent messages queue
+    var pollIdx;
+    var lastXHRstate;
+    var receiveXHR;
+
 
     //------------------------------------------------------------------- 
     // Generic functions for reception: poll(), openXHR() 
     //------------------------------------------------------------------- 
+    function poll() {
+      if(receiveXHR.readyState < 3) {
+        return;
+      }
+      var r = receiveXHR.responseText;
+      while(true) { // received message parsing loop
+        var labelEnd = r.indexOf("\x00", pollIdx);
+        if(labelEnd == -1) {
+          break;
+        }
+        var bodyEnd = r.indexOf("\x00", labelEnd + 1);
+        if (bodyEnd == -1) {
+          break;
+        }
+        var label = r.substring(pollIdx, labelEnd);
+        var body = r.substring(labelEnd + 1, bodyEnd);
+        try {
+          receiveCB(label, body);
+        } catch (e) {
+          alert("Exception when trying receiveCB from poll");
+        }
+        pollIdx = bodyEnd + 1;
+      }
+      if(receiveXHR.readyState == 4) {
+        // if connection aborted, try to relaunch it once
+        if(lastXHRstate >= 3) {
+          openXHR();
+        }
+      } else {
+        lastXHRstate = receiveXHR.readyState;
+      }
+    }
+
     function openXHR() {
-
+      pollIdx = 0; // for polled XHR response parsing
       lastXHRstate = -1; // for XHR state change detection
-
       receiveXHR = createXMLHttpRequestObject();  // bus message-receiving dedicated XHR
-
-      var url = baseURL + pattern + "?label&flush";
-
+      var url =  baseURL + pattern + "?label&timestamp=" + Number(new Date());
+      url += "&null&flush&box=" + token + clientId;
       receiveXHR.open('GET', url, true);
-
       receiveXHR.onreadystatechange = poll;
-
       receiveXHR.send(null);
-
-    };
-
+    }
 
     //------------------------------------------------------------------- 
     // Initial call to openXHR() 
     //------------------------------------------------------------------- 
     openXHR(); 
-
-    function poll() { 
-      // The XMLHttpRequest  object can be in several states.
-
-      // The readyState attribute must return the current state, which must be one of the following values: 
-
-      //   UNSENT (numeric value 0)
-
-      //    The object has been constructed. 
-
-      //   OPENED (numeric value 1)
-
-      //    The open() method has been successfully invoked. During this state request headers can be set using
-
-      //    setRequestHeader() and the request can be made using the send() method. 
-
-      //   HEADERS_RECEIVED (numeric value 2)
-
-      //    All redirects (if any) have been followed and all HTTP headers of the final response have been
-
-      //    received. Several response members of the object are now available. 
-
-      //   LOADING (numeric value 3)
-
-      //    The response entity body is being received. 
-
-      //   DONE (numeric value 4)
-
-      //    The data transfer has been completed or something went wrong during the transfer (e.g. infinite
-
-      //    redirects). 
-
-      // The OPENED state has an associated send() flag that indicates whether the send() method has been
-
-      // invoked. It can be either true or false and has an initial value of false.
-
-      // The DONE state has an associated error flag that indicates some type of network error or abortion.
-
-      // It can be either true or false and has an initial value of false. 
-
-      if(receiveXHR.readyState < 3) {
-
-        return;
-
-      }
-
-      // The responseText attribute must return the result of running these steps:
-
-      //   1. If the state is not LOADING or DONE return the empty string and terminate these steps.
-
-      //   2. Return the text response entity body. 
-
-      if(receiveXHR.readyState == 4) {
-
-	if(receiveXHR.status == 200) {
-
-          var r = receiveXHR.responseText;
-
-          var labelSize = r.substring(0, 8);
-
-          var labelEnd = 9 + parseInt(labelSize, 16);
-
-          var label = r.substring(9, labelEnd);
-
-          var bodySize = r.substring(labelEnd, labelEnd + 8);
-
-          var body = r.substring(labelEnd + 9);
-
-          try {
-
-            receiveCB(label, body);
-
-          } catch (e) {
-
-            alert("Exception when trying receiveCB from poll");
-
-          }
-
-        }
-
-        // if connection aborted, try to relaunch it once
-
-        if(lastXHRstate >= 3) {
-
-          openXHR();
-
-        }
-
-      } else {
-
-        lastXHRstate = receiveXHR.readyState;
-
-      }
-
-    }; 
 
     //------------------------------------------------------------------- 
     // Application specific function: receiveCB() 
