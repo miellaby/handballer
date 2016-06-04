@@ -31,7 +31,7 @@ struct httpd_server_s;
 #define BUS_BOX_MODE 1024
 
 struct s_httpd_conn;
-struct box_s;
+typedef struct box_s box_t;
 
 int box_free(struct box_s* box);
 int box_unbind(struct box_s* box);

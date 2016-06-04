@@ -11,9 +11,9 @@ function log(msg) {
     //puts(msg);
 }
 
-if(0)
-    autobus.hbc.logCB = function(msg) {
-        puts("logCB: " + msg) ;
+if (0)
+    autobus.hbc.logCB = function (msg) {
+        puts("logCB: " + msg);
     };
 
 // ======================================================================
@@ -22,42 +22,42 @@ if(0)
 var default_profiles = {
     red: {
         nickname: "red",
-        icon: "./images/red.gif",
+        icon: "./images/person.svg",
         mind: "happy",
         color: "red",
         emblem: ""
     },
     blue: {
         nickname: "blue",
-        icon: "./images/blue.gif",
+        icon: "./images/person.svg",
         mind: "cool",
         color: "blue",
         emblem: ""
     },
     green: {
         nickname: "green",
-        icon: "./images/green.gif",
+        icon: "./images/person.svg",
         mind: "watchful",
         color: "green",
         emblem: ""
     },
     pink: {
         nickname: "pink",
-        icon: "./images/pink.gif",
+        icon: "./images/person.svg",
         mind: "groovy",
         color: "pink",
         emblem: ""
     },
     purple: {
         nickname: "purple",
-        icon: "./images/purple.gif",
+        icon: "./images/person.svg",
         mind: "zen",
         color: "purple",
         emblem: ""
     },
     orange: {
         nickname: "orange",
-        icon: "./images/orange.gif",
+        icon: "./images/person.svg",
         mind: "open",
         color: "orange",
         emblem: ""
@@ -74,57 +74,62 @@ var settings = {
     current: null,
     saveTask: undefined,
 
-    init: function(cookieName, default_profiles) {
+    init: function (cookieName, default_profiles) {
         this.cookieName = cookieName;
         this.initial = default_profiles || {};
-        this.current = Object.copy(this.initial);
+        this.current = Object.assign({}, this.initial);
         this.load();
     },
 
-    load: function() {
-        var restored = eval("(" + (cookies.get(this.cookieName) || "null") + ")");
+    load: function () {
+        var restored;
+        try {
+            restored = JSON.parse(cookies.get(this.cookieName) || "null");
+        } catch (e) {
+            console.log(e);
+        }
         if (restored) this.current = restored;
     },
-    
-    doSave: function() {
+
+    doSave: function () {
         var expire = new Date();
         expire.setTime(expire.getTime() + 3600 * 24 * 1000 * 30);
-        cookies.set(this.cookieName, jsonize(this.current), expire);
+        cookies.set(this.cookieName, JSON.stringify(this.current), expire);
         this.saveTask = undefined;
     },
 
-    save: function() { // actually data changes are gathered via a small delay to enhance perfs
+    save: function () { // actually data changes are gathered via a small delay to enhance perfs
         if (this.saveTask !== undefined) return; // already schedulled
         var self = this;
         // note the delay amount hereafter is irrevelant, the idea is just to update the cookie only once by set() salve
-        this.saveTask = setTimeout(function() { self.doSave(); }, 500);
+        this.saveTask = setTimeout(function () { self.doSave(); }, 500);
     },
 
-    exist: function(key) {
+    exist: function (key) {
         return (this.current[key] ? true : false);
     },
 
-    duplicate: function(target, source) {
-        this.current[target] = Object.copy(this.current[source]);
+    duplicate: function (target, source) {
+        this.current[target] = Object.assign({}, this.current[source]);
     },
 
-    set: function(key, variable, value) {
+    set: function (key, variable, value) {
         if (value == this.get(key, variable)) return; // nothing new here
 
         var c = this.current[key];
         if (!c) c = this.current[key] = {};
         c[variable] = value;
-        
+
         this.save();
     },
 
-    get: function(key, variable) {
+    get: function (key, variable) {
         var c = this.current[key];
         return c ? c[variable] : c /* that is undefined */;
     },
 
-    reset: function() {
-        this.current = Object.copy(this.initial);
+    reset: function () {
+        this.current = Object.assign({}, this.initial);
         this.doSave();
     }
 };
@@ -135,26 +140,26 @@ var settings = {
 // ======================================================================
 
 function Attractor(agent, variable, delay, defaultValue) {
-   this.agent = agent;
-   this.variable = variable;
-   this.delay = delay;
-   this.timeout = undefined; 
-   this.defaultValue = defaultValue;
-   var self = this;
-   this.cb = function () {
-       self.timeout = undefined;
-       self.agent.set(self.variable, self.defaultValue);
-   };
+    this.agent = agent;
+    this.variable = variable;
+    this.delay = delay;
+    this.timeout = undefined;
+    this.defaultValue = defaultValue;
+    var self = this;
+    this.cb = function () {
+        self.timeout = undefined;
+        self.agent.set(self.variable, self.defaultValue);
+    };
 }
 
-Attractor.prototype.set = function(variable, value) {
-   this.agent.set(variable, value);
-   if (variable != this.variable) return value;
-   if (this.timeout !== undefined) clearTimeout(this.timeout);
-   if (value != this.defaultValue) {
-      this.timeout = setTimeout(this.cb, this.delay);
+Attractor.prototype.set = function (variable, value) {
+    this.agent.set(variable, value);
+    if (variable != this.variable) return value;
+    if (this.timeout !== undefined) clearTimeout(this.timeout);
+    if (value != this.defaultValue) {
+        this.timeout = setTimeout(this.cb, this.delay);
     }
-   return value;
+    return value;
 };
 
 // ======================================================================
@@ -163,32 +168,31 @@ Attractor.prototype.set = function(variable, value) {
 // variable to this variable name.
 // ======================================================================
 
-function Summary(agent, variable, levels, defaultValue) {
-    this.agent = agent;
+function Summary(state, variable, levels, defaultValue) {
+    this.state = state;
     this.variable = variable;
     this.levels = levels;
     this.defaultValue = defaultValue;
-    this.status = {};
+    this.status = new Set([]);
     this.currentLevel = levels.length;
-    agent.set(variable, defaultValue);
+    state.set(variable, defaultValue);
 }
 
-Summary.prototype.set = function(variable, value) {
-    this.status[variable] = value;
+Summary.prototype.set = function (variable, value) {
     var i = this.levels.indexOf(variable);
     if (i == -1) return value;
-    if (value && i < this.currentLevel) {
-       this.agent.set(this.variable, variable);
-       this.currentLevel = i;
+    if (value) {
+        if (this.status.has(variable)) return;
+        this.status.add(variable);
+    } else {
+        if (!this.status.has(variable)) return;
+        this.status.delete(variable);
     }
-    if (!value && i == this.currentLevel) {
-       var s = this.levels.length;
-       for (i++; i < s; i++) {
-          if (this.status[this.levels[i]]) break;
-       }
-       this.agent.set(this.variable, i < s ? this.levels[i] : this.defaultValue);
-       this.currentLevel = i;
+    var s = this.levels.length;
+    for (i = 0; i < s; i++) {
+        if (this.status.has(this.levels[i])) break;
     }
+    this.state.set(this.variable, this.levels[i] || this.defaultValue);
     return value;
 };
 
@@ -197,7 +201,7 @@ Summary.prototype.set = function(variable, value) {
 // ======================================================================
 
 function Me(uid) {
-    BusAgent.call(this, autobus, uid, BusAgent.prototype.HERE);
+    BusState.call(this, autobus, uid, BusState.prototype.HERE);
     this.setTags("intendee");
     this.ping = 0;
     this.activitySummary = new Summary(this, "activity", ["disconnected", "typing", "watching", "way"], "connected");
@@ -206,9 +210,9 @@ function Me(uid) {
     this.profileId = undefined;
 }
 
-Me.prototype = new BusAgent();
+Me.prototype = new BusState();
 
-Me.prototype.init = function(profileId) {
+Me.prototype.init = function (profileId) {
     this.subscribe("profileId", this.onProfileId);
     this.subscribe("nickname", this.onNickname);
     this.subscribe("icon", this.onIcon);
@@ -217,66 +221,64 @@ Me.prototype.init = function(profileId) {
     this.subscribe("color", this.onColor);
     this.doPing();
     var self = this;
-    setInterval(function() { self.doPing() }, 100 * 1000 - 20 * Math.random() * 1000);
+    setInterval(function () { self.doPing() }, 100 * 1000 - 20 * Math.random() * 1000);
 
     if (profileId) {
         this.setProfileId(profileId);
     } else // wait for few seconds to detect remote intendees and auto-configure
-        setTimeout(function() { self.autoConfig(); }, 3 * 1000);   
+        setTimeout(function () { self.autoConfig(); }, 3 * 1000);
 };
 
-Me.prototype.postMessage = function(content, icon, color) {
-    var msg = new BusAgent(autobus, agentUUID("m"), BusAgent.prototype.HERE);
+Me.prototype.postMessage = function (content, icon, color) {
+    var msg = new BusState(autobus, agentUUID("m"), BusState.prototype.HERE);
     msg.sets({
-            tags: ["message", "messageOf" + this.name],
-                from: this.name,
-                icon: icon,
-                color: color,
-                //to: otherIntendee,
-                content: content,
-                timestamp: 1 + this.ping
-                });
+        tags: ["message", this.name],
+        from: this.name,
+        icon: icon,
+        color: color,
+        //to: otherIntendee,
+        content: content,
+        timestamp: ++this.ping
+    });
 
     autobus.tagsonomy.removeIn("here", msg); // to prevent advertising on /status/here
 };
 
-Me.prototype.doPing = function() {
-    this.set("ping", 1 + this.ping);
+Me.prototype.doPing = function () {
+    this.set("ping", ++this.ping);
 };
 
 var lastProfileId = null;
-Me.prototype.onProfileId = function(variable, value) {
+Me.prototype.onProfileId = function (variable, value) {
     if (!settings.exist(value) && lastProfileId)
         settings.duplicate(value, lastProfileId);
 
     lastProfileId = value;
 
-    var expire = new Date();
-    expire.setTime(expire.getTime() + 3600 * 24 * 1000 * 30);
-    cookies.set("a2ac_id", this.name + "+" + value, expire);
+    localStorage.setItem("a2ac_id", this.name + "+" + value);
 }
 
-Me.prototype.onNickname = function(variable, value) {
+Me.prototype.onNickname = function (variable, value) {
     settings.set(this.profileId, "nickname", value);
 };
 
-Me.prototype.onIcon = function(variable, value) {
+Me.prototype.onIcon = function (variable, value) {
     settings.set(this.profileId, "icon", value);
 };
 
-Me.prototype.onMind = function(variable, value) {
+Me.prototype.onMind = function (variable, value) {
     settings.set(this.profileId, "mind", value);
 };
 
-Me.prototype.onEmblem = function(variable, value) {
+Me.prototype.onEmblem = function (variable, value) {
     settings.set(this.profileId, "emblem", value);
 };
 
-Me.prototype.onColor = function(variable, value) {
+Me.prototype.onColor = function (variable, value) {
     settings.set(this.profileId, "color", value);
 };
 
-Me.prototype.setProfileId = function(profileId, isNew) {
+Me.prototype.setProfileId = function (profileId, isNew) {
     this.set("profileId", profileId);
     if (isNew) return;
 
@@ -293,18 +295,18 @@ Me.prototype.setProfileId = function(profileId, isNew) {
     this.set("color", color);
 };
 
-Me.prototype.autoConfig = function() {
-    var profileId = cookies.get("a2ac_id");
+Me.prototype.autoConfig = function () {
+    var profileId = localStorage.getItem("a2ac_id");
     if (profileId) return; // already a non default settings
 
     // list known intendees names
     var names = [];
-    var intendees = autobus.tagsonomy.getOr("intendee",[]);
+    var intendees = autobus.tagsonomy.getOr("intendee", []);
     for (var l = intendees.length, i = l - 1; i >= 0; i--)
         names.push(intendees[i].nickname);
-    
+
     // here is a default list of nickname
-    var lst = [ "red", "blue", "green", "pink", "purple", "orange", "guest" ];
+    var lst = ["red", "blue", "green", "pink", "purple", "orange", "guest"];
     var default_prefix = "guest";
     var nickname;
 
@@ -312,7 +314,7 @@ Me.prototype.autoConfig = function() {
     for (var l = lst.length, i = l - 1; i >= 0; i--) {
         if (names.indexOf(lst[i]) != -1) continue;
         nickname = lst[i];
-    }   
+    }
 
     if (!nickname) { // no more free nickname, build a numbered one 
         var i = 2;
@@ -335,36 +337,36 @@ var a2ac = {
     pingsLog: {},
     lastPingsLog: {},
 
-    cleanGone: function() {
-        for (var lst = autobus.tagsonomy.getOr("intendee",[]), l = lst.length, i = l - 1; i >= 0; i--) {
+    cleanGone: function () {
+        for (var lst = autobus.tagsonomy.getOr("intendee", []), l = lst.length, i = l - 1; i >= 0; i--) {
             var intendee = lst[i];
             if (intendee === this.me || a2ac.pingsLog[intendee.name] || a2ac.lastPingsLog[intendee.name])
                 continue; // intendee still here
-            
+
             // intendee is gone
             log("intendee " + intendee.name + " is gone!");
             if (intendee.neighbour) {
-              intendee.neighbour = false;
-              a2ac.neighbourhood.removeIn("intendees", intendee);
+                intendee.neighbour = false;
+                a2ac.neighbourhood.removeIn("intendees", intendee);
             }
             intendee.forget();
         }
-        
+
         a2ac.lastPingsLog = a2ac.pingsLog;
         a2ac.pingsLog = {};
     },
 
-    onIntendeePing: function(variable, value) {
+    onIntendeePing: function (variable, value) {
         a2ac.pingsLog[this.name] = this;
         log("intendee " + this.name + " heard at " + new Date());
         if (a2ac.me.ping < value) a2ac.me.ping = value;
     },
 
-    onIntendeeActivity: function(variable, value) {
+    onIntendeeActivity: function (variable, value) {
         if (value == 'disconnected') {
             if (this.neighbour) {
-              this.neighbour = false;
-              a2ac.neighbourhood.removeIn("intendees", this);
+                this.neighbour = false;
+                a2ac.neighbourhood.removeIn("intendees", this);
             }
         } else if (!this.neighbour) {
             this.neighbour = true;
@@ -372,112 +374,104 @@ var a2ac = {
         }
     },
 
-    onMessageTimestamp: function(variable, value) {
+    onMessageTimestamp: function (variable, value) {
         if (a2ac.me.ping < value) a2ac.me.ping = value;
         if (value && !this.neighbour) {
-          this.neighbour = true;
-          var a = a2ac.neighbourhood.messages;
-          for (var i = 0 ; i < a.length ; i++) {
-            var m = a[i];
-            if (m.timestamp < value) break;
-          }
-          a2ac.neighbourhood.spliceIn("messages", i, 0, this);
-        }
-    },
-
-    onIntendeesSplice: function(tag, index, howMany /*, intendee, intendee ... */) {
-       var args = Array.prototype.slice.call(arguments,1);
-       for (var j = 2; j < args.length; j++) {
-           var intendee = args[j];
-           log("new intendee id " + intendee.name);
-           intendee.subscribeSync("ping", a2ac.onIntendeePing);
-           intendee.subscribeSync("activity", a2ac.onIntendeeActivity);
-       }
-    },
-
-    onMessagesSplice: function(tag, index, howMany /*, message, message ... */) {
-        for (var j = 3; j < arguments.length; j++) { 
-            var message = arguments[j];
-            //log("new message " + message.name);
-            message.subscribeSync("timestamp", a2ac.onMessageTimestamp);
-            //a2ac.messagesQueue.unshift(message);
-            
-            // var removed = a2ac.messagesQueue.splice(10,10);
-            // TO BE DONE: revoir la gestion des indices lors de cette manip de liste *rééntrante*
-            //for (var lst = removed, l = lst.length, i = l - 1; i >= 0; i--) {
-            //    //log("message " + lst[i].name + " forgotten");
-            //    lst[i].forget();
-            // }
-        }
-    },
-
-    loadLog: function(jsonLog) {
-      var freeds = [];
-      if (!jsonLog || jsonLog.charAt(0) != "[") {
-        console.log("not a log : " + jsonLog);
-        return;
-      }
-      var log = eval(jsonLog);
-      for (var i = 0; i < log.length; i++) {
-         var event = log[i];
-         if (!event) break;
-         var label = event.label;
-         if (autobus.agora) {
-            var agora = label.substring(0, label.indexOf('/') + 1);
-            if (agora != autobus.agora) continue;
-            label = label.substring(label.indexOf('/') + 1);
-         }
-         if (label.substring(0, 6) == "freed") {
-            freeds.push(label.substring(6));
-         } else if (label.substring(0,6) == "model/") {
-            var slashIdx = label.indexOf("/", 6);
-            var agentName = slashIdx != -1 ? label.substring(6, slashIdx) : label.substring(6);
-            var slot = slashIdx != -1 ? label.substring(slashIdx + 1) : undefined;
-            if (freeds.indexOf(agentName) == -1) {
-               obj = autobus.busAgent(agentName, BusAgent.prototype.THERE);
-               if (obj.there()) {
-                  if (slot) {
-                     value = eval("(" + event.body + ")");
-                     if (obj[slot] === undefined)
-                        obj.setted(slot, value); 
-                  } else {
-                     delta = eval("(" + event.body + ")");
-                     for (var slot in delta) {
-                        if (!delta.hasOwnProperty(slot)) continue;
-                        if (obj[slot] !== undefined) continue;
-                        obj.setted(slot, delta[slot]);
-                     }
-                  }
-               }
+            this.neighbour = true;
+            var a = a2ac.neighbourhood.messages;
+            for (var i = 0; i < a.length; i++) {
+                var m = a[i];
+                if (m.timestamp < value) break;
             }
-         } 
-      }
+            a2ac.neighbourhood.spliceIn("messages", i, 0, this);
+        }
     },
 
-    retrieveLog: function() {
+    onIntendeesSplice: function (tag, index, howMany /*, intendee, intendee ... */) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        for (var j = 2; j < args.length; j++) {
+            var intendee = args[j];
+            log("new intendee id " + intendee.name);
+            intendee.subscribeSync("ping", a2ac.onIntendeePing);
+            intendee.subscribeSync("activity", a2ac.onIntendeeActivity);
+        }
+    },
+
+    onMessagesSplice: function (tag, index, howMany /*, message, message ... */) {
+        for (var j = 3; j < arguments.length; j++) {
+            var message = arguments[j];
+            a2ac.onMessageTimestamp(message.timestamp);
+        }
+        // var t = [...autobus.tagsonomy['message']].sort((a, b) => a.timestamp - b.timestamp);
+    },
+
+    loadLog: function (jsonLog) {
+        var freeds = [];
+        if (!jsonLog || jsonLog.charAt(0) != "[") {
+            console.log("not a log : " + jsonLog);
+            return;
+        }
+        var log = JSON.parse(jsonLog);
+        for (var i = 0; i < log.length; i++) {
+            var event = log[i];
+            if (!event) break;
+            var label = event.label;
+            if (autobus.agora) {
+                var agora = label.substring(0, label.indexOf('/') + 1);
+                if (agora != autobus.agora) continue;
+                label = label.substring(label.indexOf('/') + 1);
+            }
+            if (label.substring(0, 6) == "freed") {
+                freeds.push(label.substring(6));
+            } else if (label.substring(0, 6) == "model/") {
+                var slashIdx = label.indexOf("/", 6);
+                var stateName = slashIdx != -1 ? label.substring(6, slashIdx) : label.substring(6);
+                var slot = slashIdx != -1 ? label.substring(slashIdx + 1) : undefined;
+                if (freeds.indexOf(stateName) == -1) {
+                    obj = autobus.busState(stateName, BusState.prototype.THERE);
+                    if (obj.there()) {
+                        if (slot) {
+                            value = JSON.parse(event.body);
+                            if (obj[slot] === undefined)
+                                obj.setted(slot, value);
+                        } else {
+                            delta = JSON.parse(event.body);
+                            for (var slot in delta) {
+                                if (!delta.hasOwnProperty(slot)) continue;
+                                if (slot in obj) continue;
+                                obj.setted(slot, delta[slot]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    retrieveLog: function () {
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/a2a_chat/bots/getlog.cgi", true);
+        xhr.open("GET", "/bots/getlog.cgi", true);
         xhr.setRequestHeader("Pragma", "no-cache");
-        xhr.onreadystatechange = function() {
-           if (xhr.readyState >= 4) {
-               a2ac.loadLog(xhr.responseText);
-           }
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState >= 4) {
+                a2ac.loadLog(xhr.responseText);
+            }
         }
         xhr.send("");
     },
-    
-    init: function() {
+
+    init: function () {
         settings.init("a2ac", default_profiles);
 
-        this.neighbourhood = new PubSubAgent();
+        this.neighbourhood = new PubSubState();
         this.neighbourhood.intendees = [];
         this.neighbourhood.messages = [];
 
         autobus.tagsonomy.subscribe("intendee", a2ac.onIntendeesSplice);
         autobus.tagsonomy.subscribe("message", a2ac.onMessagesSplice);
         autobus.init();
-        
-        var uIDnProf = cookies.get("a2ac_id");
+
+        var uIDnProf = localStorage.getItem("a2ac_id");
         var t = uIDnProf ? uIDnProf.split("+") : [];
         var meUID = t.length ? t[0] : agentUUID("i");
         var profileID = t.length > 1 ? t[1] : null;
@@ -487,14 +481,14 @@ var a2ac = {
         setInterval(a2ac.cleanGone, 60 * 2 * 1000);
     },
 
-    finalize: function() {
+    finalize: function () {
         a2ac.me.activitySummary.set("disconnected", true);
         a2ac.me.tell();
     },
 
-    reset: function() {
+    reset: function () {
         settings.reset();
-        cookies.set("a2ac_id", "");
+        localStorage.removeItem("a2ac_id");
         a2ac.me.set('name', agentUUID("i"));
         a2ac.me.autoConfig();
     }

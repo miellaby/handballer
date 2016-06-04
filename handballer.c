@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -335,7 +336,7 @@ int get_message_from_box(httpd_conn* get_hc) {
           add_response_buffer(get_hc, "Content-Type: ") ;
           add_response_buffer(get_hc, msg->contenttype) ;
           add_response_buffer(get_hc, "\015\012Content-Length: ") ;
-          snprintf(strvalue, sizeof(strvalue), "%d", body_len) ;
+          snprintf(strvalue, sizeof(strvalue), "%ld", body_len) ;
           add_response_buffer(get_hc, strvalue) ;
           add_response_buffer(get_hc, "\015\012Content-Location: ") ;
           add_response_buffer(get_hc, label) ;
@@ -349,12 +350,12 @@ int get_message_from_box(httpd_conn* get_hc) {
       if (label_needed)
         {
           char hexaC[10] ;
-          snprintf(hexaC, 10, "%.8X\n", 0xFFFFFFFF & strlen(label)) ;
+          snprintf(hexaC, 10, "%.8lX\n", 0xFFFFFFFF & strlen(label)) ;
           add_response_buffer(get_hc, hexaC) ;
           add_response_buffer(get_hc, label) ;
         }
       
-      snprintf(hexa, 10, "%.8X\n", 0xFFFFFFFF & body_len) ;
+      snprintf(hexa, 10, "%.8lX\n", 0xFFFFFFFF & body_len) ;
       add_response_buffer(get_hc, hexa) ;
     }
   else if (get_hc->bus_flags & BUS_NULL_MODE)
@@ -438,7 +439,7 @@ int get_message_from_box(httpd_conn* get_hc) {
       msg->escaped   = escaped;
       msg->escaped_len    = escaped_len;
  
-      TRACE(get_hc->hs->logfp, "<BUS><ESCAPED>%.*s</ESCAPED></BUS>", escaped_len, escaped);
+      TRACE(get_hc->hs->logfp, "<BUS><ESCAPED>%.*s</ESCAPED></BUS>", (int)escaped_len, escaped);
     }
   
   
@@ -687,7 +688,7 @@ bus( httpd_conn* hc )
               }
             else if (hc->bus_flags & BUS_EVENTSTREAM_MODE)
               {
-                hc->type = "application/x-dom-event-stream" ;
+                hc->type = "text/event-stream" ;
               }
             
             if (hc->msg_box->cookie) {
@@ -815,7 +816,7 @@ bus( httpd_conn* hc )
         // final \0 for string search hereafter
         postdata[postdataSize] = '\0' ;
 
-        TRACE( hc->hs->logfp, "<BUS TYPE=POST REQUEST=%.200s CONTENTTYPE=%.200s DATASIZE=%d><EXTRACT>%.200s</EXTRACT></BUS>'", hc->pathinfo, hc->contenttype, postdataSize, postdata);
+        TRACE( hc->hs->logfp, "<BUS TYPE=POST REQUEST=%.200s CONTENTTYPE=%.200s DATASIZE=%ld><EXTRACT>%.200s</EXTRACT></BUS>'", hc->pathinfo, hc->contenttype, postdataSize, postdata);
 
 
         if (!strncmp(contenttype, "multipart/", 10)) {

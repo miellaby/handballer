@@ -1,62 +1,60 @@
-function Animator(fps) {
-    this.anims = [];
-    this.fps = fps || 14;
-    this.period = 1000.0 / this.fps;
-    this.interval = null;
-    this.TraceDiv = null;
-    this.TT = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+function Animator() {
+    this.anims = new Set([]);
+    this.TT = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     this.TTi = 0;
     this.last = 0;
     this.thingsToBeDone = false;
 }
+Animator.factory = function () {
+    Animator.singleton = Animator.singleton || new Animator();
+    return Animator.singleton;
+}
 
-Animator.prototype.singleton = new Animator();
 Animator.prototype.logCB = null;
 
-Animator.prototype.remove = function(anim) {
-   this.anims.remove(anim);
+Animator.prototype.remove = function (anim) {
+    this.anims.delete(anim);
 }
 
-Animator.prototype.add = function(anim) {
-   var i = this.anims.indexOf(anim);
-   if (i != -1) return;
-   this.anims.push(anim);
-   if (this.interval == null) { // start refresh cycle
-        var self = this;
-        this.interval = setInterval(function() { self.iterate(); }, this.period);
-    }
-   this.thingsToBeDone = true;
+Animator.prototype.add = function (anim) {
+    this.anims.add(anim);
+    // start animation
+    this.rafId = this.rafId || window.requestAnimationFrame(time => this.iterate(time));
+    this.thingsToBeDone = true;
 }
 
-Animator.prototype.iterate = function() {
-    var i, n = this.anims.length;
-    var clonedArray = this.anims.slice();
-    var now = Number(new Date());
-    var factor = (this.last ? (now - this.last) / this.period : 1.0);
-    if (factor > 10) factor = 10;
-    this.last = now;
+Animator.prototype.iterate = function (time) {
+    let clonedArray = [... this.anims];
+    this.passedTime = (this.last !== 0 ? time - this.last : 0);
+    this.last = time;
     this.thingsToBeDone = false;
-    for (i = 0; i < n; i++) {
-        var m = clonedArray[i];
+    clonedArray.forEach(m => {
+        if (m.start === undefined) {
+            m.start = time;
+        }
+        m.progress = Math.min(1.0, (time - m.start) / (m.duration || 1.0));
         if (m.state == 1) {
-            m.onResume();
+            m.onResume(m.progress, this.passedTime);
             m.state == 2;
         }
-
-        if (!m.iterate(factor)) {
-            m.pause();
+        if (!m.iterate(m.progress, this.passedTime)) {
+            m.pause(m.progress);
             var f = m.onFinish;
-            m.onFinish = new Function();
-            f.call(m);
-		 
+            m.onFinish = function() {};
+            f.call(m, m.progress, this.passedTime);
+            m.start = undefined;
+            m.progress = undefined;
         } else {
             this.thingsToBeDone = true;
         }
-    }
+    });
 
     if (!this.thingsToBeDone) { // stop refresh cycle
-        clearInterval(this.interval);
-        this.interval = null;
+        window.cancelAnimationFrame(this.rafId);
+        this.last = 0;
+        this.rafId = null;
+    } else {
+        this.rafId = window.requestAnimationFrame(time => this.iterate(time));
     }
 
     if (this.logCB) {
@@ -66,4 +64,3 @@ Animator.prototype.iterate = function() {
             this.logCB(parseInt(10000 / (t9 - t0)));
     }
 };
-

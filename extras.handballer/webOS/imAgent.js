@@ -3,7 +3,7 @@
 // imAgent : Instant Messaging Agent
 //
 // =========================================================================
-var imAgent = new BusAgent() ;
+var imAgent = new BusState() ;
 
 // private variables
 // =========================================================================
@@ -131,7 +131,7 @@ _onIdentityChangeCB = function(name, identity) {
   if (counters)
     for (type in counters)
       {
-        imAgent.set(type, "0") ; // to be sure the BusAgent event will be fired if counter > 0
+        imAgent.set(type, "0") ; // to be sure the BusState event will be fired if counter > 0
         imAgent.set_and_fire(type, counters[type]) ;
       }
 }

@@ -72,7 +72,7 @@ GENHDR =	mime_encodings.h mime_types.h
 
 CLEANFILES =	$(ALL) $(OBJ) $(GENSRC) $(GENHDR)
 
-SUBDIRS =	cgi-src extras libhbc test
+SUBDIRS =	cgi-src libhbc test
 
 all:		this subdirs
 this:		$(ALL)

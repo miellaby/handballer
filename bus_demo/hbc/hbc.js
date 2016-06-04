@@ -14,12 +14,8 @@
 // =========================================================================
 
 function Hbc() {
-  // default settings
   this.baseURL = "/bus/";
   this.pattern = "**";
-  // 200 ms interval when polling is necessary
-  this.pollPeriod = 200;
-  // default client ID
   this.clientId = "top";
   this.token = String(Number(new Date()) % (Math.random() * 0xAFF00000)).substr(0,9);
   this.count = 0;
@@ -27,7 +23,6 @@ function Hbc() {
 }
 
 Hbc.prototype.logCB = null;
-
 
 // bus message sending section
 // =========================================================================
@@ -45,7 +40,7 @@ Hbc.prototype.sendOne = function(label, body) {
         hbc.sendNext();
   } };
   this.sendXhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
-  this.sendXhr.send(body == null ? "" : "" + body);
+  this.sendXhr.send(body || '');
 };
 
 // private function called back when a message sending is done
@@ -76,103 +71,32 @@ Hbc.prototype.sendNow = function(label, body) {
    var one = new XMLHttpRequest();
    one.open("POST", this.baseURL + label, false);
    one.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
-   one.send(body == null ? "" : "" + body);
+   one.send(body || '');
 }
 
 // bus message receiving section
 // =========================================================================
 
-// pooling loop when bad XHR
-Hbc.prototype.poll = function() {
-   if (this.receiveXHR.readyState < 3) return;
-
-   var r = this.receiveXHR.responseText;
-
-   while (true) { // received message parsing loop
-      var labelEnd = r.indexOf("\x00", this.pollIdx);
-      if (labelEnd == -1) break;
-      var bodyEnd = r.indexOf("\x00", labelEnd + 1);
-      if (bodyEnd == -1) break;
-      var label = r.substring(this.pollIdx, labelEnd);
-      var body = r.substring(labelEnd + 1, bodyEnd);
-      try {
-         if (this.logCB) this.logCB("receiving " + label + ": " + body);
-         this.receiveCB(label, body);
-      } catch (e) {
-         if (this.logCB) this.logCB("error in CB: " + e.message + " [" + e.name + "]");
-      }
-      this.pollIdx = bodyEnd + 1;
-   }
-
-   if (this.receiveXHR.readyState == 4) {
-         if (this.logCB) {
-           var junk = r.substr(this.pollIdx);
-           if (junk) this.logCB("unparsed junk: " + junk);
-        }
-
-        //this.receiveXHR.abort(); // useless afak
-
-        // if connection aborted, try to relaunch it once
-        if (this.lastXHRstate >= 3) this.openXHR();
-   } else {
-        this.lastXHRstate = this.receiveXHR.readyState;
-   }
-};
-
-
-// private function to open a receiving XHR
-Hbc.prototype.openXHR = function() {
-
-  // to poll new messages in receiving XHR if required
-  this.pollIdx = 0; // for polled XHR response parsing
-  this.lastXHRstate = -1; // for XHR state change detection
-
-
-  // bus message receiving dedicated XHR
-  this.receiveXHR = new XMLHttpRequest();
-
-  this.multipartSupport = (this.receiveXHR.multipart !== undefined);
-  this.multipartSupport = false; // for my test on FF3
-  if (this.multipartSupport) {
-     // newest Gecko versions : multipart support
-     this.receiveXHR.multipart = true;
-     var hbc = this;
-     this.receiveXHR.onload = function(e) {
-        var r = hbc.receiveXHR.responseText;
-        var i = r.indexOf("\n");
-        var label = r.substring(0, i);
-        var body = r.substring(i + 1);
-        if (hbc.logCB) hbc.logCB("receiving " + label + ": " + body);
-        hbc.receiveCB(label, body);
-     };
-  }
-
-  var url =  this.baseURL + this.pattern + "?label&timestamp=" + Number(new Date());
-  if (this.multipartSupport)
-     url += "&push=XYZ";
-  else
-     url += "&null&flush&box=" + this.token + this.clientId;
-
-  this.receiveXHR.open('GET', url, true);
-
-  if (!this.multipartSupport) {
-     var hbc = this;
-     this.receiveXHR.onreadystatechange = function() {
-        hbc.poll();
-     }
-  }
-
-  this.receiveXHR.send(null);
+// private function to subscribe
+Hbc.prototype.subscribe = function() {
+   var self = this;
+   var url =  this.baseURL + this.pattern + "?event&label";
+   this.evtSource = new EventSource(url, {
+      withCredentials: true,
+   });
+   this.evtSource.onmessage = function (event) {
+      var label = "what"
+      var d = event.data
+      var i = d.indexOf("\n");
+      var label = d.substring(0, i);
+      var body = d.substring(i + 1);
+      if (self.logCB) self.logCB("receiving " + label + ": " + body);
+      self.receiveCB(label, body);
+   };
 }
 
 // initialize the library
 Hbc.prototype.init = function() {
-
-  if (this.pollInterval !== undefined) { // resilience to multiple init call
-    clearInterval(this.pollInterval);
-    this.pollInterval = undefined;
-  }
-
   // recyclable message sending dedicated XHR
   this.sendXhr = new XMLHttpRequest();
 
@@ -183,18 +107,5 @@ Hbc.prototype.init = function() {
   this.sendFifo = [];
 
   // open the receiving XHR
-  this.openXHR();
-  
-  if (0) { // no more polling since flush feature is available
-    if (!this.multipartSupport) {
-       var self = this;
-       // no multipart support ==> polling
-       this.pollInterval = setInterval(function() {
-          try{
-            self.poll();
-          } catch(e) {
-           if (self.logCB) self.logCB("error in poll: " + e.message + " [" + e.name + "]");
-          }}, this.pollPeriod);
-    }
-  }
+  this.subscribe();
 }

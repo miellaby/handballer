@@ -1,8 +1,8 @@
-function RevolutionInAnim(revolution, start, howMany) {
+function RevolutionInAnim(revolution, index, howMany) {
     Anim.call(this);
     this.revolution = revolution;
     this.prop = revolution.prop;
-    this.start = start;
+    this.where = index;
     this.howMany = howMany;
     this.ratio = 0;
     this.speed = this.c0;
@@ -11,7 +11,7 @@ function RevolutionInAnim(revolution, start, howMany) {
 
 RevolutionInAnim.prototype = new Anim();
 
-RevolutionInAnim.prototype.iterate = function() {
+RevolutionInAnim.prototype.iterate = function(progress, passedTime) {
     var done = false;
 
     this.ratio += this.speed;
@@ -23,7 +23,7 @@ RevolutionInAnim.prototype.iterate = function() {
 
     this.speed -= this.c1;
     if (this.speed < this.c1) this.speed = this.c1;
-    for (var lst = this.revolution.items, i = this.start, n = this.start + this.howMany ; i < n; ++i) {
+    for (var lst = this.revolution.items, i = this.where, n = this.where + this.howMany ; i < n; ++i) {
         var elt = lst[i];
         if (this.jumpOver.indexOf(elt) != -1) continue;
         elt[this.prop].inFactor = this.ratio;
@@ -33,20 +33,20 @@ RevolutionInAnim.prototype.iterate = function() {
 
 RevolutionInAnim.prototype.onSplice = function(start, howMany /*, item, item, ... */) {
     var nbNewItem = Math.max(0, arguments.length - 2);
-    if (start <= this.start) {
-        if (start + howMany <= this.start)
+    if (start <= this.where) {
+        if (start + howMany <= this.where)
             // splice on the animated set left side 
-            this.start += nbNewItem - howMany;
+            this.where += nbNewItem - howMany;
         else {
             // splice trunking the animated set from the left side
-            this.howMany -= start + howMany - this.start;
+            this.howMany -= start + howMany - this.where;
             if (this.howMany < 0) this.howMany=0;
-            this.start = start + nbNewItem;
+            this.where = start + nbNewItem;
         }
-    } else if (start < this.start + this.howMany) {
-        if (start + howMany >= this.start + this.howMany) {
+    } else if (start < this.where + this.howMany) {
+        if (start + howMany >= this.where + this.howMany) {
             // splice trunking the animated set from the right side
-            this.howMany = start - this.start;
+            this.howMany = start - this.where;
         } else {
             // splice within the animated set
             this.howMany += nbNewItem - howMany;
@@ -60,7 +60,7 @@ RevolutionInAnim.prototype.onSplice = function(start, howMany /*, item, item, ..
 
 RevolutionInAnim.prototype.onFinish = function() {
     // console.log("auto remove");
-    this.revolution.innerAnims.remove(this);
+    this.revolution.innerAnims.delete(this);
 };
 
 RevolutionInAnim.prototype.c0 = 0.189;
@@ -70,7 +70,7 @@ function RevolutionOutAnim(revolution, start, items) {
     Anim.call(this);
     this.revolution = revolution;
     this.prop = revolution.prop;
-    this.start = start;
+    this.where = start;
     this.items = items;
     this.ratio = 1;
     this.speed = 0;
@@ -78,9 +78,11 @@ function RevolutionOutAnim(revolution, start, items) {
 }
 RevolutionOutAnim.prototype = new Anim();
 
-RevolutionOutAnim.prototype.iterate = function() {
+RevolutionOutAnim.prototype.iterate = function(progress, passedTime) {
     var done = false;
+
     this.ratio -= this.speed;
+    
     if (this.ratio < 0) {
         this.ratio = 0;
         done = true;
@@ -98,20 +100,20 @@ RevolutionOutAnim.prototype.iterate = function() {
 
 RevolutionOutAnim.prototype.onSplice = function(start, howMany /*, item, item, ... */) {
     var nbNewItem = Math.max(0, arguments.length - 2);
-    if (start <= this.start) {
-        if (start + howMany <= this.start)
+    if (start <= this.where) {
+        if (start + howMany <= this.where)
             // splice on the animated set left side 
-            this.start += nbNewItem - howMany;
+            this.where += nbNewItem - howMany;
         else {
             // splice trunking the animated set from the left side
-            this.howMany -= start + howMany - this.start;
+            this.howMany -= start + howMany - this.where;
             if (this.howMany < 0) this.howMany=0;
-            this.start = start + nbNewItem;
+            this.where = start + nbNewItem;
         }
-    } else if (start < this.start + this.howMany) {
-        if (start + howMany >= this.start + this.howMany) {
+    } else if (start < this.where + this.howMany) {
+        if (start + howMany >= this.where + this.howMany) {
             // splice trunking the animated set from the right side
-            this.howMany = start - this.start;
+            this.howMany = start - this.where;
         } else {
             // splice within the animated set
             this.howMany += nbNewItem - howMany;
@@ -125,7 +127,7 @@ RevolutionOutAnim.prototype.onSplice = function(start, howMany /*, item, item, .
 
 RevolutionOutAnim.prototype.onFinish = function() {
     // console.log("auto remove");
-    this.revolution.innerAnims.remove(this);
+    this.revolution.innerAnims.delete(this);
 };
 
 RevolutionOutAnim.prototype.c1 = 0.02;
@@ -134,7 +136,7 @@ function RevolutionShiftAnim(revolution, start, howMany, offset) {
     Anim.call(this);
     this.revolution = revolution;
     this.prop = revolution.prop;
-    this.start = start;
+    this.where = start;
     this.howMany = howMany;
     this.offset = offset;
     this.current = 0;
@@ -145,7 +147,7 @@ function RevolutionShiftAnim(revolution, start, howMany, offset) {
 
 RevolutionShiftAnim.prototype = new Anim();
 
-RevolutionShiftAnim.prototype.iterate = function() {
+RevolutionShiftAnim.prototype.iterate = function(progress, passedTime) {
     var ratio = 2 * this.current / this.offset - 1;
     var step = this.c1 * (1 - ratio*ratio) ;
     if (step < this.minStep)
@@ -159,7 +161,7 @@ RevolutionShiftAnim.prototype.iterate = function() {
         done = true;
     }
     
-    var i = this.start, n = this.howMany, l = this.revolution.items;
+    var i = this.where, n = this.howMany, l = this.revolution.items;
     while (n--) {
         var elt=l[i++];
         if (this.jumpOver.indexOf(elt) != -1) continue;
@@ -173,20 +175,20 @@ RevolutionShiftAnim.prototype.iterate = function() {
 
 RevolutionShiftAnim.prototype.onSplice = function(start, howMany /*, item, item, ... */) {
     var nbNewItem = Math.max(0, arguments.length - 2);
-    if (start <= this.start) {
-        if (start + howMany <= this.start)
+    if (start <= this.where) {
+        if (start + howMany <= this.where)
             // splice on the animated set left side 
-            this.start += nbNewItem - howMany;
+            this.where += nbNewItem - howMany;
         else {
             // splice trunking the animated set from the left side
-            this.howMany -= start + howMany - this.start;
+            this.howMany -= start + howMany - this.where;
             if (this.howMany < 0) this.howMany=0;
-            this.start = start + nbNewItem;
+            this.where = start + nbNewItem;
         }
-    } else if (start < this.start + this.howMany) {
-        if (start + howMany >= this.start + this.howMany) {
+    } else if (start < this.where + this.howMany) {
+        if (start + howMany >= this.where + this.howMany) {
             // splice trunking the animated set from the right side
-            this.howMany = start - this.start;
+            this.howMany = start - this.where;
         } else {
             // splice within the animated set
             this.howMany += nbNewItem - howMany;
@@ -199,7 +201,7 @@ RevolutionShiftAnim.prototype.onSplice = function(start, howMany /*, item, item,
 }
 
 RevolutionShiftAnim.prototype.onFinish = function() {
-    this.revolution.innerAnims.remove(this);
+    this.revolution.innerAnims.delete(this);
 }
 
 RevolutionShiftAnim.prototype.c0 = 0.03;

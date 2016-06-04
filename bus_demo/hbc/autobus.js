@@ -5,17 +5,20 @@
 
 function Autobus(agora, hbc) {
    this.agora = agora ? agora + "/" : "";
-   this.tagsonomy = new PubSubAgent();
+   this.tagsonomy = new PubSubState();
    this.hbc = (hbc ? hbc : new Hbc());
-   Autobus.singleton = this;
 };
 
-Autobus.singleton = null;
+Autobus.singleton = undefined;
+Autobus.factory = function(agora, hbc) {
+  Autobus.singleton = Autobus.singleton || new Autobus(agora, hbc);
+  return Autobus.singleton;
+}
 
 
 // Bus agent factory,
 // If the named agent already exists, one returns it without creating a second copy.
-Autobus.prototype.busAgent = function(name, location, recipient) {
+Autobus.prototype.busState = function(name, location, recipient) {
     var e = this.tagsonomy.getOr(name, null);
     if (e) { // if the agent exists both here and there, one takes note of it
         if (location == e.HERE && e.location == e.THERE ||
@@ -23,7 +26,7 @@ Autobus.prototype.busAgent = function(name, location, recipient) {
             e.location = e.BOTH;
         return e;
     }
-    return new BusAgent(this, name, location, recipient);
+    return new BusState(this, name, location, recipient);
 }
 
 Autobus.prototype.callback = function(label, body) {
@@ -69,11 +72,11 @@ Autobus.prototype.callback = function(label, body) {
         if (!obj.here()) continue;
         if (command == "set") {
            if (parameter)
-             obj.set(parameter, eval("(" + body + ")"));
+             obj.set(parameter, JSON.parse(body));
            else
-             obj.sets(eval("(" + body + ")"));
+             obj.sets(JSON.parse(body));
         } else {
-           obj.get(command).apply(this, eval("[" + body + "]"));
+           obj.get(command).apply(this, JSON.parse("[" + body + "]"));
         }
       }
 
@@ -83,13 +86,13 @@ Autobus.prototype.callback = function(label, body) {
       var agentName = slashIdx != -1 ? label.substring(6, slashIdx) : label.substring(6);
       var slot = slashIdx != -1 ? label.substring(slashIdx + 1) : undefined;
       
-      obj = this.busAgent(agentName, BusAgent.prototype.THERE);
+      obj = this.busState(agentName, BusState.prototype.THERE);
  
       if (obj.there()) {
          if (slot)
-           obj.setted(slot, eval("(" + body + ")"));
+           obj.setted(slot, JSON.parse(body));
          else
-           obj.setteds(eval("(" + body + ")"));
+           obj.setteds(JSON.parse(body));
       } 
 
    } else if (label.substring(0,7) == "status/") {

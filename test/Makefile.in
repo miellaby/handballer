@@ -69,17 +69,17 @@ test2:
 build:		hbcgetm load_post hbcpoll
 
 hbcgetm:		hbcgetm.o
-	$(CC) $(LDFLAGS) -L. -lhbc -lhbcg hbcgetm.o $(LIBS) -o hbcgetm
+	$(CC) $(LDFLAGS) -L. hbcgetm.o -lhbc -lhbcgx $(LIBS) -o hbcgetm
 
 hbcgetm.o:		../libhbc/getter.h
 
 load_post:		load_post.o
-	$(CC) $(LDFLAGS) -L. -lhbc -lhbcg load_post.o $(LIBS) -o load_post
+	$(CC) $(LDFLAGS) -L. load_post.o -lhbc -lhbcg $(LIBS) -o load_post
 
 load_post.o:		../libhbc/hbc.h
 
 hbcpoll:		hbcpoll.o
-	$(CC) $(LDFLAGS) -L. -lhbc hbcpoll.o $(LIBS) -o hbcpoll
+	$(CC) $(LDFLAGS) -L. hbcpoll.o -lhbc $(LIBS) -o hbcpoll
 
 hbcpoll.o:		../libhbc/hbc.h
 

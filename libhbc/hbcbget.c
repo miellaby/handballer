@@ -3,7 +3,7 @@
  * SubProject : Handballer Bus Client API
  * 
  */
-
+#include <unistd.h>
 #include "hbc.h"
 #include "trace.h"
 
@@ -24,7 +24,7 @@ int main (int argc, char *argv[]) {
     strcpy(tempName,"/tmp/hbcXXXXXX");
     temp = mkstemp(tempName);
 
-    write(temp, body, hbc_bodySize(sockId));
+    if (write(temp, body, hbc_bodySize(sockId)) == -1) break;
     close(temp);
     
     fprintf(stdout,"%s : %s\n", channel, tempName);

@@ -1,392 +1,384 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-"http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
+
 <head>
-<title>A2A CHAT</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<style type="text/css">
-body {
-    font-family: Tahoma, Arial, Helvetica, sans-serif;
-    font-size: 18px;
-    background-color: transparent;
-    overflow: hidden;
-    margin: 0;
-}
+  <title>TCHAT</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style type="text/css">
+    html {
+      background: linear-gradient(to right, #dae2f8, #d6a4a4);
+    }
+    body {
+      font-family: Tahoma, Arial, Helvetica, sans-serif;
+      font-size: 18px;
+      overflow: hidden;
+      margin: 0;
+    }
 
-p, div {
-    margin: 0;
-    padding: 0;
-}
+    p,
+    div {
+      margin: 0;
+      padding: 0;
+    }
 
-button {
-    background-color: #fff;
-    border: 1px solid #000;
-}
+    button {
+      background-color: #fff;
+      border: 1px solid #000;
+    }
 
-button:hover {
-    background-color: #dff4ff;
-    border: 1px solid #c2e1ef;
-    color: #369;
-}
+    button:hover {
+      background-color: #dff4ff;
+      border: 1px solid #c2e1ef;
+      color: #369;
+    }
 
-label {
-    /* margin-top:-0.5em; */
-    margin-right: 100%;
-    float: right;
-    height: 1px;
-    padding-top:0.5em;
-}
+    label {
+      /* margin-top:-0.5em; */
+      margin-right: 100%;
+      float: right;
+      height: 1px;
+      padding-top: 0.5em;
+    }
 
-form p {
-    margin-left: 240px;
-    clear: right;
-}
+    form p {
+      margin-left: 240px;
+      clear: right;
+    }
 
-input, textarea, select {
-    border: 1px solid #000;
-    padding: 2px 1px 3px 1px;
-    margin: 0 0 3px 1px;
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
-    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
-    font-size: 18px;
-    background-color: #FFF;
-}
+    input,
+    textarea,
+    select {
+      border: 1px solid #000;
+      padding: 2px 1px 3px 1px;
+      margin: 0 0 3px 1px;
+      border-radius: 4px;
+      font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+      font-size: 18px;
+      background-color: #FFF;
+    }
 
-.trap {
- position: absolute;
- left: 0;
- top: 0;
- width: 100%;
- height: 100%;
- z-index: 100;
-}
+    .trap {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+    }
 
-#intendeesArea {
-  position: absolute;
-  background-color: transparent;
-  width: 100%;
-  height: 130px;
-  z-index: 10;
-}
+    #intendeesArea {
+      position: absolute;
+      background-color: transparent;
+      width: 100%;
+      height: 130px;
+      z-index: 10;
+    }
 
-#intendeesBack {
-  background-color: transparent;
-  position: absolute;
-  left: 0%;
-  top: 0%;
-  width: 3%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 15;
-}
+    #intendeesBack {
+      background-color: transparent;
+      position: absolute;
+      left: 0%;
+      top: 0%;
+      width: 3%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 15;
+    }
 
-#intendeesTrap {
-  height: 180px;
-}
+    #intendeesTrap {
+      height: 180px;
+    }
 
-#intendeesForward {
-  background-color: transparent;
-  position: absolute;
-  right: 0%;
-  top: 0%;
-  width: 3%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 15;
-}
+    #intendeesForward {
+      background-color: transparent;
+      position: absolute;
+      right: 0%;
+      top: 0%;
+      width: 3%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 15;
+    }
 
-#intendeesGlider {
-  background-color:red;
-  position: absolute;
-  left: 0%;
-  width: 0%;
-  height: 3px;
-  top: 177px;
-  z-index: 20;
-}
+    #intendeesGlider {
+      background-color: red;
+      position: absolute;
+      left: 0%;
+      width: 0%;
+      height: 3px;
+      top: 177px;
+      z-index: 20;
+    }
 
 
-.intendeePic {
-  position: absolute;
-  width: 96px; /* 192/2 */
-  height: 130px; /* 260/2 */
-  z-index: 16;
-}
+    .intendeePic {
+      position: absolute;
+      width: 96px;
+      /* 192/2 */
+      height: 130px;
+      /* 260/2 */
+      z-index: 16;
+    }
 
-.intendeeEmblem {
-  position: absolute;
-  width: 32px;
-  height: 32px;
-  z-index: 17;
-}
+    .intendeeEmblem {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      z-index: 17;
+    }
 
-.intendeeDesc {
-/*  -moz-border-radius:4px;
+    .intendeeDesc {
+      /*  -moz-border-radius:4px;
   -webkit-border-radius:4px; */
-  border-radius:4px;
-  background: transparent;
-/*  background-image: url('images/lines.gif');*/
-  position: absolute;
-  text-align: center;
-  overflow: hidden;
-  width: 96px;
-  margin: 0;
-  color: #AAA;
-  text-shadow: 0 1px 0.05em #000, 0 -1px 0.05em #000;
-  z-index: 18;
-}
+      border-radius: 4px;
+      background: transparent;
+      /*  background-image: url('images/lines.gif');*/
+      position: absolute;
+      text-align: center;
+      overflow: hidden;
+      width: 96px;
+      margin: 0;
+      color: #AAA;
+      text-shadow: 1px 3px 3px #a5a5a5;
+      z-index: 18;
+    }
 
-.intendeeDesc quote {
-  font-size: 12px;
-}
+    .intendeeDesc quote {
+      font-size: 12px;
+    }
 
-.intendeeDesc img {
-   max-width: 32px;
-   max-height: 32px;
-}
-.intendeeDesc small {
-  font-size: 7px;
-  color: black;
-  text-shadow: none;
-}
+    .intendeeDesc img {
+      max-width: 32px;
+      max-height: 32px;
+    }
 
-
-#eventsArea {
-  position: absolute;
-  background-color: transparent;
-  width: 100%;
-  height: 0px;
-  z-index: 30;
-}
-
-.msgPic {
-  position: absolute;
-  background-color: transparent;
-  height: 48px;
-  margin-bottom:10px;
-  left: 4px;
-}
+    .intendeeDesc small {
+      font-size: 7px;
+      color: black;
+      text-shadow: none;
+    }
 
 
-.eventPic {
-  position: absolute;
-  background-color: transparent;
-  height: 48px;
-  left: 102px;
-  z-index: 31;
-}
+    #eventsArea {
+      position: absolute;
+      background-color: transparent;
+      width: 100%;
+      height: 0px;
+      z-index: 30;
+    }
+
+    .msgPic {
+      position: absolute;
+      background-color: transparent;
+      height: 48px;
+      margin-bottom: 10px;
+      left: 4px;
+    }
 
 
-.msgDesc {
-  position: absolute;
-  background-color: transparent;
-  color: #AAA;
-  left: 56px;
-  margin-bottom: 5px;
-  height: 38px ;
-  padding: 0 2px; /* stupid padding to prevent scrollbar because of shadow */
-/*  background-image:url('images/lines.gif');*/
-  -moz-border-radius: 4px;
-  -webkit-border-radius: 4px;
-  border-radius: 4px;
-  text-shadow: 0 1px 0.05em #000, 0 -1px 0.05em #000;
-  overflow: auto;
-}
-
-.msgDesc img {
-   max-width: 32px;
-   max-height: 32px;
-   vertical-align: middle;
-}
-
-.eventDesc {
-  position: absolute;
-  background-color: white;
-  color: #AAA;
-  left: 100px;
-  height: 38px ;
-  overflow: auto;
-  padding: 15px 2px 0 52px; /* stupid padding to prevent scrollbar because of shadow */
-/*  background-image:url('images/lines.gif');*/
-  -moz-border-radius: 4px;
-  -webkit-border-radius: 4px;
-  border-radius: 4px;
-  text-shadow: 0 1px 0.05em #000, 0 -1px 0.05em #000;
-  z-index: 30;
-}
-
-.eventDesc img {
-   max-width: 32px;
-   max-height: 32px;
-   vertical-align: middle;
-}
-
-#contextForm {
-    -moz-border-radius: 20px;
-    -webkit-border-radius: 20px;
-    border-radius: 20px;
-    position: absolute;
-    width: 500px;
-    right: 5px;
-    top: 100px;
-    z-index: 40;
-    background-color: #FFFFFF;
-    opacity: 0.90;
-    overflow: hidden;
-    border: 1px solid #000;
-    padding: 5px;
-}
-
-#mePicDiv {
- float: left;
- width: 192px;
- height: 260px;
-}
-
-#meEmblemImg, #iEmblemImg {
-  width: 32px;
-  height: 32px;
-  float: right;
-}
+    .eventPic {
+      position: absolute;
+      background-color: transparent;
+      height: 48px;
+      left: 102px;
+      z-index: 31;
+    }
 
 
-#iPicDiv {
- float: left;
-}
+    .msgDesc {
+      position: absolute;
+      background-color: transparent;
+      color: #AAA;
+      left: 56px;
+      margin-bottom: 5px;
+      height: 38px;
+      padding: 0 2px;
+      /* stupid padding to prevent scrollbar because of shadow */
+      /*  background-image:url('images/lines.gif');*/
+      border-radius: 4px;
+      text-shadow: 1px 3px 3px #a5a5a5;
+      overflow: auto;
+    }
 
-#msgsTrap {
-}
+    .msgDesc img {
+      max-width: 32px;
+      max-height: 32px;
+      vertical-align: middle;
+    }
 
-#msgsArea {
-   position: absolute;
-   top: 192px;
-   bottom: 60px;
-   width: 100%;
-   overflow: hidden;
-   z-index: 31;
-}
-                                                              
-#messagesGlider {                                    
-  background-color: red;                               
-  position: absolute;                                                           
-  left: 0px;
-  width: 3px;
-  height: 0%;
-  bottom: 0%;
-  z-index: 16;
-}
+    .eventDesc {
+      position: absolute;
+      background-color: white;
+      color: #AAA;
+      left: 100px;
+      height: 38px;
+      overflow: auto;
+      padding: 15px 2px 0 52px;
+      /* stupid padding to prevent scrollbar because of shadow */
+      /*  background-image:url('images/lines.gif');*/
+      -moz-border-radius: 4px;
+      -webkit-border-radius: 4px;
+      border-radius: 4px;
+      text-shadow: 1px 3px 3px #a5a5a5;
+      z-index: 30;
+    }
 
-#postLayer {
-   -moz-border-radius: 20px;
-   -webkit-border-radius: 20px;
-   position: absolute;
-   bottom: 0px;
-   right: 2px;
-   left: 2px;
-   height: 60px;
-   z-index: 29;
-   margin: 0;
-   padding: 0;
-   background-color: #FFF;
-   opacity: 0.20;
-   border: 1px solid #000;
-}
+    .eventDesc img {
+      max-width: 32px;
+      max-height: 32px;
+      vertical-align: middle;
+    }
 
-#postForm {
-  position: absolute;
-  width: 100%;
-  bottom: 0px;
-  height: 60px;
-  z-index: 30;
-  margin: 0;
-  padding: 0;
-}
+    #contextForm {
+      border-radius: 20px;
+      position: absolute;
+      width: 500px;
+      height: 330px;
+      right: 5px;
+      top: 100px;
+      z-index: 40;
+      background-color: #ffffffbb;
+      overflow: hidden;
+      border: 1px solid #000;
+      padding: 5px;
+    }
 
-#messageBodyDiv {
-  right: 2px;
-  left: 2px;
-  margin: 0;
-  padding: 0;
-  height: 42px;
-  padding-left: 54px;
-  padding-top: 9px;
-/*  background-image: url('images/lines.gif');*/
-}
+    .ContextForm {
+      width: 500px;
+      height: 330px;
+    }
 
-#messageBody {
-  background-color: transparent;
-  width: 95%;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  padding-top: 0.5em;
-  height: 2em;
-  font-family: Tahoma, Arial, Helvetica, sans-serif;
-}
+    #mePicDiv {
+      float: left;
+      width: 192px;
+      height: 260px;
+    }
+
+    .EmblemImg {
+      width: 32px;
+      height: 32px;
+      float: right;
+    }
 
 
-#msgPicImg {
-  position: absolute;
-  left: 5px;
-  top: 3px;
-  height: 48px;
-  z-index: 31;
-}
+    #iPicDiv {
+      float: left;
+    }
 
-#hideButton {
-  position: absolute;
-  right: 80px;
-  z-index: 11;
-}
+    #msgsTrap {}
 
-#closeButton {
-  position: absolute;
-  right: 20px;
-  z-index: 11;
-}
+    #msgsArea {
+      position: absolute;
+      top: 192px;
+      bottom: 120px;
+      width: 100%;
+      overflow: hidden;
+      z-index: 31;
+    }
 
-</style>
-<!-- Flavour layer -->
-<script type="text/javascript" src="/hbc/myPrototype.js"></script>
-<script type="text/javascript" src="/hbc/cookies.js"></script>
-<script type="text/javascript" src="/hbc/jsonize.js"></script>
-<!-- BUS connectivity -->
-<script type="text/javascript" src="/hbc/hbc.js"></script>
-<!-- pub/sub framework -->
-<script type="text/javascript" src="/hbc/pubsubAgent.js"></script>
-<script type="text/javascript" src="/hbc/busAgent.js"></script>
-<script type="text/javascript" src="/hbc/autobus.js"></script>
-<!-- A2A chat application core -->
-<script type="text/javascript" src="/a2a_chat/a2ac.js"></script>
-<!-- UI technologies -->
-<script type="text/javascript" src="helpers.js"></script>
-<script type="text/javascript" src="rgbcolor.js"></script>
-<script type="text/javascript" src="animator.js"></script>
-<script type="text/javascript" src="anim.js"></script>
-<script type="text/javascript" src="trap.js"></script>
-<script type="text/javascript" src="cell.js"></script>
-<script type="text/javascript" src="revolutionAnims.js"></script>
-<script type="text/javascript" src="revolution.js"></script>
-<script type="text/javascript" src="glider.js"></script>
-<script type="text/javascript" src="sound/soundmanager2-nodebug-jsmin.js"></script>
-<script type="text/javascript" src="creole.js"></script>
-<script type="text/javascript" src="a2ac_ui.js"></script>
-<!-- Top UI -->
-<script type="text/javascript" src="index.js"></script>
+    #messagesGlider {
+      background-color: red;
+      position: absolute;
+      left: 0px;
+      width: 3px;
+      height: 0%;
+      bottom: 0%;
+      z-index: 16;
+    }
+
+    #postLayer {
+      position: absolute;
+      left: 1em;
+      right: 1em;
+      bottom: 1em;
+      height: 60px;
+      z-index: 30;
+      margin: 0;
+      padding: 0;
+      border-radius: 20px;
+      margin: 0;
+      padding: 0;
+      background-color: #FFF5;
+      border: 1px solid #000;
+    }
+
+    #postForm {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #messageBody {
+      outline: none;
+      background-color: transparent;
+      width: 95%;
+      margin: 0;
+      padding: 0 1em 0 64px;
+      border: 0;
+      height: 100%;
+      font-family: Tahoma, Arial, Helvetica, sans-serif;
+      box-sizing: border-box;
+    }
+
+
+    #msgPicImg {
+      position: absolute;
+      left: 5px;
+      top: 3px;
+      height: 48px;
+      z-index: 31;
+    }
+
+    #hideButton {
+      position: absolute;
+      right: 80px;
+      z-index: 11;
+    }
+
+    #closeButton {
+      position: absolute;
+      right: 20px;
+      z-index: 11;
+    }
+  </style>
+  <!-- Flavour layer -->
+  <script type="text/javascript" src="/hbc/utils.js"></script>
+  <script type="text/javascript" src="/hbc/cookies.js"></script>
+  <!-- BUS connectivity -->
+  <script type="text/javascript" src="/hbc/hbc.js"></script>
+  <!-- pub/sub framework -->
+  <script type="text/javascript" src="/hbc/pubSubState.js"></script>
+  <script type="text/javascript" src="/hbc/busState.js"></script>
+  <script type="text/javascript" src="/hbc/autobus.js"></script>
+  <!-- A2A chat application core -->
+  <script type="text/javascript" src="/a2a_chat/a2ac.js"></script>
+  <!-- UI technologies -->
+  <script type="text/javascript" src="helpers.js"></script>
+  <script type="text/javascript" src="rgbcolor.js"></script>
+  <script type="text/javascript" src="animator.js"></script>
+  <script type="text/javascript" src="anim.js"></script>
+  <script type="text/javascript" src="trap.js"></script>
+  <script type="text/javascript" src="cell.js"></script>
+  <script type="text/javascript" src="revolutionAnims.js"></script>
+  <script type="text/javascript" src="revolution.js"></script>
+  <script type="text/javascript" src="glider.js"></script>
+  <script type="text/javascript" src="creole.js"></script>
+  <script type="text/javascript" src="a2ac_ui.js"></script>
+  <!-- Top UI -->
+  <script type="text/javascript" src="index.js"></script>
 </head>
 
-<body onload="setTimeout(function(){chat2.init();},500);" onunload="chat2.finalize();">
+<body onload="setTimeout(function(){chat2.init();},100);" onunload="chat2.finalize();">
 
   <!-- intendy area -->
-  <img id="hideButton" src="images/crossmi.png" />
   <div id="intendeesArea">
     <div class="trap" id="intendeesTrap"></div>
     <div id="intendeesBack"></div>
     <div id="intendeesForward"></div>
     <div id="intendeesGlider"></div>
-    <img id="closeButton" src="images/cross.png" />
   </div>
   <div id="eventsArea">
   </div>
@@ -394,66 +386,103 @@ input, textarea, select {
     <div id="messagesGlider"></div>
     <div class="trap" id="msgsTrap"></div>
   </div>
-  
+
 
   <div id="contextForm" style="display:none;">
     <form id="mePropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
-      <button type="reset" style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);"><img src="images/cross.png" /></button>
+      <button type="button" style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);">
+      &times;</button>
       <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
-      <div id="mePicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="mePicImg" src="images/blank.gif" /></td></tr></table></div>
+      <div id="mePicDiv">
+        <table style="border-width: 0" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="text-align: center"><img id="mePicImg" class="iPicImg" src="images/blank.gif" /></td>
+          </tr>
+        </table>
+      </div>
       <h2>My properties</h2>
       <p><label for="meProfileId">profile&nbsp;ID&nbsp;</label>
-        <select id="meProfileId"><option value="#NEW#">New ...</option></select>
+        <select id="meProfileId">
+          <option value="#NEW#">New ...</option>
+        </select>
         <input type="text" id="meNewProfileId" value="" style="display:none;" />
-        &nbsp;<button type="button" onclick="javascript:chat2.deleteCurrentProfile();" style="-moz-border-radius: 20px; -webkit-border-radius: 20px; width: 2em;">X</button> 
+        &nbsp;<button type="button" onclick="javascript:chat2.deleteCurrentProfile();"
+          style="-moz-border-radius: 20px; -webkit-border-radius: 20px; width: 2em;">X</button>
       </p>
       <p><label for="meNickname">nickname&nbsp;</label>
-        <input type="text" id="meNickname" value="" style="" /></p>
+        <input type="text" id="meNickname" class="iName" value="" style="" />
+      </p>
       <p><label for="mePic">picture&nbsp;</label>
-        <input type="text" id="mePic" value="" style="" /></p>
+        <input type="text" id="mePic" class='iPic' value="" style="" />
+      </p>
       <p><label for="meMind">mind&nbsp;</label>
-        <input type="text" id="meMind" value="" /></p>
+        <input type="text" id="meMind" class="'iMind" value="" />
+      </p>
       <p><label for="meEmblem">emblem&nbsp;</label>
-        <input type="text" id="meEmblem" value="" />&nbsp;<img id="meEmblemImg" src="images/blank.gif" /></p>
+        <input type="text" id="meEmblem" class='iEmblem' value="" />&nbsp;<img id="meEmblemImg" class="iEmblemImg" src="images/blank.gif" style="width: 32px; height: 32px;"/>
+      </p>
       <p><label for="meColor">color&nbsp;</label>
-        <input type="text" id="meColor" value="" style="" /></p>
+        <input type="text" id="meColor" class='iColor' value="" style="" />
+      </p>
       <div style="position: absolute; bottom: 0; margin: 10px; left: 0; right: 0;">
-         <button style="float: right;" onclick="javascript:chat2.submitContextForm();">Submit</button>
-         <button type="button" style="float: left;" onclick="javascript:chat2.reset();">Reset all settings</button>
+        <button type="submit" style="float: right;" onclick="javascript:chat2.submitContextForm();">Submit</button>
+        <button type="button" style="float: left;" onclick="javascript:chat2.reset();">Reset all settings</button>
       </div>
     </form>
-<form id ="iPropsForm" class="ContextForm" action="null">
-      <button style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);"><img src="images/cross.png" /></button>
+    <form id="iPropsForm" class="ContextForm">
+      <button type="button" style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);">
+        &times;</button>
       <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
-      <div id="iPicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="iPicImg" src="images/blank.gif" /></td></tr></table></div>
+      <div id="iPicDiv">
+        <table style="border-width: 0" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="text-align: center"><img class="iPicImg" src="images/blank.gif" /></td>
+          </tr>
+        </table>
+      </div>
       <p><label for="iName">nick&nbsp;</label>
-        <input type="text" readonly="readonly" id="iName" value="" style="" /></p>
+        <input type="text" readonly="readonly" class='iName' value="" style="" />
+      </p>
       <p><label for="iPic">pic&nbsp;</label>
-        <input type="text" readonly="readonly" id="iPic" value="" style="" /></p>
+        <input type="text" readonly="readonly" class='iPic' value="" style="" />
+      </p>
       <p><label for="iMind">mind&nbsp;</label>
-        <input type="text" readonly="readonly" id="iMind" value="" /></p>
+        <input type="text" readonly="readonly" class="iMind" value="" />
+      </p>
       <p><label for="iEmblem">emblem&nbsp;</label>
-        <input type="text" id="iEmblem" readonly="readonly" value="" />&nbsp;<img id="iEmblemImg" src="images/blank.gif" style="width: 32px; height: 32px;" /></p>
+        <input type="text" class="iEmblem" readonly="readonly" value="" />&nbsp;<img class="iEmblemImg" src="images/blank.gif"
+          style="width: 32px; height: 32px;" />
+      </p>
       <p><label for="iColor">color&nbsp;</label>
-        <input type="text" readonly="readonly" id="iColor" value="" /></p>
+        <input type="text" readonly="readonly" class="iColor" value="" />
+      </p>
     </form>
-    <form id ="mPropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
-      <button style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);"><img src="images/cross.png" /></button>
+    <form id="mPropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
+      <button type="button" style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);">
+      &times;</button>
       <label for="mFrom">from&nbsp;</label>
       <input type="text" readonly="readonly" id="mFrom" value="" style="" />
       <p><label for="mDate">date&nbsp;</label>
-        <input type="text" readonly="readonly" id="mDate" value="" style="" /></p>
+        <input type="text" readonly="readonly" id="mDate" value="" style="" />
+      </p>
     </form>
   </div>
 
-  <div id="postLayer"></div>
+  <div id="postLayer">
   <form id="postForm" action="javascript:chat2.onMessageSubmit();">
-    <div id="messageBodyDiv"><input id="messageBody" autofocus autocomplete="off" value="*type a message here*" /></div>
+    <input id="messageBody" autofocus autocomplete="off" placeholder="Your message" />
     <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
-    <div id="msgPicDiv"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center"><img id="msgPicImg" src="images/blank.gif"/ </td></tr></table></div>
-        
+    <div id="msgPicDiv">
+      <table style="border-width: 0;" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="text-align: center"><img id="msgPicImg" src="images/blank.gif"></td>
+        </tr>
+      </table>
+    </div>
+
     <button type="submit" style="display:none;">submit</button>
-  </form>
+  </form></div>
 
 </body>
+
 </html>

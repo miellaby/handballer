@@ -4,8 +4,7 @@
    <HEAD>
       <META http-equiv="Content-Type" content="text/html; charset=UTF-8" />
       <TITLE>A2A Chat UI Test</TITLE>
-      <SCRIPT type="text/javascript" src="../../hbc/myPrototype.js"></SCRIPT>
-      <SCRIPT type="text/javascript" src="../../hbc/jsonize.js"></SCRIPT>
+      <SCRIPT type="text/javascript" src="../../hbc/utils.js"></SCRIPT>
       <SCRIPT type="text/javascript" src="helpers.js"></script>
       <SCRIPT type="text/javascript" src="animator.js"></SCRIPT>
       <SCRIPT type="text/javascript" src="anim.js"></SCRIPT>
@@ -33,7 +32,7 @@ if(1) {
    revolutionOfIntendees.splice(0, 0, { icon: "images/blue.gif", nickname: "blue"  + (i++) }, { icon: "images/red.gif", nickname: "red" + (i++) }, { icon: "images/green.gif", nickname: "green" + (i++) });
    revolutionOfIntendees.splice(0, 0, { icon: "images/blue.gif", nickname: "blue"  + (i++) }, { icon: "images/red.gif", nickname: "red" + (i++) }, { icon: "images/green.gif", nickname: "green" + (i++) });
    setTimeout(function() { revolutionOfIntendees.splice(1, 0, { icon: "images/green.gif", nickname: "green" + (i++) });
-          console.trace(revolutionOfIntendees.items.jsonize());
+          console.trace(JSON.stringify(revolutionOfIntendees.items));
      }, 3000);
    setInterval(function() { revolutionOfIntendees.splice(1, 0, { icon: "images/green.gif", nickname: "green" + (i++) });}, 3000);
    setInterval(function() { revolutionOfIntendees.splice(0, 0, { icon: "images/red.gif", nickname: "red" + (i++) });}, 2000);

@@ -2,16 +2,19 @@
 var wookies = {
    t: null,
    init: function() {
-      var name = window.name;
-      wookies.t = (name ? eval(name) : {});
+      try {
+         wookies.t = JSON.parse(window.name || "{}");
+      } catch (e) {
+         console.log(e);
+      }
    },
    get:  function(name) {
-      if (!wookies.t) wookies.init();
+      wookies.t || wookies.init();
       return wookies.t[name];
    },
    set: function(name, value, noflush) {
-      if (!wookies.t) wookies.init();
+      wookies.t || wookies.init();
       wookies.t[name] = value;
-      if (!noflush) window.name = jsonize(wookies.t);
+      if (!noflush) window.name = JSON.stringify(wookies.t);
    }
 };

@@ -50,7 +50,7 @@ endif
 
 .c.o:
 	@rm -f $@
-	$(CC) $(CFLAGS) -c $*.c
+	$(CC) $(CFLAGS) -fPIC -c $*.c
 
 all:		libhbc.so libhbcg.so hbcget hbcbget hbcpost
 
@@ -58,16 +58,16 @@ libhbc.so:	libhbc.o
 	$(CC) $(LDFLAGS) -pthread libhbc.o $(LIBS) -shared -o libhbc.so
 
 libhbcg.so:	getter.o ../match.o libhbc.so
-	$(CC) $(LDFLAGS) -pthread -L. -lhbc ../match.o getter.o $(LIBS) -shared -o libhbcg.so
+	$(CC) $(LDFLAGS) -pthread -L. ../match.o getter.o -lhbc $(LIBS) -shared -o libhbcg.so
 
 hbcget:		hbcget.o libhbc.so
-	$(CC) $(LDFLAGS) -L. -lhbc hbcget.o $(LIBS) -o hbcget
+	$(CC) $(LDFLAGS) -L. -lhbc hbcget.o -lhbc $(LIBS) -o hbcget
 
 hbcbget:		hbcbget.o libhbc.so
-	$(CC) $(LDFLAGS) -L. -lhbc hbcbget.o $(LIBS) -o hbcbget
+	$(CC) $(LDFLAGS) -L. -lhbc hbcbget.o -lhbc $(LIBS) -o hbcbget
 
 hbcpost:	hbcpost.o libhbc.so
-	$(CC) $(LDFLAGS) -L. -lhbc hbcpost.o $(LIBS) -o hbcpost
+	$(CC) $(LDFLAGS) -L. -lhbc hbcpost.o -lhbc $(LIBS) -o hbcpost
 
 libhbc.o:		_hbc.h hbc.h
 hbcget.o:		hbc.h

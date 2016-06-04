@@ -1,9 +1,6 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-"http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <title>Bus Sniffer</title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 
 <body>
@@ -28,64 +25,50 @@
 <input name="labelId" id="labelId" value="demo/chat/*">
 <input value="GET" type="button" onclick="subscribeToMessages()">
 </ul>
-<h2>Received messages<button onclick="document.getElementById('trace').innerHTML='';">clear</button></h2>
-<pre id='trace' style="border:2px solid black;background:#EFE;"></pre>
 
-<div style="width:50%;position:absolute;right:10px;top:10px;background:#FEE;border:2px groove black;">
- <h5>Last action: <i id="actionText">None.</i></br>
- <h3>Last POST result <button onclick="showHide(document.getElementById('postResult'));">show/hide</button></h3>
- <iframe id="postResult" name="postResult" style="border:2px solid black;display:none;visibility:hidden;"></iframe>
- <h3>Current GET response <button onclick="showHide(document.getElementById('getResult'));">show/hide</button></h3>
- <div id='getResult'  style="border:2px solid black;display:none;visibility:hidden;"></div>
-</div>
-
-<div id="divInvisible" style="visibility:hidden;display:none">
- <iframe id="iframeNotif" name="iframeNotif"></iframe>
- <form name="postForm" action="/bus/" method="post" target="postResult">
- <input name="body" value="" />
- </form>
-</div>
-
+<h2>Received messages <button onclick="document.getElementById('trace').innerHTML='';">clear</button></h2>
+<pre id="trace"></pre>
 <script type="text/javascript">
-function showHide(o) {
-   var v = (o.style.display == 'none') ;
-   o.style.visibility = (v ? null : 'hidden');
-   o.style.display = (v ? null  : 'none');
-}
 
 function onBusMessage(label,body) {
   document.getElementById("trace").innerHTML += label + ": " + body + "\n" ;
-  setTimeout(function () {document.getElementById('getResult').innerHTML = document.getElementById('iframeNotif').contentWindow.document.body.innerHTML.replace(/</g,'&lt;').replace(/>/g,'&gt;');}, 0) ;
 }
 
 function handballerPost(label,body) {
-  document.forms.postForm.action = "/bus/" + label + "?form=body";
-  document.forms.postForm.body.value = body ;
-  document.forms.postForm.submit();
-  document.getElementById('actionText').innerHTML = "POST /bus/" + label + " &quot;" + body + "&quot;" ;
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "/bus/" + label);
+  xhr.send(body);
 }
 
 function postMessage(){
-  liste = document.getElementById('typeList');
-  if (liste.selectedIndex == 0)
+  list = document.getElementById('typeList');
+  if (list.selectedIndex == 0)
    label = document.getElementById('messageType').value ;
   else
-   label = liste[liste.selectedIndex].text ;
+   label = list[list.selectedIndex].text ;
   body = document.getElementById('messageBody').value;
 
   handballerPost(label, body);
 }
 
 function subscribeToMessages() {
-  document.getElementById('iframeNotif').src = "/bus/" + document.getElementById('labelId').value + "?label&script=window.parent.onBusMessage" ;
-  document.getElementById('actionText').innerHTML = "GET " + document.getElementById('iframeNotif').src ;
-  document.getElementById('getResult').innerHTML = "" ;
+  var label = document.getElementById('labelId').value;
+  subscribeTo(label);
+}
+
+function subscribeTo(label) {
+  var evtSource = new EventSource("/bus/" + label + "?label&event", {
+    withCredentials: true,
+  });
+  evtSource.onmessage = function (event) {
+    var label = event.data.split("\n")[0];
+    var body = event.data.substr(label.length + 1);
+    onBusMessage(label, body)
+  };
 }
 
 document.getElementById('typeList').selectedIndex = 1 ;
 subscribeToMessages() ;
 </script>
-
-
 </body>
 </html>

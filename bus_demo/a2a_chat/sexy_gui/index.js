@@ -3,12 +3,12 @@
 // ======================================================================
 
 
-IntendeeCell.prototype.onClick = function() {
+IntendeeCell.prototype.onClick = function () {
     chat2.showContextForm(this);
 }
 
-MessageCell.prototype.onClick = function() {
-//    chat2.showContextForm(this);
+MessageCell.prototype.onClick = function () {
+    //    chat2.showContextForm(this);
 }
 
 function contextFormAnimIterate() {
@@ -22,7 +22,7 @@ function contextFormAnimIterate() {
 }
 
 function puts(msg, pic, color) {
-    chat2.revolutionOfMessages && chat2.revolutionOfMessages.unshift({"from": "code", "content": msg, "icon": pic, "color": color || "purple"});
+    chat2.revolutionOfMessages && chat2.revolutionOfMessages.unshift({ "from": "code", "content": msg, "icon": pic, "color": color || "purple" });
 }
 
 // ****************************************
@@ -32,79 +32,82 @@ var chat2 = {
     context: null,
     contextForm: null,
     revolutionOfIntendees: new Revolution(),
-    revolutionOfMessages:  new Revolution(),
-    revolutionOfEvents:  new Revolution(),
+    revolutionOfMessages: new Revolution(),
+    revolutionOfEvents: new Revolution(),
     intendeesGlider: new Glider(),
     messagesGlider: new Glider(),
     iTrap: new Trap(),
     mTrap: new Trap(),
     msgPic: null,
     msgColor: null,
-    creole: new Parse.Simple.Creole({forIE: document.all,
-                                     interwiki: {
-                WikiCreole: 'http://www.wikicreole.org/wiki/',
-                Wikipedia: 'http://en.wikipedia.org/wiki/'},
-                                     linkFormat: '' }),
-    incomingSound: null,
-    leavingSound: null,
-    speakingSound: null,
+    creole: new Parse.Simple.Creole({
+        forIE: document.all,
+        interwiki: {
+            WikiCreole: 'http://www.wikicreole.org/wiki/',
+            Wikipedia: 'http://en.wikipedia.org/wiki/'
+        },
+        linkFormat: ''
+    }),
+    incomingSound: new Audio('sound/freesound__soaper__footsteps_1.mp3'),
+    leavingSound: new Audio('sound/freesound__FreqMan__011_Door_opens_and_shuts.mp3'),
+    speakingSound: new Audio('sound/freesound__acclivity__Goblet_G_Medium.mp3'),
     history: [],
     historyIndex: -1,
-    onIntendeesSplice: function(tag, index, howMany /*, intendee, intendee ... */) {
+    onIntendeesSplice: function (tag, index, howMany /*, intendee, intendee ... */) {
         //console.log(arguments);
-        var args = Array.prototype.slice.call(arguments,1);
-        if (chat2.incomingSound && args.length > 2)
-            chat2.incomingSound.play();
-        if (chat2.leavingSound && howMany)
-            chat2.leavingSound.play();
+        var args = Array.prototype.slice.call(arguments, 1);
+        let sound = args.length > 2 ? chat2.incomingSound : leavingSound;
+        sound.play().catch(e => { console.log(e) });
         chat2.revolutionOfIntendees.splice.apply(chat2.revolutionOfIntendees, args);
     },
 
-    onMessagesSplice: function(tag, index, howMany /*, message, message ... */) {
-        var args = Array.prototype.slice.call(arguments,1);                     
+    onMessagesSplice: function (tag, index, howMany /*, message, message ... */) {
+        var t = chat2.revolutionOfMessages;
+        var args = Array.prototype.slice.call(arguments, 1);
         var hidden = (document.getElementById("msgsArea").style.display == "none");
 
-        if (chat2.speakingSound && arguments.length > 3 && a2ac.me.activity == 'away') // need to make sound if away
-            chat2.speakingSound.play();
+        if (arguments.length > 3 && a2ac.me.activity == 'away') // need to make sound if away
+            chat2.speakingSound.play().catch(e => { console.log(e) });
 
-        for (var i = index, n = index + howMany ; i < index; i++) {
-            chat2.revolutionOfMessages.remove(chat2.revolutionOfMessages.items.indexOf(this.intendees[i]));
-        }
-        
-        chat2.revolutionOfMessages.splice.apply(chat2.revolutionOfMessages, args);
+        // for (var i = index, n = index + howMany; i < index; i++) {
+        //     var o = t.items.indexOf(a2ac.intendees[i]);
+        //     t = t.filter(e => e !== o);
+        // }
 
-        if (hidden || chat2.revolutionOfMessages.n > 0) {
-           for (var l = arguments, i = 3 /* jump over the first args */, n = l.length; i < n; ++i) {
-               var newItem = l[i];
-               chat2.advertiseMessage(newItem);
-           }
+        t.splice.apply(t, args);
+        chat2.revolutionOfMessages = t;
+        if (hidden || t.n > 0) {
+            for (var l = arguments, i = 3 /* jump over the first args */, n = l.length; i < n; ++i) {
+                var newItem = l[i];
+                chat2.advertiseMessage(newItem);
+            }
         }
     },
 
-    onMessageSubmit: function() {
+    onMessageSubmit: function () {
         var v = document.getElementById('messageBody');
         var lastWord = v.value.substr(v.value.lastIndexOf(' ') + 1);
         var p = lastWord ? settings.current[encodeURIComponent(lastWord).replace(/\./g, '%2E')] : null;
         if (p && lastWord == v.value) {
             a2ac.me.setProfileId(encodeURIComponent(lastWord).replace(/\./g, '%2E'));
-           // a2ac.me.postMessage("", a2ac.me.icon, a2ac.me.color);
+            // a2ac.me.postMessage("", a2ac.me.icon, a2ac.me.color);
         } else if (p) {
             v.value = v.value.substr(0, v.value.lastIndexOf(' '));
             a2ac.me.postMessage(p.emblem ? v.value + " {{" + p.emblem + "}}" : v.value, p.icon, p.color);
         } else {
             a2ac.me.postMessage(v.value, a2ac.me.icon, a2ac.me.color);
         }
-      
+
         if (v.value) {
             chat2.history.unshift(v.value);
             if (chat2.history.length > 100)
-                chat2.history.splice(100,1);
+                chat2.history.splice(100, 1);
         }
         chat2.historyIndex = -1;
         v.value = "";
     },
 
-    onMeProfileId: function(variable, value) {
+    onMeProfileId: function (variable, value) {
         value = decodeURIComponent(value);
         var s = document.getElementById("meProfileId");
         var ot = s.options;
@@ -117,57 +120,59 @@ var chat2 = {
             s.value = value;
         }
         s.defaultValue = value;
-//         for (var i = 0; i < ot.length && ot[i].text != value; i++);
-//         if (i < ot.length)
-//             s.selectedIndex = i;
-//         else {
-//             s.add(new Option(value, value));
-//             s.selectedIndex = ot.length;
-//         }
+        //         for (var i = 0; i < ot.length && ot[i].text != value; i++);
+        //         if (i < ot.length)
+        //             s.selectedIndex = i;
+        //         else {
+        //             s.add(new Option(value, value));
+        //             s.selectedIndex = ot.length;
+        //         }
     },
 
 
-    onMeNickname: function(variable, value) {
+    onMeNickname: function (variable, value) {
         var e = document.getElementById("meNickname");
         e.defaultValue = e.value = value;
     },
 
-    onMeIcon: function(variable, value) {
+    onMeIcon: function (variable, value) {
         var e = document.getElementById("mePic");
         e.defaultValue = e.value = value;
-        imgBoxURL(document.getElementById("mePicImg"), value, 99, 133);
+        value && imgBoxURL(document.getElementById("mePicImg"), value, 99, 133);
         chat2.setMsgPic(null); /* Reset msg icon */
     },
 
-    onMeMind: function(variable, value) {
+    onMeMind: function (variable, value) {
         var e = document.getElementById("meMind");
         e.defaultValue = e.value = value;
     },
 
-    onMeEmblem: function(variable, value) {
+    onMeEmblem: function (variable, value) {
         var e = document.getElementById("meEmblem");
         e.defaultValue = e.value = value;
-        document.getElementById("meEmblemImg").src = value || 'images/blank.gif';
+        if (value) document.getElementsById("meEmblemImg").src = value || 'images/blank.gif';
         chat2.setMsgPic(null); /* Reset msg icon */
     },
 
-    onMeColor: function(variable, value) {
+    onMeColor: function (variable, value) {
         var e = document.getElementById("meColor");
         e.defaultValue = e.value = value;
         chat2.setMsgColor(null);
     },
 
-    setMsgPic: function(url) {
-        this.msgPic = url;
-        if (!url) url = a2ac.me.icon || "images/star.png"; 
-        document.getElementById("msgPicImg").src = url;
+    setMsgPic: function (url) {
+        chat2.msgPic = url;
+        url = url || a2ac.me.icon || "images/star.png";
+        let img = document.getElementById("msgPicImg");
+        img.src = url;
+        img.style.filter = 'drop-shadow(0 0 0.5rem ' + a2ac.me.color + ')';
     },
 
-    setMsgColor: function(color) {
-        this.msgColor = color;
+    setMsgColor: function (color) {
+        chat2.msgColor = color;
     },
 
-    resetProfileList: function() {
+    resetProfileList: function () {
         var p = a2ac.me.profileId, s = document.getElementById("meProfileId");
         s.options.length = 1;
         for (var k in settings.current) {
@@ -181,7 +186,7 @@ var chat2 = {
         }
     },
 
-    deleteCurrentProfile: function() {
+    deleteCurrentProfile: function () {
         var d = null, p = a2ac.me.profileId;
         for (var k in settings.current) {
             if (!k || !settings.current.hasOwnProperty(k) || k == p) continue;
@@ -191,53 +196,63 @@ var chat2 = {
         }
         if (d) {
             delete settings.current[d];
-            this.resetProfileList();
+            chat2.resetProfileList();
         }
     },
 
-    updateForm: function(variable, value) {
-        var t = { "nickname": "iName", "icon": "iPic", "emblem": "iEmblem", "mind": "iMind", "color": "iColor", "from": "mFrom", "date": "mDate" } ;
+    updateForm: function (variable, value) {
+        let c = chat2.context;
+        let form = chat2.targetForm && document.getElementById(chat2.targetForm);
+        if (!form) return;
+
+        var t = { "nickname": "iName", "icon": "iPic", "emblem": "iEmblem", "mind": "iMind", "color": "iColor", "from": "mFrom", "date": "mDate" };
         var id = t[variable];
         if (!id) return;
-        document.getElementById(id).value = value;
+        form.getElementsByClassName(id)[0].value = value;
         if (id == 'iPic')
-            imgBoxURL(document.getElementById("iPicImg"), value, 99, 133);
-        if (id == 'iEmblem')
-            document.getElementById("iEmblemImg").src = value;
+            imgBoxURL(form.getElementsByClassName("iPicImg")[0], value, 99, 133);
+        if (id == 'iEmblem') {
+            let e = form.getElementsByClassName("iEmblemImg")[0]
+            e.src = value || '';
+            e.style.display = value ? 'block' : 'none';
+        }
     },
-    
-    showContextForm: function(e) {
+
+    showContextForm: function (e) {
         var form = this.contextForm = document.getElementById("contextForm");
         form.style.display = "none";
         form.style.width = "";
         form.style.height = "";
-        if (!e || !form) return;
+        if (!e || !e.item || !form) return;
 
-        if (this.context) {
-            if (this.context.profileId !== undefined) {
-                this.context.unsubscribe("nickname", this.updateForm);
-                this.context.unsubscribe("icon", this.updateForm);
-                this.context.unsubscribe("mind", this.updateForm);
-                this.context.unsubscribe("emblem", this.updateForm);
-                this.context.unsubscribe("color", this.updateForm);
-                this.context = null;
-            } else if (this.context.content !== undefined) {
-                this.context.unsubscribe("content", this.updateForm);
-                this.context.unsubscribe("date", this.updateForm);
+        let c = chat2.context;
+        if (c) {
+            if (c.profileId !== undefined) {
+                c.unsubscribe("nickname", this.updateForm);
+                c.unsubscribe("icon", this.updateForm);
+                c.unsubscribe("mind", this.updateForm);
+                c.unsubscribe("emblem", this.updateForm);
+                c.unsubscribe("color", this.updateForm);
+                c = null;
+            } else if (c.content !== undefined) {
+                c.unsubscribe("content", this.updateForm);
+                c.unsubscribe("date", this.updateForm);
             }
         }
 
         // form choice
         var isMe = (e.item === a2ac.me);
         var targetForm = (isMe ? "mePropsForm"
-                          : (e.item.profileId !== undefined ? "iPropsForm"
-                             : (e.item.content !== undefined ? "mPropsForm" : null )));
+            : (e.item.profileId !== undefined ? "iPropsForm"
+                : (e.item.content !== undefined ? "mPropsForm" : null)));
+        chat2.targetForm = targetForm;
         for (var i = 0, l = ["mePropsForm", "iPropsForm", "mPropsForm"]; i < l.length; i++) {
             var elt = l[i];
             if (elt == targetForm) continue;
-            try { document.getElementById(elt).style.display = "none"; } catch (e) {};
+            try { document.getElementById(elt).style.display = "none"; } catch (e) { };
         }
-        if (targetForm) document.getElementById(targetForm).style.display = "block";
+        let iForm = targetForm && document.getElementById(targetForm);
+        if (iForm) iForm.style.display = "block";
 
         // form fill up
         if (targetForm == "iPropsForm") {
@@ -246,7 +261,7 @@ var chat2 = {
             e.item.subscribeSync("mind", this.updateForm);
             e.item.subscribeSync("emblem", this.updateForm);
             e.item.subscribeSync("color", this.updateForm);
-            this.context = e.item;
+            this.context = c = e.item;
         } else if (targetForm == "mPropsForm") {
             e.item.subscribeSync("from", this.updateForm);
             e.item.subscribeSync("date", this.updateForm);
@@ -261,20 +276,20 @@ var chat2 = {
         if (isNaN(coords.x)) coords = readDOM(e.desc);
         var ed = getEltDimensions(form);
         var wd = getWindowDimensions(window);
-        a.start = {x: coords.x, y: coords.y, w: coords.w, h: coords.h};
-        a.current = Object.copy(a.start);
+        a.start = { x: coords.x, y: coords.y, w: coords.w, h: coords.h };
+        a.current = Object.assign({}, a.start);
         a.end = {
-            x: (wd[0]-ed[0]) / 2,
-            y: (wd[1]-ed[1]) / 2,
+            x: (wd[0] - ed[0]) / 2,
+            y: (wd[1] - ed[1]) / 2,
             w: ed[0],
             h: ed[1]
         };
         a.iterate = contextFormAnimIterate;
-        a.onResume = function() { this.form.style.display = "block"; };
+        a.onResume = function () { this.form.style.display = "block"; };
         a.resume();
     },
 
-    submitContextForm: function(e) {
+    submitContextForm: function (e) {
         var s = document.getElementById('meProfileId'), profileId;
         if (s.style.display != 'none') {
             profileId = s.options[s.selectedIndex].text;
@@ -294,54 +309,38 @@ var chat2 = {
         this.showContextForm(null);
     },
 
-    advertiseMessage: function(item) {
+    advertiseMessage: function (item) {
         chat2.revolutionOfEvents.push(item);
         setTimeout(chat2.unstackEventCB, 5000);
     },
-    unstackEventCB: function() {
+    unstackEventCB: function () {
         chat2.revolutionOfEvents.splice(0, 1);
     },
 
-    browsePast: function(event) {
+    browsePast: function (event) {
         var keyId = event.keyCode;
         if (keyId == 38) { // up 
             if (chat2.historyIndex < chat2.history.length - 1) {
                 chat2.historyIndex++;
                 this.value = chat2.history[chat2.historyIndex];
             }
-            
+
         } else if (keyId == 40) { // down
             if (chat2.historyIndex >= 0) {
                 chat2.historyIndex--;
                 this.value = (chat2.historyIndex == -1
-                              ? '' : chat2.history[chat2.historyIndex]);
+                    ? '' : chat2.history[chat2.historyIndex]);
             }
         } else {
             // chat2.historyIndex = 0;
         }
     },
 
-    init: function() {
-        if (typeof console != "object") { var console = { log: function() {} }; };
+    init: function () {
+        if (typeof console != "object") { var console = { log: function () { } }; };
 
-        var a2acAgora = getURLParameterByName("agora"),
-            back = getURLParameterByName("back");
-
-
-        var back = getURLParameterByName("back");
-        if (!back) {
-            document.getElementById("closeButton").style.display = "none";
-            document.getElementById("hideButton").style.display = "none";
-        } else {
-            var el = document.createElement("iframe");
-            el.setAttribute('id', 'bfrm');
-            el.setAttribute('style', 'position: absolute; border: 0; margin: 0; padding: 0; width: 100%; height: 100%; z-index:0;');
-            document.body.appendChild(el);
-            el.setAttribute('src', back);
-            document.getElementById("closeButton").onclick = function() {window.location = back;};
-            document.getElementById("hideButton").onclick = function() {chat2.hide();};
-        }
-
+        var a2acAgora = getURLParameterByName("agora");
+ 
         // Init gliders
         this.intendeesGlider.init(document.getElementById("intendeesGlider"), "left", "width");
         this.messagesGlider.init(document.getElementById("messagesGlider"), "bottom", "height");
@@ -363,38 +362,38 @@ var chat2 = {
         }
 
         if (!a2acAgora)
-            a2acAgora = (back ? back.b64() : 'a2ac') ;
+            a2acAgora = 'a2ac';
         autobus.agora = a2acAgora + '/';
 
         this.iTrap.bind(document.getElementById("intendeesTrap"));
-        this.iTrap.onResume = function() { chat2.revolutionOfIntendees.resume(); }
-        this.iTrap.onPause = function() { chat2.revolutionOfIntendees.friction=null; }
-        this.iTrap.iterate = function() {
+        this.iTrap.onResume = function () { chat2.revolutionOfIntendees.resume(); }
+        this.iTrap.onPause = function () { chat2.revolutionOfIntendees.friction = null; }
+        this.iTrap.iterate = function () {
             Trap.prototype.iterate.call(this);
             chat2.revolutionOfIntendees.friction = this.down ? - this.dx / IntendeeCell.prototype.gap : null;
             return this.down;
         }
 
         this.mTrap.bind(document.getElementById("msgsTrap"));
-        this.mTrap.onResume = function() { chat2.revolutionOfMessages.resume(); }
-        this.mTrap.onPause = function() { chat2.revolutionOfMessages.friction=null; }
-        this.mTrap.iterate = function() {
+        this.mTrap.onResume = function () { chat2.revolutionOfMessages.resume(); }
+        this.mTrap.onPause = function () { chat2.revolutionOfMessages.friction = null; }
+        this.mTrap.iterate = function () {
             Trap.prototype.iterate.call(this);
             chat2.revolutionOfMessages.friction = this.down ? this.dy / MessageCell.prototype.gap : null;
             return this.down;
         }
 
-        document.getElementById("intendeesBack").onmousedown = function() { chat2.revolutionOfIntendees.friction = -0.2; chat2.revolutionOfIntendees.resume(); };
-        document.getElementById("intendeesBack").onmouseup = document.getElementById("intendeesBack").onmouseout = function() { chat2.revolutionOfIntendees.friction = null; };
-        document.getElementById("intendeesForward").onmousedown = function() { chat2.revolutionOfIntendees.friction = 0.2; chat2.revolutionOfIntendees.resume(); };
-        document.getElementById("intendeesForward").onmouseup = document.getElementById("intendeesForward").onmouseout = function() { chat2.revolutionOfIntendees.friction = null; };
-        document.getElementById("meNewProfileId").onblur = function() {
-             if (this.value) a2ac.me.setProfileId(encodeURIComponent(this.value).replace(/\./g,'%2E'));
-             this.style.display = 'none';
-             var s = document.getElementById("meProfileId");
-             s.style.display = "inline";
+        document.getElementById("intendeesBack").onmousedown = function () { chat2.revolutionOfIntendees.friction = -0.2; chat2.revolutionOfIntendees.resume(); };
+        document.getElementById("intendeesBack").onmouseup = document.getElementById("intendeesBack").onmouseout = function () { chat2.revolutionOfIntendees.friction = null; };
+        document.getElementById("intendeesForward").onmousedown = function () { chat2.revolutionOfIntendees.friction = 0.2; chat2.revolutionOfIntendees.resume(); };
+        document.getElementById("intendeesForward").onmouseup = document.getElementById("intendeesForward").onmouseout = function () { chat2.revolutionOfIntendees.friction = null; };
+        document.getElementById("meNewProfileId").onblur = function () {
+            if (this.value) a2ac.me.setProfileId(encodeURIComponent(this.value).replace(/\./g, '%2E'));
+            this.style.display = 'none';
+            var s = document.getElementById("meProfileId");
+            s.style.display = "inline";
         }
-        document.getElementById("meProfileId").onchange = function() {
+        document.getElementById("meProfileId").onchange = function () {
             if (this.selectedIndex <= 0) {
                 this.style.display = 'none';
                 var i = document.getElementById("meNewProfileId");
@@ -402,53 +401,52 @@ var chat2 = {
                 i.value = "my new profile";
                 i.focus();
                 i.select();
-                
-                
+
+
             } else {
                 var profileId = this.options[this.selectedIndex].value;
-                profileId = encodeURIComponent(profileId).replace(/\./g,'%2E');
+                profileId = encodeURIComponent(profileId).replace(/\./g, '%2E');
                 a2ac.me.setProfileId(profileId);
             }
         }
- 
-        document.body.onmouseover = function() {
+
+        document.body.onmouseover = function () {
             a2ac.me.awayAttractor.set('away', false);
         };
-        window.onfocus = function() {
+        window.onfocus = function () {
             a2ac.me.activitySummary.set('watching', true);
             a2ac.me.awayAttractor.set('away', false);
         };
-        window.onblur = function() {
+        window.onblur = function () {
             a2ac.me.activitySummary.set('watching', false);
             a2ac.me.awayAttractor.set('away', true);
         };
         var input = document.getElementById("messageBody");
-        input.onkeydown = function() {
+        input.onkeydown = function () {
             a2ac.me.awayAttractor.set('away', false);
             a2ac.me.typingAttractor.set('typing', true);
         };
-        input.onkeyup = function(e) {
+        input.onkeyup = function (e) {
             chat2.browsePast.call(this, e);
         };
         var defaultValue = input.value;
         input.value = '';
 
-        input.onfocus = function() {
+        input.onfocus = function () {
             a2ac.me.awayAttractor.set('away', false);
             if (this.value == defaultValue) {
                 this.value = '';
                 this.style.color = a2ac.me.color;
-                var darker = RGBColor.darker(a2ac.me.color).toName();
-
-                this.style.textShadow = "0 1px 0.5px " + darker + ", 0 -1px 0.5px " + darker;
+                var lighter = RGBColor.lighter(a2ac.me.color).toName();
+                this.style.textShadow = "1px 1px 1.5px " + lighter;
             }
         };
-        input.onblur = function() {
+        input.onblur = function () {
             a2ac.me.awayAttractor.set('away', false);
             if (!this.value.length) {
                 this.value = defaultValue;
                 this.style.color = "gray";
-                this.style.textShadow = "0 1px 10px #000, 0 -1px 0.05px #000";
+                this.style.textShadow = undefined;
             }
         };
 
@@ -465,86 +463,12 @@ var chat2 = {
         a2ac.me.subscribeSync("color", this.onMeColor);
     },
 
-    finalize: function() {
+    finalize: function () {
         a2ac.finalize();
     },
-    
-    reset: function() {
+
+    reset: function () {
         a2ac.reset();
         this.resetProfileList();
-    },
-
-    hide: function(value) {
-        var c = document.getElementById("hideButton");
-        var a = new Anim();
-        a.ia = document.getElementById("intendeesArea");
-        a.ma = document.getElementById("msgsArea");
-        a.pf = document.getElementById("postForm");
-        a.pl = document.getElementById("postLayer");
-        a.ratio = 0;
-        var edi = getEltDimensions(a.ia);
-        var edp = getEltDimensions(a.pf);
-        if (value === undefined)
-            value = (a.ma.style.display != "none");
-        c.src = value ? "images/micross.png" : "images/crossmi.png";
-        a.start = {y: value ? 0 : -edi[1]};
-        a.current = Object.copy(a.start);
-        a.start2 = {y: value ? 0 : -edp[1]};
-        a.current2 = Object.copy(a.start2);
-        a.end = { y: value ? -edi[1] : 0 };
-        a.end2 = { y: value ? -edp[1] : 0 };
-        if (!value) {
-            
-            a.ia.style.display =
-                a.pf.style.display =
-                a.pl.style.display = "block";
-            chat2.revolutionOfIntendees.redraw(); // redraw to get cells removed by hiding
-        }
-        a.iterate = function() {
-            this.ratio += 0.1;
-            if (this.ratio > 1) this.ratio = 1;
-            this.current.y = this.start.y + (this.end.y - this.start.y) * this.ratio;
-            this.current2.y = this.start2.y + (this.end2.y - this.start2.y) * this.ratio;
-            writeDOM(this.ia, this.current);
-            writeDOM(this.pf, this.current2, "left", "bottom");
-            writeDOM(this.pl, this.current2, "left", "bottom");
-            if (this.ratio == 1) {
-                if (this.end.y < 0) {
-                    this.ia.style.display =
-                        this.pf.style.display =
-                        this.pl.style.display =
-                        this.ma.style.display = "none";
-                } else {
-                    this.ma.style.display = "block";
-                    chat2.revolutionOfMessages.redraw(); // redraw to get cells removed by hiding
-                }
-                return false;
-            }
-            return true;
-        }
-        a.resume();
-
     }
-};
-soundManager.url = "./sound";
-soundManager.onload = function() {
-  chat2.incomingSound = soundManager.createSound({
-    id: 'incoming',
-    url: 'sound/freesound__soaper__footsteps_1.mp3'
-  });
-
-  chat2.leavingSound = soundManager.createSound({
-    id: 'leaving',
-    url: 'sound/freesound__FreqMan__011_Door_opens_and_shuts.mp3'
-  });
-
-  chat2.speakingSound  = soundManager.createSound({
-    id: 'speaking',
-    url: 'sound/freesound__acclivity__Goblet_G_Medium.mp3'
-  });
-};
-
-
-soundManager.onerror = function() {
-  // SM2 could not start, no sound support, something broke etc. Handle gracefully.
 };

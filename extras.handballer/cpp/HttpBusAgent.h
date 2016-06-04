@@ -9,7 +9,7 @@ using namespace std;
 
 typedef bus_callback_t httpBusCB_t ;
 
-class HttpBusAgent {
+class HttpBusState {
 
 // Attributes
 private:
@@ -21,7 +21,7 @@ private:
 public:
 
 	// Constructor
-	HttpBusAgent();
+	HttpBusState();
 
     // sub-GET (to be called before start) : retourne true si OK
 	bool get(string channelPattern, httpBusCB_t callBack, void *context);
@@ -33,7 +33,7 @@ public:
 	bool post(string channel, string messageBody);
 
 	// Destructor: close running GET
-	~HttpBusAgent();
+	~HttpBusState();
 
 };
 
