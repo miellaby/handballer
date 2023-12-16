@@ -16,6 +16,8 @@ libhbc/hbcget
 libhbc/hbcbget
 libhbc/hbcpost
 libhbc/*.so
+test/hbcgetm
+test/hbcpoll
 test/hbcbgetm
 test/hbcbpoll
 test/load_post
