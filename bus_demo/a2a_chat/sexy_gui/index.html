@@ -69,9 +69,9 @@
 
     #intendeesArea {
       position: absolute;
-      background-color: transparent;
+      background-color: #FFFFFF88;
       width: 100%;
-      height: 130px;
+      height: 22vh;
       z-index: 10;
     }
 
@@ -107,16 +107,16 @@
       left: 0%;
       width: 0%;
       height: 3px;
-      top: 177px;
+      bottom: -50px;
       z-index: 20;
     }
 
 
     .intendeePic {
       position: absolute;
-      width: 96px;
+      min-width: 124px;
       /* 192/2 */
-      height: 130px;
+      height: 100%;
       /* 260/2 */
       z-index: 16;
     }
@@ -128,7 +128,7 @@
       z-index: 17;
     }
 
-    .intendeeDesc {
+    .intendeeText {
       /*  -moz-border-radius:4px;
   -webkit-border-radius:4px; */
       border-radius: 4px;
@@ -137,23 +137,23 @@
       position: absolute;
       text-align: center;
       overflow: hidden;
-      width: 96px;
+      width: 116px;
       margin: 0;
       color: #AAA;
       text-shadow: 1px 3px 3px #a5a5a5;
       z-index: 18;
     }
 
-    .intendeeDesc quote {
+    .intendeeText quote {
       font-size: 12px;
     }
 
-    .intendeeDesc img {
+    .intendeeText img {
       max-width: 32px;
       max-height: 32px;
     }
 
-    .intendeeDesc small {
+    .intendeeText small {
       font-size: 7px;
       color: black;
       text-shadow: none;
@@ -171,8 +171,8 @@
     .msgPic {
       position: absolute;
       background-color: transparent;
-      height: 48px;
-      margin-bottom: 10px;
+      height: 50px;
+      margin-bottom: 40px;
       left: 4px;
     }
 
@@ -186,13 +186,14 @@
     }
 
 
-    .msgDesc {
+    .msgText {
       position: absolute;
       background-color: transparent;
       color: #AAA;
-      left: 56px;
-      margin-bottom: 5px;
-      height: 38px;
+      height: 75px;
+      width: 80%;
+      left: 10%;
+      right: 10%;
       padding: 0 2px;
       /* stupid padding to prevent scrollbar because of shadow */
       /*  background-image:url('images/lines.gif');*/
@@ -201,13 +202,15 @@
       overflow: auto;
     }
 
-    .msgDesc img {
+    .msgText p { margin-bottom: 4px };
+
+    .msgText img {
       max-width: 32px;
       max-height: 32px;
       vertical-align: middle;
     }
 
-    .eventDesc {
+    .eventText {
       position: absolute;
       background-color: white;
       color: #AAA;
@@ -224,7 +227,7 @@
       z-index: 30;
     }
 
-    .eventDesc img {
+    .eventText img {
       max-width: 32px;
       max-height: 32px;
       vertical-align: middle;
@@ -270,11 +273,11 @@
 
     #msgsArea {
       position: absolute;
-      top: 192px;
-      bottom: 120px;
+      top: 0;
+      bottom: 90px;
       width: 100%;
       overflow: hidden;
-      z-index: 31;
+      z-index: 9;
     }
 
     #messagesGlider {
@@ -389,9 +392,9 @@
 
 
   <div id="contextForm" style="display:none;">
-    <form id="mePropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
-      <button type="button" style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);">
+    <button type="button" style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);">
       &times;</button>
+    <form id="mePropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
       <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
       <div id="mePicDiv">
         <table style="border-width: 0" cellpadding="0" cellspacing="0">
@@ -400,29 +403,21 @@
           </tr>
         </table>
       </div>
-      <h2>My properties</h2>
-      <p><label for="meProfileId">profile&nbsp;ID&nbsp;</label>
-        <select id="meProfileId">
-          <option value="#NEW#">New ...</option>
-        </select>
-        <input type="text" id="meNewProfileId" value="" style="display:none;" />
-        &nbsp;<button type="button" onclick="javascript:chat2.deleteCurrentProfile();"
-          style="-moz-border-radius: 20px; -webkit-border-radius: 20px; width: 2em;">X</button>
-      </p>
+      <h2>Your profile</h2>
       <p><label for="meNickname">nickname&nbsp;</label>
-        <input type="text" id="meNickname" class="iName" value="" style="" />
+        <input type="text" name="meNickname" class="iName" value="" style="" />
       </p>
       <p><label for="mePic">picture&nbsp;</label>
-        <input type="text" id="mePic" class='iPic' value="" style="" />
+        <input type="text" name="mePic" class='iPic' value="" style="" />
       </p>
       <p><label for="meMind">mind&nbsp;</label>
-        <input type="text" id="meMind" class="'iMind" value="" />
+        <input type="text" name="meMind" class="'iMind" value="" />
       </p>
       <p><label for="meEmblem">emblem&nbsp;</label>
-        <input type="text" id="meEmblem" class='iEmblem' value="" />&nbsp;<img id="meEmblemImg" class="iEmblemImg" src="images/blank.gif" style="width: 32px; height: 32px;"/>
+        <input type="text" name="meEmblem" class='iEmblem' value="" />&nbsp;<img id="meEmblemImg" class="iEmblemImg" src="images/blank.gif" style="width: 32px; height: 32px;"/>
       </p>
       <p><label for="meColor">color&nbsp;</label>
-        <input type="text" id="meColor" class='iColor' value="" style="" />
+        <input type="text" name="meColor" class='iColor' value="" style="" />
       </p>
       <div style="position: absolute; bottom: 0; margin: 10px; left: 0; right: 0;">
         <button type="submit" style="float: right;" onclick="javascript:chat2.submitContextForm();">Submit</button>
@@ -430,8 +425,6 @@
       </div>
     </form>
     <form id="iPropsForm" class="ContextForm">
-      <button type="button" style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);">
-        &times;</button>
       <!-- the div / table hereafter aims to facilitate conservative ratio re-dimensionning -->
       <div id="iPicDiv">
         <table style="border-width: 0" cellpadding="0" cellspacing="0">
@@ -441,30 +434,29 @@
         </table>
       </div>
       <p><label for="iName">nick&nbsp;</label>
-        <input type="text" readonly="readonly" class='iName' value="" style="" />
+        <input type="text" readonly="readonly" name="iName" class='iName' value="" style="" />
       </p>
       <p><label for="iPic">pic&nbsp;</label>
-        <input type="text" readonly="readonly" class='iPic' value="" style="" />
+        <input type="text" readonly="readonly" name="iPic" class='iPic' value="" style="" />
       </p>
       <p><label for="iMind">mind&nbsp;</label>
-        <input type="text" readonly="readonly" class="iMind" value="" />
+        <input type="text" readonly="readonly" name="iMind" class="iMind" value="" />
       </p>
       <p><label for="iEmblem">emblem&nbsp;</label>
-        <input type="text" class="iEmblem" readonly="readonly" value="" />&nbsp;<img class="iEmblemImg" src="images/blank.gif"
+        <input type="text" name="iEmblem" ="iEmblem" readonly="readonly" value="" />&nbsp;<img class="iEmblemImg" src="images/blank.gif"
           style="width: 32px; height: 32px;" />
       </p>
       <p><label for="iColor">color&nbsp;</label>
-        <input type="text" readonly="readonly" class="iColor" value="" />
+        <input type="text" readonly="readonly" name="iColor" class="iColor" value="" />
       </p>
     </form>
     <form id="mPropsForm" class="ContextForm" action="javascript:chat2.submitContextForm();">
-      <button type="button" style="float: right; border: 0;" onclick="javascript:chat2.showContextForm(null);">
-      &times;</button>
       <label for="mFrom">from&nbsp;</label>
-      <input type="text" readonly="readonly" id="mFrom" value="" style="" />
-      <p><label for="mDate">date&nbsp;</label>
-        <input type="text" readonly="readonly" id="mDate" value="" style="" />
-      </p>
+      <input type="text" readonly="readonly" name="mFrom" class="mFrom" value="" style="" />
+      <label for="mDate">date&nbsp;</label>
+      <input type="text" readonly="readonly" name="mDate" class="mDate" value="" style="" />
+      <label for="mContent">date&nbsp;</label>
+      <textarea readonly="readonly" name="mContent" class="mContent" value="" style="width: 100%; height: 10em;"></textarea>
     </form>
   </div>
 

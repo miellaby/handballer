@@ -9,7 +9,7 @@
 
 
 void printHelp() {
-    printf("Usage: hbcget [-n]\n");
+    printf("Usage: hbcget [-n] CHANNEL_PATTERN\n");
     printf("Options:\n");
     printf("  -n    Separate messages with null character (\\0) instead of newline\n");
 }
@@ -19,13 +19,6 @@ int main (int argc, char *argv[]) {
   int useNullSeparator = 0;  // Default is no null separator
   char *channel ;
   char *body ;
-
-  // Check for command-line option
-  if (argc > 1 && argv[1][0] == '-' && argv[1][1] == 'n') {
-      useNullSeparator = 1;
-      argc--;
-      argv++;
-  }
 
   // Check for command-line options
   for (int i = 1; i < argc; i++) {

@@ -4,25 +4,29 @@
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>A2A CHAT</title>
+   <title>TCHAT</title>
 </head>
 
 <body onload="setTimeout(init,500);">
-   <h2>A2A Chat</h2>
-   <form action="javascript:nameMe(document.getElementById('meNickname').value)">
-      <h3>You are:&nbsp;&nbsp;&nbsp;<input type="text" id="meNickname" value="guest">
+   <h2>TCHAT</h2>
+   <form action="javascript:nameMe(document.getElementsByName('meNickname')[0].value)">
+      <h3>You are
+         <input type="text" name="meNickname" value="guest">
          <input type="submit" value="Set nickname!">
       </h3>
    </form>
    <h3>
       <form action="javascript:postMessage()">
-         You say:&nbsp;&nbsp;&nbsp;<input type="text" id="messageBody" value="Hello world!">
+         You say <input type="text" id="messageBody" value="Hello world!">
          <input type="submit" value="Shout!">
+      </form>
    </h3>
-   </form>
-   <h3>You hear:&nbsp;&nbsp;&nbsp;<button onclick="document.getElementById('trace').innerHTML='';">clear</button></h3>
-   <pre id='trace' style="border:2px solid black;background:#EFE;"></pre>
-
+   <button onclick="document.getElementById('trace').innerHTML='';" style="float: right">clear</button>
+   <h3>
+      You hear
+      <div id='trace' style="white-space: pre-line; width: 100%; background:#EFE;"></div>
+   </h3>
+ 
    <script type="text/javascript" src='/hbc/myPrototype.js'></script>
    <script type="text/javascript" src='/hbc/hbc.js'></script>
    <script type="text/javascript" src='/hbc/pubSubState.js'></script>
@@ -32,14 +36,14 @@
    <script type="text/javascript">
       function puts(msg) {
          var t = document.getElementById("trace");
-         t.innerText += msg + "\n";
+         t.innerText = msg + "\n" + t.innerText;
       }
 
-      var autobus = new Autobus("a2ac");
+      var autobus = Autobus.factory("a2ac");
 
       if (1)
          autobus.hbc.logCB = function (msg) {
-            puts("logCB: " + msg);
+            puts(msg);
          }
 
       function log(msg) {
@@ -48,17 +52,17 @@
       }
 
       var pingsLog = {};
-      function onIntendeePing(variable, value) {
+      function onIntendeeTimestamp(variable, value) {
          pingsLog[this.name] = this;
-         log("intendee " + this.name + " heard at " + new Date());
-         if (me.ping < value) me.ping = value;
+         log("intendee " + this.name + " heard at " + new Date().toISOString().slice(0, 19).replace("T", " "));
+         if (me.timestamp < Number(value)) me.timestamp = Number(value);
       }
 
       function onIntendeeNickname(variable, value) {
          puts("intendee " + this.name + " nickname is " + value);
          if (this === me) {
             cookies.set("a2ac_nick", value);
-            document.getElementById('meNickname').value = value;
+            document.getElementsByName('meNickname')[0].value = value;
          }
       }
 
@@ -66,21 +70,21 @@
          for (var i = 3; i < arguments.length; i++) {
             var intendee = arguments[i];
             puts("new intendee id " + intendee.name);
-            intendee.subscribe("ping", onIntendeePing);
+            intendee.subscribe("timestamp", onIntendeeTimestamp);
             intendee.subscribe("nickname", onIntendeeNickname);
          }
       }
 
 
       function onMessageContent(variable, value) {
-         var intendee = autobus.tagsonomy.getOr(this.from, null);
+         var intendee = autobus.index.getOr(this.from, null);
          var who = (intendee && intendee.nickname ? intendee.nickname : "intendee " + this.intendee);
 
          puts(who + " said: " + value);
       }
 
       function onMessageTimestamp(variable, value) {
-         if (me.ping < value) me.ping = value;
+         if (me.timestamp <Number(value)) me.timestamp = Number(value);
       }
 
       var messagesQueue = [];
@@ -104,14 +108,14 @@
 
       function postMessage() {
          var v = document.getElementById('messageBody');
-         var msg = new Busgent(autobus, agentUUID("m"), BusState.prototype.here);
+         var msg = new BusState(autobus, stateUUID("m"), BusState.prototype.here);
          msg.sets({
-            tags: ["message"],
             from: me.name,
             //to: otherIntendee,
             content: v.value,
-            timestamp: 1 + me.ping
+            timestamp: 1 + me.timestamp
          });
+         msg.setTags("message", "messageFrom." + me.name);
          v.value = "";
       }
 
@@ -120,7 +124,7 @@
       }
 
       function pingMe() {
-         me.set("ping", ++me.ping);
+         me.set("timestamp", 1 + me.timestamp);
       }
 
       var lastPingsLog = {};
@@ -142,20 +146,13 @@
       function autoConfig() {
          var nick = cookies.get("a2ac_nick");
          if (!nick) {
-            var names = [];
-            var intendees = autobus.tagsonomy.getOr("intendee", []);
-            for (var l = intendees.length, i = l - 1; i >= 0; i--)
-               names.push(intendees[i].nickname);
-
+            var names = autobus.tagsonomy.getOr("intendee", []).map(i => i.nickname);
             var lst = ["red", "blue", "green", "purple", "orange", "pink", "gray"];
-            for (var l = lst.length, i = l - 1; i >= 0; i--) {
-               if (names.indexOf(lst[i]) != -1) continue;
-               nick = lst[i];
-            }
+            var nick = lst.find(n => ~names.indexOf(n));
             if (!nick) {
                var default_prefix = "guest";
                var i = 2;
-               while (names.indexOf(default_prefix + i) != -1) i++;
+               while (~names.indexOf(default_prefix + i)) i++;
                nick = default_prefix + i;
             }
          }
@@ -167,9 +164,9 @@
          autobus.tagsonomy.subscribe("intendee", onIntendeesSplice);
          autobus.tagsonomy.subscribe("message", onMessagesSplice);
 
-         me = new BusState(autobus, agentUUID("i"), BusState.prototype.here);
+         me = new BusState(autobus, stateUUID("i"), BusState.prototype.here);
          me.setTags("intendee");
-         me.ping = 0;
+         me.timestamp = 0;
          pingMe();
          setTimeout(autoConfig, 3 * 1000);
          setInterval(function () { pingMe() }, 60 * 2 * 1000 - 30 * Math.random() * 100);

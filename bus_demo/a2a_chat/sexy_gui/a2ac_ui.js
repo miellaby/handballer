@@ -10,7 +10,7 @@ function centerByMargin(img) {
 // ======================================================================
 
 function IntendeeCell() {
-    ImgDescCell.call(this);
+    ImgTextCell.call(this);
     this.emblem = document.createElement('img');
     this.emblem.style.display = 'none';
     this.emblem.className += 'intendeeEmblem';
@@ -24,13 +24,13 @@ function IntendeeCell() {
     if (this.trap) { this.trap.bindTarget(this.img); }
 }
 
-IntendeeCell.prototype = new ImgDescCell();
+IntendeeCell.prototype = new ImgTextCell();
 IntendeeCell.prototype.constructor = IntendeeCell;
 IntendeeCell.prototype.cssClass = "intendee";
 IntendeeCell.prototype.area = null;
 IntendeeCell.prototype.trap = null;
-IntendeeCell.prototype.gap = 100;
-IntendeeCell.prototype.height = 130;
+IntendeeCell.prototype.gap = 120;
+IntendeeCell.prototype.height = 100;
 IntendeeCell.prototype.defaultImg = "./images/person.svg";
 IntendeeCell.prototype.defaultColor = 'gray';
 IntendeeCell.prototype.defaultName = "...";
@@ -95,7 +95,7 @@ IntendeeCell.prototype.show = function (item, change) {
         this.desc.style.fontWeight = (item === a2ac.me ? "bold" : "normal");
     }
     if (!change || change == "icon")
-        imgBoxURL(this.img, item.icon || this.defaultImg, 96, 130, centerByMargin);
+        imgBoxURL(this.img, item.icon || this.defaultImg, 116, 130, centerByMargin);
     if (!change || change == "emblem")
         this.emblem.src = item.emblem || this.defaultEmblem || '';
 
@@ -112,10 +112,11 @@ IntendeeCell.prototype.show = function (item, change) {
                 "<small>" + item.activity + "</small>";
         }
         // this.desc.style.height = item.mind ? "90px" : "60px";
-        var lightColor = RGBColor.lighter(item.color).toName();
+        let color = item.color || this.defaultColor;
+        var lightColor = RGBColor.lighter(color).toName();
         this.desc.style.color = '#333';
         this.desc.style.textShadow = "1px 1px 1.5px " + lightColor;
-        this.img.style.filter = 'drop-shadow(0 0 0.5rem ' + item.color + ')';
+        this.img.style.filter = 'drop-shadow(0 0 0.5rem ' + color + ')';
     }
 };
 
@@ -124,23 +125,23 @@ IntendeeCell.prototype.show = function (item, change) {
 // ======================================================================
 
 function MessageCell() {
-    ImgDescCell.call(this);
-
-    var self = this;
-    this.selfUpdate = function (name, value) { self.show(self.item, name); };
-    this.img.onclick = function () { self.onClick(); };
-    this.desc.onclick = function () { self.onClick(); };
+    ImgTextCell.call(this);
+    this.selfUpdate = (name, value) => this.show(this.item, name);
+    this.showIntendee = () => MessageCell.prototype.showIntendee.call(this);
+    this.img.onclick = () => this.onClick();
+    this.desc.onclick = () => this.onClick();
     if (this.trap) this.trap.bindTarget(this.img);
 }
 
-MessageCell.prototype = new ImgDescCell();
+MessageCell.prototype = new ImgTextCell();
 MessageCell.prototype.constructor = MessageCell;
 MessageCell.prototype.cssClass = "msg";
 MessageCell.prototype.area = null;
 MessageCell.prototype.trap = null;
-MessageCell.prototype.gap = 53;
-MessageCell.prototype.defaultImg = "./images/star.png";
-MessageCell.prototype.defaultDesc = "...";
+MessageCell.prototype.gap = 73;
+MessageCell.prototype.defaultImg = "";
+MessageCell.prototype.defaultText = "...";
+MessageCell.prototype.defaultColor = "black";
 
 MessageCell.prototype.setCoords = function (inFactor, x) {
     //console.log("inFactor " + inFactor + "; x " + x);
@@ -160,6 +161,7 @@ MessageCell.prototype.getOpeningSize = function () {
     return (this.area === document.body ? window.innerHeight : this.area.clientHeight) / this.gap;
 }
 
+
 MessageCell.prototype.unbind = function () {
     if (this.item.unsubscribe) {
         this.item.unsubscribe("from", this.selfUpdate);
@@ -168,8 +170,8 @@ MessageCell.prototype.unbind = function () {
         this.item.unsubscribe("color", this.selfUpdate);
 
         if (this.item.intendee) {
-            this.item.intendee.unsubscribe("icon", this.selfUpdate);
-            this.item.intendee.unsubscribe("color", this.selfUpdate);
+            this.item.intendee.unsubscribe("icon", this.showIntendee);
+            this.item.intendee.unsubscribe("color", this.showIntendee);
         }
     }
 }
@@ -182,13 +184,30 @@ MessageCell.prototype.hide = function () {
     this.desc.style.display = "none";
 };
 
+MessageCell.prototype.showIntendee = function () {
+    let item = this.item;
+    let intendee = item.intendee;
+    this.img.src = item.icon || intendee && intendee.icon || this.defaultImg || '';
+    let color = item.color || intendee && intendee.color || this.defaultColor;
+    let lighter = RGBColor.lighter(color).toName();
+    this.desc.style.color = color;
+    this.desc.style.textShadow = "1px 1px 1.5px " + lighter;
+    this.img.style.filter = 'drop-shadow(0 0 0.5rem ' + color + ')';
+}
+
 MessageCell.prototype.show = function (item, change) {
-    // if not yet done, find the intendee object corresponding to this message
-    if (!item.intendee)
-        item.intendee = item.from && Autobus.factory().tagsonomy.getOr(item.from, null);
+    if (!("intendee" in item)) { // if not done
+        // find the intendee object corresponding to this message
+        requestAnimationFrame(() => {
+            let intendee = item.from && Autobus.factory().index.getOr(item.from, null);
+            item.setted('intendee', intendee);
+            item.intendee.subscribe("icon", this.showIntendee);
+            item.intendee.subscribe("color", this.showIntendee);
+            this.showIntendee();
+        });
+    }
 
     if (item !== this.item) {
-        if (this.item) this.unbind();
         this.item = item;
         if (item.subscribe) {
             item.subscribe("from", this.selfUpdate);
@@ -197,24 +216,20 @@ MessageCell.prototype.show = function (item, change) {
             item.subscribe("color", this.selfUpdate);
         }
         if (item.intendee) {
-            item.intendee.subscribe("icon", this.selfUpdate);
-            item.intendee.subscribe("color", this.selfUpdate);
+            item.intendee.subscribe("icon", this.showIntendee);
+            item.intendee.subscribe("color", this.showIntendee);
         }
 
         this.img.style.display = "block";
         this.desc.style.display = "block";
     }
-    this.img.src = item.icon || (item.intendee && item.intendee.icon) || this.defaultImg || '';
-    this.img.style.filter = 'drop-shadow(0 0 0.5rem ' + item.color + ')';
-    var color = item.color || (item.intendee && item.intendee.color);
-    var darker = RGBColor.darker(color).toName();
-    this.desc.style.color = color;
-    this.desc.style.textShadow = "1px 1px 2.5px " + darker;
+    
+    this.showIntendee();
     if (item.content) {
         this.desc.innerHTML = ''
         chat2.creole.parse(this.desc, item.content);
     } else {
-        this.desc.innerHTML = this.defaultDesc;
+        this.desc.innerHTML = this.defaultText;
     }
 };
 

@@ -1,9 +1,9 @@
-function ImgDescCell() {
+function ImgTextCell() {
     this.item = null;
     this.img = document.createElement('img');
     this.desc = document.createElement('p');
     this.img.className += this.cssClass + 'Pic';
-    this.desc.className += this.cssClass + 'Desc';
+    this.desc.className += this.cssClass + 'Text';
     this.img.style.display = "none";
     this.desc.style.display = "none";
     if (!this.area) return;
@@ -11,11 +11,11 @@ function ImgDescCell() {
     this.area.appendChild(this.img);
 }
 
-ImgDescCell.prototype.constructor = ImgDescCell;
-ImgDescCell.prototype.cssClass = "cell";
+ImgTextCell.prototype.constructor = ImgTextCell;
+ImgTextCell.prototype.cssClass = "cell";
 
-ImgDescCell.prototype.show = function(item) { };
+ImgTextCell.prototype.show = function(item) { };
 
-ImgDescCell.prototype.setCoords = function(inFactor, x) { } ;
+ImgTextCell.prototype.setCoords = function(inFactor, x) { } ;
 
-ImgDescCell.prototype.hide = function() { };
+ImgTextCell.prototype.hide = function() { };

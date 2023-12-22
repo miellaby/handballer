@@ -35,57 +35,51 @@ Revolution.prototype.getItem = function (i) {
     return this.items[i];
 };
 
-Revolution.prototype.push = function () {
-    var args = Array.prototype.slice.call(arguments);
-    this.splice.apply(this, [this.items.length, 0].concat(args));
+Revolution.prototype.push = function (...args) {
+    this.splice.apply(this, [this.items.length, 0, ...args]);
 }
 
-Revolution.prototype.unshift = function () {
-    var args = Array.prototype.slice.call(arguments);
-    this.splice.apply(this, [0, 0].concat(args));
+Revolution.prototype.unshift = function (...args) {
+    this.splice.apply(this, [0, 0, ...args]);
 }
 
-Revolution.prototype.splice = function (index, howMany) {
-    if (howMany === undefined) howMany = 0;
-    var newItems = [];
-    var newItemPos = 1.0 + index; // we add 1.0 because it will be displayed outside otherelse (because of the nice clipping)
+Revolution.prototype.splice = function (index, howMany, ...added) {
+    howMany = howMany || 0;
+    let newItems = [];
+    let newItemPos = 1.0 + index; // we add 1.0 because it will be displayed outside otherelse (because of the nice clipping)
 
-    for (var l = arguments, i = 2 /* jump over 2 first args */, n = l.length; i < n; ++i) {
-        var newItem = l[i];
+    added.forEach(newItem => {
         newItem[this.prop] = {
             revolutionPos: newItemPos,
             inFactor: 0,
             cell: null
         };
         newItems.push(newItem);
-        newItemPos += 1.0;
+        newItemPos += 1.0; // (newItem.getRevolutionSize && newItem.getRevolutionSize() || 1.0);
+    })
+
+    let spliceArgs = [index, howMany, ...newItems];
+    if (newItems.length) {
+        this.innerAnims.forEach(a => a.onSplice && a.onSplice.apply(a, spliceArgs));
     }
 
-    var spliceArgs = [index, howMany];
-    if (newItems.length) {
-        spliceArgs.push.apply(spliceArgs, newItems);
-        this.innerAnims.forEach(a => a["onSplice"] && a.onSplice.apply(a, spliceArgs));
-    }
-
-    var outs = this.items.splice.apply(this.items, spliceArgs);
+    let outs = this.items.splice.apply(this.items, spliceArgs);
 
     if (newItems.length) {
-        var inAnim = new RevolutionInAnim(this, index, newItems.length);
+        let inAnim = new RevolutionInAnim(this, index, newItems.length);
         this.innerAnims.add(inAnim);
         inAnim.resume();
     }
 
     if (outs.length) {
-        //console.log("outs " + outs.length);
         this.leavings.push.apply(this.leavings, outs);
-
-        var outAnim = new RevolutionOutAnim(this, index, outs);
+        let outAnim = new RevolutionOutAnim(this, index, outs);
         this.innerAnims.add(outAnim);
         outAnim.resume();
     }
 
     if (newItems.length != howMany && index + newItems.length < this.items.length) {
-        var shiftAnim = new RevolutionShiftAnim(this,
+        let shiftAnim = new RevolutionShiftAnim(this,
                                                 /* start */ index + newItems.length,
                                                 /* howMany */ this.items.length - index - newItems.length,
                                                 /* offset */ newItems.length - howMany);
@@ -123,15 +117,15 @@ Revolution.prototype.computeSpeed = function (progress, time) {
         }
         this.motion = true;
     } else {
-        var a = Math.abs(this.speed);
+        let a = Math.abs(this.speed);
         if (a > 0.2) {
             this.speed *= 0.8; // slowing quick
             this.motion = true;
         } else { // notch motion
-            var offset = this.pos % 1.0;
+            let offset = this.pos % 1.0;
             if (offset > 0.5) offset = 1 - offset;
             if (offset < - 0.5) offset = 1 + offset;
-            var speed = this.speed - offset * 0.2;
+            let speed = this.speed - offset * 0.2;
             if (offset * (speed + offset) <= 0) {
                 this.offset = 0;
                 this.speed = 0;
@@ -147,7 +141,7 @@ Revolution.prototype.computeSpeed = function (progress, time) {
 
 
 Revolution.prototype.computeItemSide = function (item) {
-    var x = item[this.prop].revolutionPos - this.pos - 1.0;
+    let x = item[this.prop].revolutionPos - this.pos - 1.0;
     return (x > this.cellConstructor.prototype.getOpeningSize() ? 1
         : (x < - 1.0 ? - 1 : 0));
 }
@@ -167,10 +161,10 @@ Revolution.prototype.iterate = function (progress, passedTime) {
 };
 
 Revolution.prototype.redraw = function () {
-    var nbItem = this.items.length;
-    var pos = this.pos;
-    var n = pos > 0 ? parseInt(pos) : parseInt(pos) - 1;
-    var o = this.cellConstructor.prototype.getOpeningSize() || 1;
+    let nbItem = this.items.length;
+    let pos = this.pos;
+    let n = pos > 0 ? parseInt(pos) : parseInt(pos) - 1;
+    let o = this.cellConstructor.prototype.getOpeningSize() || 1;
 
     this.generation ^= true;
 
@@ -179,13 +173,13 @@ Revolution.prototype.redraw = function () {
         this.n = n;
         this.nbItem = nbItem;
 
-        var toGet = [];
+        let toGet = [];
 
-        var i, nothing = true, toRight = false;
+        let i, nothing = true, toRight = false;
         for (i = 0; i < nbItem; ++i) {
-            var j = (i + n) % nbItem;
+            let j = (i + n) % nbItem;
             if (j < 0) j += nbItem;
-            var side = this.computeItemSide(this.items[j]);
+            let side = this.computeItemSide(this.items[j]);
             if (side > 0) {
                 toRight = true;
                 continue;
@@ -209,40 +203,39 @@ Revolution.prototype.redraw = function () {
             }
         }
 
-        for (var lst = this.visibleCells, i = 0, cell; cell = lst[i]; ++i) {
+        for (let lst = this.visibleCells, i = 0, cell; cell = lst[i]; ++i) {
             if (cell.generation == this.generation) continue;
             // not visible any more
             cell.item[this.prop].cell = null;
             this.pool.push(cell);
             cell.hide();
             lst.splice(i--, 1);
-            m--;
+            // m--;
         }
 
         while (toGet.length) {
-            var item = toGet.shift();
-            var cell = this.pool.shift() || new this.cellConstructor();
+            let item = toGet.shift();
+            let cell = this.pool.shift() || new this.cellConstructor();
             item[this.prop].cell = cell;
             cell.show(item);
             this.visibleCells.push(cell);
         }
     }
-
-    for (var lst = this.visibleCells, i = 0, cell; cell = lst[i]; ++i) {
+    this.visibleCells.forEach(cell => {
         cell.generation = this.generation;
         cell.setCoords(cell.item[this.prop].inFactor, cell.item[this.prop].revolutionPos - pos);
-    }
+    });
 
-    for (var lst = this.leavings, i = 0, m = lst.length; i < m; i++) {
-        var item = lst[i];
-        var itemCtx = item[this.prop];
+    for (let lst = this.leavings, i = 0, m = lst.length; i < m; i++) {
+        let item = lst[i];
+        let itemCtx = item[this.prop];
         if (itemCtx.inFactor <= 0) {
             if (itemCtx.cell) {
                 this.pool.push(itemCtx.cell);
                 itemCtx.cell.hide();
                 itemCtx.cell = null;
             }
-            lst.splice(i--, 1);
+            this.leavings.splice(i--, 1);
             m--;
         } else {
             if (!itemCtx.cell) {
@@ -252,5 +245,8 @@ Revolution.prototype.redraw = function () {
             itemCtx.cell.setCoords(itemCtx.inFactor, itemCtx.revolutionPos - pos);
         }
     }
-    if (this.glider) this.glider.update((pos + o) / (Math.max(o, nbItem) + 2 * o), (pos + 2 * o) / (Math.max(o, nbItem) + 2 * o), this.isMoving());
+
+    if (this.glider) {
+        this.glider.update((pos + o) / (Math.max(o, nbItem) + 2 * o), (pos + 2 * o) / (Math.max(o, nbItem) + 2 * o), this.isMoving());
+    }
 };

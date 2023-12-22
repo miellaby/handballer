@@ -8,21 +8,14 @@
 
 function BusState(autobus, name, location, recipient) {
     this.autobus = autobus;
-    this.location = undefined;
-    PubSubState.call(this, name, autobus ? autobus.tagsonomy : undefined);
+    PubSubState.call(this, name, autobus && autobus.tagsonomy, autobus && autobus.index);
     if (!autobus) return; // prototype case handling
-
-    this.recipient = recipient ? (recipient.abccli || this.autobus.agora) : this.autobus.agora;
-
-    if ((location == BusState.prototype.HERE || location == BusState.prototype.BOTH) && autobus.agora)
+    this.location = location || BusState.prototype.THERE;
+    this.recipient = recipient && recipient.abccli || this.autobus.agora;
+    if ((location & BusState.prototype.HERE) && autobus.agora)
         this.setted("abcli", autobus.hbc.token + autobus.hbc.clientId);
-
-    this.location = (location === undefined ? BusState.prototype.THERE : location);
-
-    if (this.here()) {
-        if (this.tagsonomy && name)
-            this.tagsonomy.pushIn("here", this);
-    }
+    if (this.here() && this.tagsonomy && name)
+        this.tagsonomy.pushIn("here", this);
 };
 
 BusState.prototype = new PubSubState();
@@ -45,12 +38,15 @@ BusState.prototype.setted = function (variable, newValue) {
 };
 
 BusState.prototype.setteds = function (deltaObj) {
-    for (var variable in deltaObj) {
-        if (!deltaObj.hasOwnProperty(variable)) continue;
-        var newValue = deltaObj[variable];
-        if (newValue != this[variable])
+    Object.entries(deltaObj).forEach(e => {
+        let [variable, newValue] = e
+        if (variable !== 'tags' && newValue != this[variable]) {
             this.set_and_fire(variable, newValue);
-    }
+        }
+    });
+    if (deltaObj.tags !== undefined && deltaObj.tags !== this.tags) {
+        this.set_and_fire('tags', deltaObj.tags);
+    } 
 };
 
 BusState.prototype.set = function (variable, value) {
@@ -67,8 +63,10 @@ BusState.prototype.set = function (variable, value) {
     }
 
     if (this.autobus.toTellTimeout === undefined) {
-        var self = this;
-        this.autobus.toTellTimeout = setTimeout(function () { self.autobus.toTellTimeout = undefined; self.tell(); }, 0);
+        this.autobus.toTellTimeout = setTimeout(() => {
+            this.autobus.toTellTimeout = undefined;
+            this.tell();
+        }, 0);
     }
 
     if (this.here()) { // do
@@ -81,10 +79,10 @@ BusState.prototype.set = function (variable, value) {
 };
 
 BusState.prototype.sets = function (deltaObj) {
-    for (var variable in deltaObj) {
-        if (!deltaObj.hasOwnProperty(variable)) continue;
-        this.set(variable, deltaObj[variable]);
-    }
+    Object.entries(deltaObj).forEach(e => {
+        let [variable, value] = e;
+        this.set(variable, value);
+    });
 };
 
 BusState.prototype.tell = function () {
