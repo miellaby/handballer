@@ -12,7 +12,7 @@ function RevolutionInAnim(revolution, index, howMany) {
 RevolutionInAnim.prototype = new Anim();
 
 RevolutionInAnim.prototype.iterate = function(progress, passedTime) {
-    var done = false;
+    let done = false;
 
     this.ratio += this.speed;
 
@@ -23,16 +23,16 @@ RevolutionInAnim.prototype.iterate = function(progress, passedTime) {
 
     this.speed -= this.c1;
     if (this.speed < this.c1) this.speed = this.c1;
-    for (var lst = this.revolution.items, i = this.where, n = this.where + this.howMany ; i < n; ++i) {
-        var elt = lst[i];
-        if (this.jumpOver.indexOf(elt) != -1) continue;
+    for (let lst = this.revolution.items, i = this.where, n = this.where + this.howMany ; i < n; ++i) {
+        let elt = lst[i];
+        if (this.jumpOver.indexOf(elt) !== -1) continue;
         elt[this.prop].inFactor = this.ratio;
     }
     return !done;
 };
 
-RevolutionInAnim.prototype.onSplice = function(start, howMany /*, item, item, ... */) {
-    var nbNewItem = Math.max(0, arguments.length - 2);
+RevolutionInAnim.prototype.onSplice = function(start, howMany, ...added) {
+    let nbNewItem = added.length;
     if (start <= this.where) {
         if (start + howMany <= this.where)
             // splice on the animated set left side 
@@ -50,10 +50,7 @@ RevolutionInAnim.prototype.onSplice = function(start, howMany /*, item, item, ..
         } else {
             // splice within the animated set
             this.howMany += nbNewItem - howMany;
-            for (var i = 2, n = arguments.length; i < n; i++) {
-                var item = arguments[i];
-                this.jumpOver.push(item);
-            }
+            added.forEach(item => this.jumpOver.push(item));
         }
     }
 }
@@ -79,7 +76,7 @@ function RevolutionOutAnim(revolution, start, items) {
 RevolutionOutAnim.prototype = new Anim();
 
 RevolutionOutAnim.prototype.iterate = function(progress, passedTime) {
-    var done = false;
+    let done = false;
 
     this.ratio -= this.speed;
     
@@ -90,16 +87,16 @@ RevolutionOutAnim.prototype.iterate = function(progress, passedTime) {
 
     this.speed += this.c1;
 
-    for (var lst = this.items, i = 0, n = this.items.length ; i < n; ++i) {
-        var elt = lst[i];
-        if (this.jumpOver.indexOf(elt) != -1) continue;
-        elt[this.prop].inFactor = this.ratio;
-    }
+    this.items.forEach(elt => {
+        if (this.jumpOver.indexOf(elt) === -1) {
+            elt[this.prop].inFactor = this.ratio;
+        }
+    });
     return !done;
 };
 
-RevolutionOutAnim.prototype.onSplice = function(start, howMany /*, item, item, ... */) {
-    var nbNewItem = Math.max(0, arguments.length - 2);
+RevolutionOutAnim.prototype.onSplice = function(start, howMany, ...added) {
+    let nbNewItem = added.length;
     if (start <= this.where) {
         if (start + howMany <= this.where)
             // splice on the animated set left side 
@@ -117,10 +114,7 @@ RevolutionOutAnim.prototype.onSplice = function(start, howMany /*, item, item, .
         } else {
             // splice within the animated set
             this.howMany += nbNewItem - howMany;
-            for (var i = 2, n = arguments.length; i < n; i++) {
-                var item = arguments[i];
-                this.jumpOver.push(item);
-            }
+            added.forEach(item => this.jumpOver.push(item));
         }
     }
 }
@@ -148,22 +142,22 @@ function RevolutionShiftAnim(revolution, start, howMany, offset) {
 RevolutionShiftAnim.prototype = new Anim();
 
 RevolutionShiftAnim.prototype.iterate = function(progress, passedTime) {
-    var ratio = 2 * this.current / this.offset - 1;
-    var step = this.c1 * (1 - ratio*ratio) ;
+    let ratio = 2 * this.current / this.offset - 1;
+    let step = this.c1 * (1 - ratio*ratio) ;
     if (step < this.minStep)
         step = this.minStep;
-    var delta = this.offset < 0 ? -step : step;
+    let delta = this.offset < 0 ? -step : step;
 
-    var done = false;
+    let done = false;
     if (delta < 0 && this.current + delta < this.offset
         || delta > 0 && this.current + delta > this.offset) {
         delta = (delta > 0 ? this.offset - this.current : this.current - this.offset);
         done = true;
     }
     
-    var i = this.where, n = this.howMany, l = this.revolution.items;
+    let i = this.where, n = this.howMany, l = this.revolution.items;
     while (n--) {
-        var elt=l[i++];
+        let elt=l[i++];
         if (this.jumpOver.indexOf(elt) != -1) continue;
         elt[this.prop].revolutionPos += delta;
     }
@@ -173,8 +167,8 @@ RevolutionShiftAnim.prototype.iterate = function(progress, passedTime) {
     return !done;
 };
 
-RevolutionShiftAnim.prototype.onSplice = function(start, howMany /*, item, item, ... */) {
-    var nbNewItem = Math.max(0, arguments.length - 2);
+RevolutionShiftAnim.prototype.onSplice = function(start, howMany, ...added) {
+    let nbNewItem = added.length;
     if (start <= this.where) {
         if (start + howMany <= this.where)
             // splice on the animated set left side 
@@ -192,10 +186,7 @@ RevolutionShiftAnim.prototype.onSplice = function(start, howMany /*, item, item,
         } else {
             // splice within the animated set
             this.howMany += nbNewItem - howMany;
-            for (var i = 2, n = arguments.length; i < n; i++) {
-                var item = arguments[i];
-                this.jumpOver.push(item);
-            }
+            added.forEach(item => this.jumpOver.push(item));
         }
     }
 }

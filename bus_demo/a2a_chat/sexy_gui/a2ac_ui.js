@@ -115,7 +115,7 @@ IntendeeCell.prototype.show = function (item, change) {
         let color = item.color || this.defaultColor;
         var lightColor = RGBColor.lighter(color).toName();
         this.desc.style.color = '#333';
-        this.desc.style.textShadow = "1px 1px 1.5px " + lightColor;
+        this.desc.style.textShadow = "1px 2px 3px " + lightColor;
         this.img.style.filter = 'drop-shadow(0 0 0.5rem ' + color + ')';
     }
 };
@@ -191,7 +191,7 @@ MessageCell.prototype.showIntendee = function () {
     let color = item.color || intendee && intendee.color || this.defaultColor;
     let lighter = RGBColor.lighter(color).toName();
     this.desc.style.color = color;
-    this.desc.style.textShadow = "1px 1px 1.5px " + lighter;
+    this.desc.style.textShadow = "1px 2px 3px " + lighter;
     this.img.style.filter = 'drop-shadow(0 0 0.5rem ' + color + ')';
 }
 

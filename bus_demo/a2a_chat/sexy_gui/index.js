@@ -354,7 +354,7 @@ var chat2 = {
                 this.value = '';
                 this.style.color = a2ac.me.color;
                 var lighter = RGBColor.lighter(a2ac.me.color).toName();
-                this.style.textShadow = "1px 1px 1.5px " + lighter;
+                this.style.textShadow = "1px 2px 3px " + lighter;
             }
         };
         input.onblur = function () {

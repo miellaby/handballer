@@ -198,7 +198,7 @@
       /* stupid padding to prevent scrollbar because of shadow */
       /*  background-image:url('images/lines.gif');*/
       border-radius: 4px;
-      text-shadow: 1px 3px 3px #a5a5a5;
+      text-shadow: 1px 2px 3px #a5a5a5;
       overflow: auto;
     }
 
@@ -236,7 +236,8 @@
     #contextForm {
       border-radius: 20px;
       position: absolute;
-      width: 500px;
+      width: 90vw;
+      max-width: 500px;
       height: 330px;
       right: 5px;
       top: 100px;
@@ -248,7 +249,8 @@
     }
 
     .ContextForm {
-      width: 500px;
+      width: 90vw;
+      max-width: 500px;
       height: 330px;
     }
 
@@ -443,7 +445,7 @@
         <input type="text" readonly="readonly" name="iMind" class="iMind" value="" />
       </p>
       <p><label for="iEmblem">emblem&nbsp;</label>
-        <input type="text" name="iEmblem" ="iEmblem" readonly="readonly" value="" />&nbsp;<img class="iEmblemImg" src="images/blank.gif"
+        <input type="text" name="iEmblem" class="iEmblem" readonly="readonly" value="" />&nbsp;<img class="iEmblemImg" src="images/blank.gif"
           style="width: 32px; height: 32px;" />
       </p>
       <p><label for="iColor">color&nbsp;</label>
