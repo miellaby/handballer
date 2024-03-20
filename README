@@ -1,5 +1,8 @@
-Simple HTTP Pub/Sub server base on thttpd
+Simple HTTP Pub/Sub server
 
-                    version 1.2, based on thttpd version 2.25b of 29dec2003
+A thttpd fork which is both a HTTP1.1 web server and a convenient Publish/Subscribe message broker.
 
-This fork of thttpd runs both as a web server and as a convenient HTTP Pub/Sub bus.
+Support SSE (Server Side Event) and several outdated polling strategies.
+
+handballer 1.2 is based on thttpd version 2.25b of 29dec2003
+
